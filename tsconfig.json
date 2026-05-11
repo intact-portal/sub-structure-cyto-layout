@@ -7,7 +7,7 @@
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "skipLibCheck": true,
-    "outDir": "dist"
+    "outDir": "docs"
   },
   "include": ["src/index.ts"],
   "exclude": ["src/index_*"]
