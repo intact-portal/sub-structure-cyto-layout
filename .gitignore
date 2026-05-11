@@ -1,6 +1,6 @@
 /tmp
 /out-tsc
-/dist
+/dist/
 package-lock.json
 .idea/
 
