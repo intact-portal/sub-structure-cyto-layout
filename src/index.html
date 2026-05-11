@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Structure Recognition Layout</title>
+  <script src="../dist/cytoscape.min.js"></script>
+  <style>
+    /* 新增：设置 body 为 flex 容器，实现水平并排 */
+    body {
+      margin: 0;
+      display: flex;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* 修改：由绝对定位改为侧边栏布局 */
+    .sidebar {
+      width: 380px;
+      min-width: 320px;
+      height: 100vh;
+      background: #f4f4f4;
+      border-right: 1px solid #ccc;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding: 10px;
+      box-sizing: border-box;
+      overflow-y: auto; /* 允许侧边栏内容滚动 */
+      z-index: 999;
+    }
+
+    /* 修改：让 Cytoscape 容器占据剩余的宽度 */
+    #cy {
+      flex-grow: 1;
+      height: 100vh;
+      display: block;
+      background: #f9f9f9;
+    }
+
+    .panel {
+      background: rgba(255, 255, 255, 0.9);
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .stats-panel {
+      font-size: 14px;
+      color: #333;
+      border-left: 4px solid #2196F3;
+      line-height: 1.5;
+    }
+
+    .controls-panel {
+      border-left: 4px solid #4CAF50;
+    }
+
+    .controls-panel h3 {
+      margin: 0 0 12px 0;
+      font-size: 16px;
+      color: #333;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .controls-section {
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    .controls-section:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+    }
+
+    .controls-section h4 {
+      margin: 0 0 8px 0;
+      font-size: 13px;
+      color: #666;
+      font-weight: 600;
+    }
+
+    .control-item {
+      margin-bottom: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .control-item label {
+      font-size: 12px;
+      color: #555;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* 文件选择器样式 */
+    .file-input-container {
+      margin-bottom: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .file-input-container input[type="file"] {
+      font-size: 12px;
+    }
+
+    .control-item input[type="range"] {
+      width: 100%;
+      height: 4px;
+      border-radius: 2px;
+      background: #ddd;
+      outline: none;
+      -webkit-appearance: none;
+    }
+
+    .control-item input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #4CAF50;
+      cursor: pointer;
+    }
+
+    .control-item input[type="range"]::-moz-range-thumb {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #4CAF50;
+      cursor: pointer;
+      border: none;
+    }
+
+    .control-item input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+    }
+
+    .value-display {
+      font-weight: 600;
+      color: #4CAF50;
+      font-size: 11px;
+      min-width: 50px;
+      text-align: right;
+    }
+
+    .btn {
+      padding: 8px 16px;
+      background: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      transition: background 0.2s;
+    }
+
+    .btn:hover { background: #45a049; }
+    .btn-secondary { background: #2196F3; }
+
+    .toggle-btn {
+      padding: 4px 8px;
+      font-size: 11px;
+      background: #666;
+    }
+
+    .sidebar.minimized {
+      width: 60px;
+      min-width: 60px;
+    }
+    .sidebar.minimized .stats-panel,
+    .sidebar.minimized .controls-section,
+    .sidebar.minimized .file-input-container,
+    .sidebar.minimized .btn-group {
+      display: none;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+    }
+  </style>
+</head>
+<body>
+
+<div id="sidebar" class="sidebar">
+  <div class="panel file-input-container">
+    <h4 style="margin:0 0 8px 0; font-size:13px; color:#666;">Load Data</h4>
+    <input type="file" id="fileInput" accept=".json,.cyjs">
+  </div>
+
+  <div id="stats" class="panel stats-panel">
+    Nodes: 0 | Edges: 0<br>
+    Render Time: --
+  </div>
+
+  <div id="controls" class="panel controls-panel">
+    <h3>
+      Parameters
+      <button class="btn toggle-btn" onclick="toggleControls()">Hide</button>
+    </h3>
+
+    <div class="controls-section">
+      <h4>Force-Directed</h4>
+      <div class="control-item">
+        <label>Ideal Edge Length <span class="value-display" id="val-IDEAL_LENGTH">100</span></label>
+        <input type="range" id="IDEAL_LENGTH" min="50" max="1000" value="100" step="10">
+      </div>
+      <div class="control-item">
+        <label>Repulsion Force <span class="value-display" id="val-REPULSION">10000</span></label>
+        <input type="range" id="REPULSION" min="1000" max="30000" value="10000" step="1000">
+      </div>
+      <div class="control-item">
+        <label>Spring Strength <span class="value-display" id="val-SPRING_K">0.15</span></label>
+        <input type="range" id="SPRING_K" min="0.01" max="0.5" value="0.15" step="0.01">
+      </div>
+      <div class="control-item">
+        <label>Iterations <span class="value-display" id="val-ITERATIONS">200</span></label>
+        <input type="range" id="ITERATIONS" min="50" max="500" value="200" step="50">
+      </div>
+      <div class="control-item">
+        <label>Angular Strength <span class="value-display" id="val-ANGULAR_STRENGTH">0.2</span></label>
+        <input type="range" id="ANGULAR_STRENGTH" min="0" max="1" value="0.2" step="0.05">
+      </div>
+    </div>
+
+    <div class="controls-section">
+      <h4>Structure Detection</h4>
+      <div class="control-item">
+        <label>Min Star Leaves <span class="value-display" id="val-MIN_STAR_LEAVES">3</span></label>
+        <input type="range" id="MIN_STAR_LEAVES" min="2" max="10" value="3" step="1">
+      </div>
+      <div class="control-item">
+        <label>Min Cycle Length <span class="value-display" id="val-MIN_CYCLE_LENGTH">3</span></label>
+        <input type="range" id="MIN_CYCLE_LENGTH" min="3" max="10" value="3" step="1">
+      </div>
+      <div class="control-item">
+        <label>Min Chain Length <span class="value-display" id="val-MIN_CHAIN_LENGTH">2</span></label>
+        <input type="range" id="MIN_CHAIN_LENGTH" min="2" max="10" value="2" step="1">
+      </div>
+    </div>
+
+    <div class="controls-section">
+      <h4>Layout Options</h4>
+      <div class="control-item"><label style="flex-direction: row; gap: 8px;"><input type="checkbox" id="USE_ANGULAR_FORCE" checked> Use Angular Force</label></div>
+      <div class="control-item"><label style="flex-direction: row; gap: 8px;"><input type="checkbox" id="SUBSTRUCTURE_LAYOUT" checked> Substructure Layout</label></div>
+      <div class="control-item"><label style="flex-direction: row; gap: 8px;"><input type="checkbox" id="ENABLE_INITIAL_FORCE_LAYOUT"> Initial Force Layout</label></div>
+    </div>
+
+    <div class="btn-group">
+      <button class="btn" onclick="applyLayout()">Apply Layout</button>
+      <button class="btn btn-secondary" onclick="resetParameters()">Reset</button>
+    </div>
+  </div>
+</div>
+
+<div id="cy"></div>
+
+<script type="module">
+  import register from '../dist/index.js';
+  register(cytoscape);
+
+  let cy = null;
+  let currentParams = {};
+
+  const DEFAULT_PARAMS = {
+    IDEAL_LENGTH: 100, REPULSION: 10000, SPRING_K: 0.15, ITERATIONS: 300,
+    ANGULAR_STRENGTH: 0.2, CENTER_GRAVITY: 0.01, USE_ANGULAR_FORCE: true,
+    MIN_STAR_LEAVES: 3, MIN_CYCLE_LENGTH: 3, MAX_CYCLE_LENGTH: 30,
+    MIN_CHAIN_LENGTH: 2, MIN_PARALLEL_NEIGHBORS: 2, CYCLE_NODE_SPACING: 100,
+    STAR_RING_SPACING: 100, STAR_BASE_NODES_PER_RING: 6, CHAIN_MIN_RADIUS: 150,
+    PARALLEL_GAP: 80, LEAF_NODE_DISTANCE: 200, VNODE_RADIUS_MULTIPLIER: 0.2,
+    VNODE_IDEAL_LENGTH: 100, VNODE_REPULSION: 10000, VNODE_SPRING_K: 0.15,
+    VNODE_ITERATIONS: 600, VNODE_ANGULAR_STRENGTH: 0.1, SPREAD_V_NODES: true,
+    SUBSTRUCTURE_LAYOUT: true, ENABLE_INITIAL_FORCE_LAYOUT: false
+  };
+
+  currentParams = { ...DEFAULT_PARAMS };
+
+  function setupControls() {
+    const rangeInputs = document.querySelectorAll('input[type="range"]');
+    rangeInputs.forEach(input => {
+      input.addEventListener('input', (e) => {
+        const value = parseFloat(e.target.value);
+        document.getElementById(`val-${input.id}`).textContent = value;
+        currentParams[input.id] = value;
+      });
+    });
+
+    document.querySelectorAll('input[type="checkbox"]').forEach(input => {
+      input.addEventListener('change', (e) => {
+        currentParams[input.id] = e.target.checked;
+      });
+    });
+
+    // 监听文件选择
+    document.getElementById('fileInput').addEventListener('change', handleFileSelect);
+  }
+
+  // 处理本地文件读取
+  function handleFileSelect(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        const data = JSON.parse(e.target.result);
+        renderCytoscape(data);
+      } catch (err) {
+        console.error("解析文件失败:", err);
+        document.getElementById('stats').innerHTML = '<span style="color:red">Error parsing JSON</span>';
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  function renderCytoscape(data) {
+    const statsEl = document.getElementById('stats');
+
+    // 如果实例已存在，销毁旧实例
+    if (cy) {
+      cy.destroy();
+    }
+
+    cy = window.cy = cytoscape({
+      container: document.getElementById('cy'),
+      elements: data.elements || data,
+      style: [
+        { selector: 'node[structColor]', style: { 'background-color': 'data(structColor)' } },
+        { selector: 'node', style: { 'label': 'data(id)', 'color': '#333', 'font-size': '20px', 'width': 50, 'height': 50 } },
+        { selector: 'edge', style: { 'width': 5, 'line-color': '#aaa', 'curve-style': 'haystack' } }
+      ]
+    });
+
+    const nodeCount = cy.nodes().length;
+    const edgeCount = cy.edges().length;
+
+    const startTime = performance.now();
+    cy.one('layoutstop', () => {
+      const endTime = performance.now();
+      const duration = (endTime - startTime).toFixed(2);
+      statsEl.innerHTML = `<strong>Nodes:</strong> ${nodeCount} | <strong>Edges:</strong> ${edgeCount}<br><strong>Render Time:</strong> ${duration} ms`;
+    });
+
+    applyLayout();
+  }
+
+  window.applyLayout = function() {
+    if (!cy) return;
+
+    // 给每个节点随机初始位置
+    const spread = 500;
+    cy.nodes().forEach(node => {
+      node.position({ x: Math.random() * spread, y: Math.random() * spread });
+    });
+
+    if (cy) cy.resize();
+
+    cy.layout({
+      name: 'ForceLayout',
+      params: currentParams
+    }).run();
+  };
+
+  window.resetParameters = function() {
+    currentParams = { ...DEFAULT_PARAMS };
+    Object.keys(DEFAULT_PARAMS).forEach(key => {
+      const input = document.getElementById(key);
+      if (input) {
+        if (input.type === 'checkbox') input.checked = DEFAULT_PARAMS[key];
+        else {
+          input.value = DEFAULT_PARAMS[key];
+          const display = document.getElementById(`val-${key}`);
+          if (display) display.textContent = DEFAULT_PARAMS[key];
+        }
+      }
+    });
+    applyLayout();
+  };
+
+  window.toggleControls = function() {
+    const sidebar = document.getElementById('sidebar');
+    const panel = document.getElementById('controls');
+    const btn = panel.querySelector('.toggle-btn');
+
+    if (sidebar.classList.contains('minimized')) {
+      sidebar.classList.remove('minimized');
+      panel.classList.remove('collapsed');
+      btn.textContent = 'Hide';
+    } else {
+      sidebar.classList.add('minimized');
+      panel.classList.add('collapsed');
+      btn.textContent = 'Show';
+    }
+    if (cy) setTimeout(() => cy.resize(), 100);
+  };
+
+  // 页面启动时仅初始化控件监听
+  setupControls();
+
+</script>
+</body>
+</html>
