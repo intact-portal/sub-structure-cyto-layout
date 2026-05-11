@@ -198,6 +198,10 @@
 <div id="sidebar" class="sidebar">
   <div class="panel file-input-container">
     <h4 style="margin:0 0 8px 0; font-size:13px; color:#666;">Load Data</h4>
+    <select id="dataFileSelect" style="width:100%; padding:6px; margin-bottom:8px; font-size:12px; border-radius:4px; border:1px solid #ccc;">
+      <option value="">-- Select a data file --</option>
+    </select>
+    <div style="text-align:center; margin:8px 0; color:#999; font-size:11px;">or</div>
     <input type="file" id="fileInput" accept=".json,.cyjs">
   </div>
 
@@ -307,6 +311,60 @@
 
     // 监听文件选择
     document.getElementById('fileInput').addEventListener('change', handleFileSelect);
+
+    // 监听数据文件下拉选择
+    document.getElementById('dataFileSelect').addEventListener('change', handleDataFileSelect);
+
+    // 加载可用的数据文件列表
+    loadDataFileList();
+  }
+
+  // 加载数据文件列表
+  async function loadDataFileList() {
+    const dataFiles = [
+      '1_Q14195.cyjs',
+      '2_35922511.cyjs',
+      '3_38413612.cyjs',
+      '4_37316325.cyjs',
+      '5_34524948.cyjs',
+      '6_36115835.cyjs',
+      '7_33961781.cyjs',
+      'Ndc80.cyjs',
+      'layout1.cyjs',
+      'layout2.cyjs',
+      'layout3.cyjs',
+      'layout4.cyjs',
+      'layout5.cyjs',
+      'layout6.cyjs',
+      'layout7.cyjs'
+    ];
+
+    const select = document.getElementById('dataFileSelect');
+    dataFiles.forEach(file => {
+      const option = document.createElement('option');
+      option.value = file;
+      option.textContent = file;
+      select.appendChild(option);
+    });
+  }
+
+  // 处理数据文件下拉选择
+  async function handleDataFileSelect(event) {
+    const fileName = event.target.value;
+    if (!fileName) return;
+
+    const statsEl = document.getElementById('stats');
+    statsEl.innerHTML = '<span style="color:#2196F3">Loading...</span>';
+
+    try {
+      const response = await fetch(`../data/${fileName}`);
+      if (!response.ok) throw new Error(`Failed to load ${fileName}`);
+      const data = await response.json();
+      renderCytoscape(data);
+    } catch (err) {
+      console.error("加载数据文件失败:", err);
+      statsEl.innerHTML = '<span style="color:red">Error loading file</span>';
+    }
   }
 
   // 处理本地文件读取
@@ -319,6 +377,8 @@
       try {
         const data = JSON.parse(e.target.result);
         renderCytoscape(data);
+        // 清空下拉选择
+        document.getElementById('dataFileSelect').value = '';
       } catch (err) {
         console.error("解析文件失败:", err);
         document.getElementById('stats').innerHTML = '<span style="color:red">Error parsing JSON</span>';
