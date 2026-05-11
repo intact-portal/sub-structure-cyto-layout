@@ -15,18 +15,25 @@ rm -rf dist
 echo "Building..."
 npm run build
 
-# Setup Git LFS in dist
-echo "Setting up Git LFS in dist..."
+# Compress large files (>100MB) to avoid GitHub's file size limit
+echo "Compressing large data files..."
+cd dist/data
+for file in *.cyjs; do
+    size=$(stat -f%z "$file" 2>/dev/null || stat -c%s "$file" 2>/dev/null)
+    if [ "$size" -gt 104857600 ]; then
+        echo "  Compressing $file ($(numfmt --to=iec-i --suffix=B $size 2>/dev/null || echo ${size}B))"
+        gzip -9 "$file"
+    fi
+done
+cd ../..
+
+# Setup Git in dist (NO LFS - GitHub Pages doesn't serve LFS files)
+echo "Setting up Git in dist..."
 cd dist
 git init
-git lfs install
 
-# Track LFS files BEFORE adding them
-echo "data/*.cyjs filter=lfs diff=lfs merge=lfs -text" > .gitattributes
-
-# Add all files and commit
+# Add all files and commit (actual files, not LFS pointers)
 echo "Committing..."
-git add .gitattributes
 git add -A
 git commit -m "Deploy to GitHub Pages"
 
