@@ -357,10 +357,27 @@
     statsEl.innerHTML = '<span style="color:#2196F3">Loading...</span>';
 
     try {
-      const response = await fetch(`../data/${fileName}`);
-      if (!response.ok) throw new Error(`Failed to load ${fileName}`);
-      const data = await response.json();
-      renderCytoscape(data);
+      // Try regular file first
+      let response = await fetch(`./data/${fileName}`);
+
+      // If 404, try gzipped version
+      if (!response.ok) {
+        response = await fetch(`./data/${fileName}.gz`);
+        if (!response.ok) throw new Error(`Failed to load ${fileName}`);
+
+        // Decompress gzipped content
+        const blob = await response.blob();
+        const ds = new DecompressionStream('gzip');
+        const decompressedStream = blob.stream().pipeThrough(ds);
+        const decompressedBlob = await new Response(decompressedStream).blob();
+        const text = await decompressedBlob.text();
+        const data = JSON.parse(text);
+        renderCytoscape(data);
+      } else {
+        // Regular file
+        const data = await response.json();
+        renderCytoscape(data);
+      }
     } catch (err) {
       console.error("加载数据文件失败:", err);
       statsEl.innerHTML = '<span style="color:red">Error loading file</span>';
