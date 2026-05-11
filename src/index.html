@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Structure Recognition Layout</title>
-  <script src="../dist/cytoscape.min.js"></script>
+  <script src="./cytoscape.min.js"></script>
   <style>
     /* 新增：设置 body 为 flex 容器，实现水平并排 */
     body {
@@ -269,7 +269,7 @@
 <div id="cy"></div>
 
 <script type="module">
-  import register from '../dist/index.js';
+  import register from './index.js';
   register(cytoscape);
 
   let cy = null;
