@@ -2,14 +2,15 @@
   "name": "cytoscape-layout-plugin",
   "version": "1.0.0",
   "description": "",
-  "main": "docs/index.js",
+  "main": "dist/index.js",
   "scripts": {
-    "build": "tsc && cp src/index.html docs/index.html",
-    "deploy": "npm run build && git add docs && git commit -m 'Deploy to GitHub Pages' && git push"
+    "build": "tsc && cp src/index.html dist/index.html && cp node_modules/cytoscape/dist/cytoscape.min.js dist/",
+    "deploy": "npm run build && gh-pages -d dist"
   },
   "devDependencies": {
     "@types/cytoscape": "^3.21.9",
     "cytoscape": "^3.33.1",
+    "gh-pages": "^6.3.0",
     "typescript": "^5.9.3",
     "vite-plugin-singlefile": "^2.3.3"
   },
