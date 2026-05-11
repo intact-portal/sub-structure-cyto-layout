@@ -4,9 +4,9 @@
   "description": "",
   "main": "dist/index.js",
   "scripts": {
-    "build": "tsc && cp src/index.html dist/index.html && cp node_modules/cytoscape/dist/cytoscape.min.js dist/ && ln -sf ../data dist/data 2>/dev/null || true",
+    "build": "tsc && cp src/index.html dist/index.html && cp node_modules/cytoscape/dist/cytoscape.min.js dist/ && cp -r data dist/data",
     "dev": "npm run build && concurrently \"tsc --watch\" \"http-server dist -p 8080 -c-1\"",
-    "deploy": "npm run build && gh-pages -d dist"
+    "deploy": "npm run build && gh-pages -d dist -t"
   },
   "devDependencies": {
     "@types/cytoscape": "^3.21.9",
