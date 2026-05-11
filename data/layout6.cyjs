@@ -1,0 +1,5606 @@
+{
+  "format_version" : "1.0",
+  "generated_by" : "cytoscape-3.10.4",
+  "target_cytoscapejs_version" : "~2.1",
+  "data" : {
+    "shared_name" : "network.graphml",
+    "name" : "network.graphml",
+    "SUID" : 131,
+    "__Annotations" : [ ],
+    "selected" : true
+  },
+  "elements" : {
+    "nodes" : [ {
+      "data" : {
+        "id" : "569",
+        "shared_name" : "EBI-2622890",
+        "name" : "EBI-2622890",
+        "SUID" : 569,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 415.59145372353714,
+        "y" : -1106.7679012446727
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "567",
+        "shared_name" : "EBI-2830349",
+        "name" : "EBI-2830349",
+        "SUID" : 567,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 404.26674669228714,
+        "y" : -976.5048473506297
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "565",
+        "shared_name" : "EBI-77613",
+        "name" : "EBI-77613",
+        "SUID" : 565,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 314.88869493447464,
+        "y" : -1050.5843074946727
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "563",
+        "shared_name" : "EBI-1028658",
+        "name" : "EBI-1028658",
+        "SUID" : 563,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -278.9725530818828,
+        "y" : 1.0160648197804676
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "561",
+        "shared_name" : "EBI-2256711",
+        "name" : "EBI-2256711",
+        "SUID" : 561,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -179.68700010336715,
+        "y" : -142.70469934037578
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "559",
+        "shared_name" : "EBI-1341",
+        "name" : "EBI-1341",
+        "SUID" : 559,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 1457.916530780422,
+        "y" : 485.9546939701711
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "557",
+        "shared_name" : "EBI-2809438",
+        "name" : "EBI-2809438",
+        "SUID" : 557,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 1460.238121204006,
+        "y" : 378.2153446049367
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "555",
+        "shared_name" : "EBI-2872467",
+        "name" : "EBI-2872467",
+        "SUID" : 555,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -188.00209409750778,
+        "y" : -34.46794396928203
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "553",
+        "shared_name" : "EBI-359610",
+        "name" : "EBI-359610",
+        "SUID" : 553,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -329.01322919882614,
+        "y" : -1168.7517879634227
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "551",
+        "shared_name" : "EBI-311073",
+        "name" : "EBI-311073",
+        "SUID" : 551,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 1395.548698596584,
+        "y" : -1101.4714229731883
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "549",
+        "shared_name" : "EBI-1052371",
+        "name" : "EBI-1052371",
+        "SUID" : 549,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 139.49613588296097,
+        "y" : -773.6730373530711
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "547",
+        "shared_name" : "EBI-2556545",
+        "name" : "EBI-2556545",
+        "SUID" : 547,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 1615.038200549709,
+        "y" : -1273.0395382075633
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "545",
+        "shared_name" : "EBI-299451",
+        "name" : "EBI-299451",
+        "SUID" : 545,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -3.2595709041484042,
+        "y" : 589.3365909428273
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "543",
+        "shared_name" : "EBI-358983",
+        "name" : "EBI-358983",
+        "SUID" : 543,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 44.18593996010941,
+        "y" : 378.2153446049367
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "541",
+        "shared_name" : "EBI-359977",
+        "name" : "EBI-359977",
+        "SUID" : 541,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 22.29323976479691,
+        "y" : 484.6044742436086
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "539",
+        "shared_name" : "EBI-79306",
+        "name" : "EBI-79306",
+        "SUID" : 539,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 197.0977632328145,
+        "y" : -863.1024768977488
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "537",
+        "shared_name" : "EBI-46257296",
+        "name" : "EBI-46257296",
+        "SUID" : 537,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 252.91584794961136,
+        "y" : -956.558691802534
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "535",
+        "shared_name" : "EBI-722004",
+        "name" : "EBI-722004",
+        "SUID" : 535,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 1248.661216907131,
+        "y" : -1226.8849971919383
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "533",
+        "shared_name" : "EBI-10303490",
+        "name" : "EBI-10303490",
+        "SUID" : 533,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 1143.1149522586934,
+        "y" : -1261.149096313032
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "531",
+        "shared_name" : "EBI-1028277",
+        "name" : "EBI-1028277",
+        "SUID" : 531,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 1560.238121204006,
+        "y" : 485.94904821821797
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "529",
+        "shared_name" : "EBI-10199985",
+        "name" : "EBI-10199985",
+        "SUID" : 529,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -295.1089056209453,
+        "y" : -113.81151086381328
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "527",
+        "shared_name" : "EBI-307924",
+        "name" : "EBI-307924",
+        "SUID" : 527,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 1436.7194139286153,
+        "y" : -1273.0395382075633
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "525",
+        "shared_name" : "EBI-2855119",
+        "name" : "EBI-2855119",
+        "SUID" : 525,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 1352.6713182254903,
+        "y" : -1198.9939144282664
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "523",
+        "shared_name" : "EBI-1753538",
+        "name" : "EBI-1753538",
+        "SUID" : 523,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 1662.8085176273457,
+        "y" : 485.9546939701711
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "521",
+        "shared_name" : "EBI-2927384",
+        "name" : "EBI-2927384",
+        "SUID" : 521,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 1665.1301080509297,
+        "y" : 378.2153446049367
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "519",
+        "shared_name" : "EBI-2852679",
+        "name" : "EBI-2852679",
+        "SUID" : 519,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 311.4256860538594,
+        "y" : 378.2153446049367
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "517",
+        "shared_name" : "EBI-702104",
+        "name" : "EBI-702104",
+        "SUID" : 517,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -1286.2337835506328,
+        "y" : 378.2153446049367
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "515",
+        "shared_name" : "EBI-490245",
+        "name" : "EBI-490245",
+        "SUID" : 515,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -430.24072248495895,
+        "y" : -1154.7333553462352
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "513",
+        "shared_name" : "EBI-1756009",
+        "name" : "EBI-1756009",
+        "SUID" : 513,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 1765.1301080509297,
+        "y" : 485.9546939701711
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "511",
+        "shared_name" : "EBI-1033846",
+        "name" : "EBI-1033846",
+        "SUID" : 511,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 1767.4516984745137,
+        "y" : 378.2153446049367
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "509",
+        "shared_name" : "EBI-25505481",
+        "name" : "EBI-25505481",
+        "SUID" : 509,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 577.9773828312032,
+        "y" : 378.2153446049367
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "507",
+        "shared_name" : "EBI-2476339",
+        "name" : "EBI-2476339",
+        "SUID" : 507,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -1443.9344671443828,
+        "y" : 864.0897647709523
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "505",
+        "shared_name" : "EBI-2841591",
+        "name" : "EBI-2841591",
+        "SUID" : 505,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -1441.6128767207988,
+        "y" : 756.350415405718
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "503",
+        "shared_name" : "EBI-310731",
+        "name" : "EBI-310731",
+        "SUID" : 503,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -1341.6128767207988,
+        "y" : 864.0897647709523
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "501",
+        "shared_name" : "EBI-3924922",
+        "name" : "EBI-3924922",
+        "SUID" : 501,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -1339.2912862972148,
+        "y" : 756.350415405718
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "499",
+        "shared_name" : "EBI-3916159",
+        "name" : "EBI-3916159",
+        "SUID" : 499,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -1341.6128767207988,
+        "y" : 964.0897647709523
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "497",
+        "shared_name" : "EBI-2835440",
+        "name" : "EBI-2835440",
+        "SUID" : 497,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -1239.2912862972148,
+        "y" : 864.0897647709523
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "495",
+        "shared_name" : "EBI-2872294",
+        "name" : "EBI-2872294",
+        "SUID" : 495,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -1236.9696958736308,
+        "y" : 756.350415405718
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "493",
+        "shared_name" : "EBI-1755002",
+        "name" : "EBI-1755002",
+        "SUID" : 493,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -1048.0452764705547,
+        "y" : 807.8827335209523
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "491",
+        "shared_name" : "EBI-1030755",
+        "name" : "EBI-1030755",
+        "SUID" : 491,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -1136.9696958736308,
+        "y" : 756.350415405718
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "489",
+        "shared_name" : "EBI-2623451",
+        "name" : "EBI-2623451",
+        "SUID" : 489,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -600.0965307430156,
+        "y" : 604.7150928349172
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "487",
+        "shared_name" : "EBI-14058448",
+        "name" : "EBI-14058448",
+        "SUID" : 487,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -1241.6128767207988,
+        "y" : 964.0897647709523
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "485",
+        "shared_name" : "EBI-745147",
+        "name" : "EBI-745147",
+        "SUID" : 485,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 677.9773828312032,
+        "y" : 378.2153446049367
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "483",
+        "shared_name" : "EBI-525939",
+        "name" : "EBI-525939",
+        "SUID" : 483,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -859.1208570674785,
+        "y" : 807.8827335209523
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "481",
+        "shared_name" : "EBI-7188069",
+        "name" : "EBI-7188069",
+        "SUID" : 481,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -948.0452764705547,
+        "y" : 756.350415405718
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "479",
+        "shared_name" : "EBI-518882",
+        "name" : "EBI-518882",
+        "SUID" : 479,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -942.8873022273906,
+        "y" : 462.70869177290547
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "477",
+        "shared_name" : "EBI-1030834",
+        "name" : "EBI-1030834",
+        "SUID" : 477,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -759.1208570674785,
+        "y" : 864.0897647709523
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "475",
+        "shared_name" : "EBI-12509683",
+        "name" : "EBI-12509683",
+        "SUID" : 475,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -756.7992666438945,
+        "y" : 756.350415405718
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "473",
+        "shared_name" : "EBI-296950",
+        "name" : "EBI-296950",
+        "SUID" : 473,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 1106.8957177921407,
+        "y" : 378.2153446049367
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "471",
+        "shared_name" : "EBI-1059294",
+        "name" : "EBI-1059294",
+        "SUID" : 471,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -1260.5704382137187,
+        "y" : 526.2126590580617
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "469",
+        "shared_name" : "EBI-3048545",
+        "name" : "EBI-3048545",
+        "SUID" : 469,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 1536.7194139286153,
+        "y" : -1181.573828521284
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "467",
+        "shared_name" : "EBI-2371346",
+        "name" : "EBI-2371346",
+        "SUID" : 467,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 1614.861946277248,
+        "y" : -1181.3644169001902
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "465",
+        "shared_name" : "EBI-10049055",
+        "name" : "EBI-10049055",
+        "SUID" : 465,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -533.6624334529765,
+        "y" : -396.9355343013133
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "463",
+        "shared_name" : "EBI-64049958",
+        "name" : "EBI-64049958",
+        "SUID" : 463,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -648.2180364803203,
+        "y" : -427.7839229731883
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "461",
+        "shared_name" : "EBI-4314282",
+        "name" : "EBI-4314282",
+        "SUID" : 461,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 549.7751695438496,
+        "y" : -992.7761753230418
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "459",
+        "shared_name" : "EBI-1035358",
+        "name" : "EBI-1035358",
+        "SUID" : 459,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -409.66583616293747,
+        "y" : -356.20942956498516
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "457",
+        "shared_name" : "EBI-2568198",
+        "name" : "EBI-2568198",
+        "SUID" : 457,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -75.32100278891403,
+        "y" : -385.1397884517039
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "455",
+        "shared_name" : "EBI-6189824",
+        "name" : "EBI-6189824",
+        "SUID" : 455,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -195.65552122153122,
+        "y" : -394.6471126704539
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "453",
+        "shared_name" : "EBI-12945620",
+        "name" : "EBI-12945620",
+        "SUID" : 453,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -656.7992666438945,
+        "y" : 864.0897647709523
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "451",
+        "shared_name" : "EBI-21507346",
+        "name" : "EBI-21507346",
+        "SUID" : 451,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -654.4776762203105,
+        "y" : 756.350415405718
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "449",
+        "shared_name" : "EBI-1172957",
+        "name" : "EBI-1172957",
+        "SUID" : 449,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 144.1859399601094,
+        "y" : 504.44911688276875
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "447",
+        "shared_name" : "EBI-6256193",
+        "name" : "EBI-6256193",
+        "SUID" : 447,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 222.62057130776566,
+        "y" : 434.67834204146016
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "445",
+        "shared_name" : "EBI-2683468",
+        "name" : "EBI-2683468",
+        "SUID" : 445,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -671.2685430721172,
+        "y" : -29.210558715375782
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "443",
+        "shared_name" : "EBI-5773557",
+        "name" : "EBI-5773557",
+        "SUID" : 443,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -1409.1858404353984,
+        "y" : 548.4333621830617
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "441",
+        "shared_name" : "EBI-80252",
+        "name" : "EBI-80252",
+        "SUID" : 441,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -1443.9344671443828,
+        "y" : 393.87519567915547
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "439",
+        "shared_name" : "EBI-538287",
+        "name" : "EBI-538287",
+        "SUID" : 439,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -1351.8283880428203,
+        "y" : 460.3779422611867
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "437",
+        "shared_name" : "EBI-724977",
+        "name" : "EBI-724977",
+        "SUID" : 437,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -554.4776762203105,
+        "y" : 864.0897647709523
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "435",
+        "shared_name" : "EBI-3946257",
+        "name" : "EBI-3946257",
+        "SUID" : 435,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -552.1560857967265,
+        "y" : 756.350415405718
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "433",
+        "shared_name" : "EBI-1045757",
+        "name" : "EBI-1045757",
+        "SUID" : 433,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 1614.3998185917012,
+        "y" : -1089.642218413862
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "431",
+        "shared_name" : "EBI-6163585",
+        "name" : "EBI-6163585",
+        "SUID" : 431,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 1692.8550035282246,
+        "y" : -1181.0282810359324
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "429",
+        "shared_name" : "EBI-9257341",
+        "name" : "EBI-9257341",
+        "SUID" : 429,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -422.76629240073044,
+        "y" : -808.9946621089305
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "427",
+        "shared_name" : "EBI-2565102",
+        "name" : "EBI-2565102",
+        "SUID" : 427,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 1357.916530780422,
+        "y" : 378.2153446049367
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "425",
+        "shared_name" : "EBI-750770",
+        "name" : "EBI-750770",
+        "SUID" : 425,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 1206.8957177921407,
+        "y" : 535.8566715092336
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "423",
+        "shared_name" : "EBI-727477",
+        "name" : "EBI-727477",
+        "SUID" : 423,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 1287.5374719425313,
+        "y" : 461.95734899946797
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "421",
+        "shared_name" : "EBI-4315002",
+        "name" : "EBI-4315002",
+        "SUID" : 421,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -1141.6128767207988,
+        "y" : 964.0897647709523
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "419",
+        "shared_name" : "EBI-524131",
+        "name" : "EBI-524131",
+        "SUID" : 419,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -231.6370123103984,
+        "y" : 573.7579547733937
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "417",
+        "shared_name" : "EBI-495538",
+        "name" : "EBI-495538",
+        "SUID" : 417,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -452.15608579672653,
+        "y" : 864.0897647709523
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "415",
+        "shared_name" : "EBI-494743",
+        "name" : "EBI-494743",
+        "SUID" : 415,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -449.83449537314254,
+        "y" : 756.350415405718
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "413",
+        "shared_name" : "EBI-525714",
+        "name" : "EBI-525714",
+        "SUID" : 413,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -886.7435491756328,
+        "y" : 163.77973669478047
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "411",
+        "shared_name" : "EBI-1387782",
+        "name" : "EBI-1387782",
+        "SUID" : 411,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 707.2096177860371,
+        "y" : -1024.8219097285594
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "409",
+        "shared_name" : "EBI-2847071",
+        "name" : "EBI-2847071",
+        "SUID" : 409,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -537.0704076961406,
+        "y" : 514.5036823124562
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "407",
+        "shared_name" : "EBI-5564336",
+        "name" : "EBI-5564336",
+        "SUID" : 407,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 1022.0529443546407,
+        "y" : 437.73261755415547
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "405",
+        "shared_name" : "EBI-2339969",
+        "name" : "EBI-2339969",
+        "SUID" : 405,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 943.1315576358907,
+        "y" : 506.81672399946797
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "403",
+        "shared_name" : "EBI-1391211",
+        "name" : "EBI-1391211",
+        "SUID" : 403,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -270.6395452693828,
+        "y" : -741.5146816401805
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "401",
+        "shared_name" : "EBI-1771314",
+        "name" : "EBI-1771314",
+        "SUID" : 401,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 807.2096177860371,
+        "y" : -965.300505462202
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "399",
+        "shared_name" : "EBI-525675",
+        "name" : "EBI-525675",
+        "SUID" : 399,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -349.83449537314254,
+        "y" : 864.0897647709523
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "397",
+        "shared_name" : "EBI-7404021",
+        "name" : "EBI-7404021",
+        "SUID" : 397,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -347.51290494955856,
+        "y" : 756.350415405718
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "395",
+        "shared_name" : "EBI-6691679",
+        "name" : "EBI-6691679",
+        "SUID" : 395,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -1041.6128767207988,
+        "y" : 964.0897647709523
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "393",
+        "shared_name" : "EBI-2873748",
+        "name" : "EBI-2873748",
+        "SUID" : 393,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -247.51290494955856,
+        "y" : 864.0841190189992
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "391",
+        "shared_name" : "EBI-1188108",
+        "name" : "EBI-1188108",
+        "SUID" : 391,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -244.94250852621872,
+        "y" : 756.350415405718
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "389",
+        "shared_name" : "EBI-965864",
+        "name" : "EBI-965864",
+        "SUID" : 389,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -144.94250852621872,
+        "y" : 864.0897647709523
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "387",
+        "shared_name" : "EBI-2805248",
+        "name" : "EBI-2805248",
+        "SUID" : 387,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -142.62091810263473,
+        "y" : 756.350415405718
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "385",
+        "shared_name" : "EBI-4314481",
+        "name" : "EBI-4314481",
+        "SUID" : 385,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -491.6166723445781,
+        "y" : -962.049242797407
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "383",
+        "shared_name" : "EBI-716404",
+        "name" : "EBI-716404",
+        "SUID" : 383,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 495.30135744057816,
+        "y" : 449.88129919478047
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "381",
+        "shared_name" : "EBI-747170",
+        "name" : "EBI-747170",
+        "SUID" : 381,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 411.4256860538594,
+        "y" : 520.1241885990773
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "379",
+        "shared_name" : "EBI-1268321",
+        "name" : "EBI-1268321",
+        "SUID" : 379,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 761.666057757961,
+        "y" : 447.3814517826711
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "377",
+        "shared_name" : "EBI-1268284",
+        "name" : "EBI-1268284",
+        "SUID" : 377,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 843.1315576358907,
+        "y" : 518.036938843218
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "375",
+        "shared_name" : "EBI-2805262",
+        "name" : "EBI-2805262",
+        "SUID" : 375,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -1043.4572942928203,
+        "y" : -1269.1779659419383
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "373",
+        "shared_name" : "EBI-714770",
+        "name" : "EBI-714770",
+        "SUID" : 373,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -42.62091810263473,
+        "y" : 864.0897647709523
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "371",
+        "shared_name" : "EBI-1580565",
+        "name" : "EBI-1580565",
+        "SUID" : 371,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -40.29932767905075,
+        "y" : 756.350415405718
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "369",
+        "shared_name" : "EBI-518861",
+        "name" : "EBI-518861",
+        "SUID" : 369,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -1160.5704382137187,
+        "y" : 526.9491702885305
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "367",
+        "shared_name" : "EBI-18539709",
+        "name" : "EBI-18539709",
+        "SUID" : 367,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 59.70067232094925,
+        "y" : 864.0897647709523
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "365",
+        "shared_name" : "EBI-520729",
+        "name" : "EBI-520729",
+        "SUID" : 365,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 62.022262744533236,
+        "y" : 756.350415405718
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "363",
+        "shared_name" : "EBI-1030956",
+        "name" : "EBI-1030956",
+        "SUID" : 363,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 664.196647815334,
+        "y" : -1273.0395382075633
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "361",
+        "shared_name" : "EBI-1030991",
+        "name" : "EBI-1030991",
+        "SUID" : 361,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 700.7678758426778,
+        "y" : -1169.5378749995555
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "359",
+        "shared_name" : "EBI-1031024",
+        "name" : "EBI-1031024",
+        "SUID" : 359,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 622.3228990360371,
+        "y" : -1087.0117061763133
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "357",
+        "shared_name" : "EBI-4314301",
+        "name" : "EBI-4314301",
+        "SUID" : 357,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 583.0718004032246,
+        "y" : -1197.1190975337352
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "355",
+        "shared_name" : "EBI-718419",
+        "name" : "EBI-718419",
+        "SUID" : 355,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 1007.9603807254903,
+        "y" : -997.1529567866648
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "353",
+        "shared_name" : "EBI-6897823",
+        "name" : "EBI-6897823",
+        "SUID" : 353,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -112.19057066000778,
+        "y" : -1036.495531859907
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "351",
+        "shared_name" : "EBI-963338",
+        "name" : "EBI-963338",
+        "SUID" : 351,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -941.6128767207988,
+        "y" : 964.0897647709523
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "349",
+        "shared_name" : "EBI-299383",
+        "name" : "EBI-299383",
+        "SUID" : 349,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 264.11806028329056,
+        "y" : 756.350415405718
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "347",
+        "shared_name" : "EBI-9680942",
+        "name" : "EBI-9680942",
+        "SUID" : 347,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 162.02226274453324,
+        "y" : 776.6376773686086
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "345",
+        "shared_name" : "EBI-2855248",
+        "name" : "EBI-2855248",
+        "SUID" : 345,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 293.4024049564473,
+        "y" : -1273.0395382075633
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "343",
+        "shared_name" : "EBI-1044859",
+        "name" : "EBI-1044859",
+        "SUID" : 343,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -1021.4656408504375,
+        "y" : 589.9756900639211
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "341",
+        "shared_name" : "EBI-2846607",
+        "name" : "EBI-2846607",
+        "SUID" : 341,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 1562.8085176273457,
+        "y" : 378.2153446049367
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "339",
+        "shared_name" : "EBI-720783",
+        "name" : "EBI-720783",
+        "SUID" : 339,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -564.966998882664,
+        "y" : -3.4186275630320324
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "337",
+        "shared_name" : "EBI-4314390",
+        "name" : "EBI-4314390",
+        "SUID" : 337,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -103.2595709041484,
+        "y" : 472.15199774214375
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "335",
+        "shared_name" : "EBI-2836676",
+        "name" : "EBI-2836676",
+        "SUID" : 335,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -44.894763775242154,
+        "y" : -1218.8008907466258
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "333",
+        "shared_name" : "EBI-6267018",
+        "name" : "EBI-6267018",
+        "SUID" : 333,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 39.49613588296097,
+        "y" : -1088.6674678950633
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "331",
+        "shared_name" : "EBI-529023",
+        "name" : "EBI-529023",
+        "SUID" : 331,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 364.11806028329056,
+        "y" : 864.0897647709523
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "329",
+        "shared_name" : "EBI-13076860",
+        "name" : "EBI-13076860",
+        "SUID" : 329,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 366.43965070687454,
+        "y" : 756.350415405718
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "327",
+        "shared_name" : "EBI-1056653",
+        "name" : "EBI-1056653",
+        "SUID" : 327,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -213.12923032797653,
+        "y" : 465.2680713505422
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "325",
+        "shared_name" : "EBI-4314354",
+        "name" : "EBI-4314354",
+        "SUID" : 325,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -282.1253698543437,
+        "y" : 378.2153446049367
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "323",
+        "shared_name" : "EBI-297082",
+        "name" : "EBI-297082",
+        "SUID" : 323,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -531.3237188533672,
+        "y" : -152.27098352006328
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "321",
+        "shared_name" : "EBI-742600",
+        "name" : "EBI-742600",
+        "SUID" : 321,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -272.32735807455856,
+        "y" : -607.9180782466258
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "319",
+        "shared_name" : "EBI-15643544",
+        "name" : "EBI-15643544",
+        "SUID" : 319,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -804.7941778377422,
+        "y" : -1087.0564144282664
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "317",
+        "shared_name" : "EBI-64073345",
+        "name" : "EBI-64073345",
+        "SUID" : 317,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -936.2342718318828,
+        "y" : -1255.8926876216258
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "315",
+        "shared_name" : "EBI-16356454",
+        "name" : "EBI-16356454",
+        "SUID" : 315,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 466.43965070687454,
+        "y" : 864.0841190189992
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "313",
+        "shared_name" : "EBI-5652260",
+        "name" : "EBI-5652260",
+        "SUID" : 313,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 469.0100471302144,
+        "y" : 756.350415405718
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "311",
+        "shared_name" : "EBI-4314328",
+        "name" : "EBI-4314328",
+        "SUID" : 311,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 515.5914537235371,
+        "y" : -883.5925205378855
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "309",
+        "shared_name" : "EBI-16427978",
+        "name" : "EBI-16427978",
+        "SUID" : 309,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 526.1073228641621,
+        "y" : -772.9922969966258
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "307",
+        "shared_name" : "EBI-15596193",
+        "name" : "EBI-15596193",
+        "SUID" : 307,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 569.0100471302144,
+        "y" : 864.0897647709523
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "305",
+        "shared_name" : "EBI-11724451",
+        "name" : "EBI-11724451",
+        "SUID" : 305,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 571.3316375537984,
+        "y" : 756.350415405718
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "303",
+        "shared_name" : "EBI-54635718",
+        "name" : "EBI-54635718",
+        "SUID" : 303,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -742.5217931941875,
+        "y" : 656.350415405718
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "301",
+        "shared_name" : "EBI-519169",
+        "name" : "EBI-519169",
+        "SUID" : 301,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -758.6019628719218,
+        "y" : 545.2559635014211
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "299",
+        "shared_name" : "EBI-717441",
+        "name" : "EBI-717441",
+        "SUID" : 299,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -1099.3392675594218,
+        "y" : 378.2153446049367
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "297",
+        "shared_name" : "EBI-495373",
+        "name" : "EBI-495373",
+        "SUID" : 297,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -1055.4589880184062,
+        "y" : 483.20866125532734
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "295",
+        "shared_name" : "EBI-4314442",
+        "name" : "EBI-4314442",
+        "SUID" : 295,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 1043.1149522586934,
+        "y" : -1114.1582668452586
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "293",
+        "shared_name" : "EBI-3912464",
+        "name" : "EBI-3912464",
+        "SUID" : 293,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 671.3316375537984,
+        "y" : 864.0897647709523
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "291",
+        "shared_name" : "EBI-718785",
+        "name" : "EBI-718785",
+        "SUID" : 291,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 673.6532279773824,
+        "y" : 756.350415405718
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "289",
+        "shared_name" : "EBI-62841388",
+        "name" : "EBI-62841388",
+        "SUID" : 289,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -137.72374326742965,
+        "y" : -1156.2234371333445
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "287",
+        "shared_name" : "EBI-12810028",
+        "name" : "EBI-12810028",
+        "SUID" : 287,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 164.21105211220902,
+        "y" : -1202.3300350337352
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "285",
+        "shared_name" : "EBI-2313231",
+        "name" : "EBI-2313231",
+        "SUID" : 285,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 261.3189317508809,
+        "y" : -1162.4129207759227
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "283",
+        "shared_name" : "EBI-946223",
+        "name" : "EBI-946223",
+        "SUID" : 283,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -382.1253698543437,
+        "y" : 378.2153446049367
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "281",
+        "shared_name" : "EBI-10249550",
+        "name" : "EBI-10249550",
+        "SUID" : 281,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -465.03592283285934,
+        "y" : 440.63290899702656
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "279",
+        "shared_name" : "EBI-2826725",
+        "name" : "EBI-2826725",
+        "SUID" : 279,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 894.5971910282246,
+        "y" : -1041.123186889204
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "277",
+        "shared_name" : "EBI-2816428",
+        "name" : "EBI-2816428",
+        "SUID" : 277,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -948.190387554539,
+        "y" : -1141.6433284907664
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "275",
+        "shared_name" : "EBI-2873704",
+        "name" : "EBI-2873704",
+        "SUID" : 275,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -671.1793401912578,
+        "y" : -1153.1216610102977
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "273",
+        "shared_name" : "EBI-3914938",
+        "name" : "EBI-3914938",
+        "SUID" : 273,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -654.5081060603984,
+        "y" : -1038.374438109907
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "271",
+        "shared_name" : "EBI-2554508",
+        "name" : "EBI-2554508",
+        "SUID" : 271,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -797.394000835789,
+        "y" : 278.2153446049367
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "269",
+        "shared_name" : "EBI-4314807",
+        "name" : "EBI-4314807",
+        "SUID" : 269,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 980.4010545536153,
+        "y" : -1085.7066677241648
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "267",
+        "shared_name" : "EBI-1030170",
+        "name" : "EBI-1030170",
+        "SUID" : 267,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -78.26735288657028,
+        "y" : -1111.4197872310008
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "265",
+        "shared_name" : "EBI-2816560",
+        "name" : "EBI-2816560",
+        "SUID" : 265,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 875.7228566928975,
+        "y" : 756.350415405718
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "263",
+        "shared_name" : "EBI-1054562",
+        "name" : "EBI-1054562",
+        "SUID" : 263,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 773.6532279773824,
+        "y" : 776.767407593218
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "261",
+        "shared_name" : "EBI-21899250",
+        "name" : "EBI-21899250",
+        "SUID" : 261,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 1077.8186542316548,
+        "y" : 756.350415405718
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "259",
+        "shared_name" : "EBI-7151999",
+        "name" : "EBI-7151999",
+        "SUID" : 259,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 975.7228566928975,
+        "y" : 776.6376773686086
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "257",
+        "shared_name" : "EBI-716505",
+        "name" : "EBI-716505",
+        "SUID" : 257,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -322.6573332027324,
+        "y" : -182.18925744584453
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "255",
+        "shared_name" : "EBI-1030190",
+        "name" : "EBI-1030190",
+        "SUID" : 255,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -221.52028257407028,
+        "y" : -1087.7332637935008
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "253",
+        "shared_name" : "EBI-8007671",
+        "name" : "EBI-8007671",
+        "SUID" : 253,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -366.4106872753032,
+        "y" : -1057.1103695063914
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "251",
+        "shared_name" : "EBI-519945",
+        "name" : "EBI-519945",
+        "SUID" : 251,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -842.8873022273906,
+        "y" : 471.0227176518117
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "249",
+        "shared_name" : "EBI-519208",
+        "name" : "EBI-519208",
+        "SUID" : 249,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -783.9273412898906,
+        "y" : 378.2153446049367
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "247",
+        "shared_name" : "EBI-519160",
+        "name" : "EBI-519160",
+        "SUID" : 247,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -700.0965307430156,
+        "y" : 449.41218298384297
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "245",
+        "shared_name" : "EBI-3918416",
+        "name" : "EBI-3918416",
+        "SUID" : 245,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -237.89899045981247,
+        "y" : -137.67656213334453
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "243",
+        "shared_name" : "EBI-2565117",
+        "name" : "EBI-2565117",
+        "SUID" : 243,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -221.56117612875778,
+        "y" : -261.1945980220164
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "241",
+        "shared_name" : "EBI-2805156",
+        "name" : "EBI-2805156",
+        "SUID" : 241,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -841.6128767207988,
+        "y" : 964.0897647709523
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "239",
+        "shared_name" : "EBI-2568294",
+        "name" : "EBI-2568294",
+        "SUID" : 239,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -404.827895946873,
+        "y" : -191.55522424271953
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "237",
+        "shared_name" : "EBI-4314733",
+        "name" : "EBI-4314733",
+        "SUID" : 237,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -353.16577131308395,
+        "y" : -77.03190881303203
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "235",
+        "shared_name" : "EBI-458344",
+        "name" : "EBI-458344",
+        "SUID" : 235,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 1177.8186542316548,
+        "y" : 864.0897647709523
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "233",
+        "shared_name" : "EBI-1032551",
+        "name" : "EBI-1032551",
+        "SUID" : 233,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 1180.1402446552388,
+        "y" : 756.350415405718
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "231",
+        "shared_name" : "EBI-2806056",
+        "name" : "EBI-2806056",
+        "SUID" : 231,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -214.5509527400859,
+        "y" : -534.6131618647898
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "229",
+        "shared_name" : "EBI-2550721",
+        "name" : "EBI-2550721",
+        "SUID" : 229,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -664.2305486873515,
+        "y" : 93.23615759321797
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "227",
+        "shared_name" : "EBI-12684511",
+        "name" : "EBI-12684511",
+        "SUID" : 227,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -770.0396307186015,
+        "y" : 166.50190466353047
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "225",
+        "shared_name" : "EBI-2821415",
+        "name" : "EBI-2821415",
+        "SUID" : 225,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 973.4591905399434,
+        "y" : -1273.0395382075633
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "223",
+        "shared_name" : "EBI-3910563",
+        "name" : "EBI-3910563",
+        "SUID" : 223,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 1280.1402446552388,
+        "y" : 864.0897647709523
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "221",
+        "shared_name" : "EBI-4314412",
+        "name" : "EBI-4314412",
+        "SUID" : 221,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 1282.4618350788228,
+        "y" : 756.350415405718
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "219",
+        "shared_name" : "EBI-2805465",
+        "name" : "EBI-2805465",
+        "SUID" : 219,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 1382.4618350788228,
+        "y" : 864.0897647709523
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "217",
+        "shared_name" : "EBI-16578656",
+        "name" : "EBI-16578656",
+        "SUID" : 217,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 1384.7834255024068,
+        "y" : 756.350415405718
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "215",
+        "shared_name" : "EBI-4314670",
+        "name" : "EBI-4314670",
+        "SUID" : 215,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -741.6128767207988,
+        "y" : 964.0897647709523
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "213",
+        "shared_name" : "EBI-2550735",
+        "name" : "EBI-2550735",
+        "SUID" : 213,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -436.23686964072067,
+        "y" : -96.01793176225078
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "211",
+        "shared_name" : "EBI-9071715",
+        "name" : "EBI-9071715",
+        "SUID" : 211,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -488.0825155452617,
+        "y" : -213.89860803178203
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "209",
+        "shared_name" : "EBI-2568341",
+        "name" : "EBI-2568341",
+        "SUID" : 209,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -367.0335529521831,
+        "y" : -244.17512780717266
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "207",
+        "shared_name" : "EBI-3922712",
+        "name" : "EBI-3922712",
+        "SUID" : 207,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 1484.7834255024068,
+        "y" : 864.0897647709523
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "205",
+        "shared_name" : "EBI-12923856",
+        "name" : "EBI-12923856",
+        "SUID" : 205,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 1487.1050159259908,
+        "y" : 756.350415405718
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "203",
+        "shared_name" : "EBI-2568401",
+        "name" : "EBI-2568401",
+        "SUID" : 203,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -277.05997068442184,
+        "y" : -515.5081356196727
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "201",
+        "shared_name" : "EBI-725421",
+        "name" : "EBI-725421",
+        "SUID" : 201,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -351.1445005611308,
+        "y" : -654.5155819087352
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "199",
+        "shared_name" : "EBI-3919694",
+        "name" : "EBI-3919694",
+        "SUID" : 199,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 927.8918077274434,
+        "y" : -1165.4992855220164
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "197",
+        "shared_name" : "EBI-64055792",
+        "name" : "EBI-64055792",
+        "SUID" : 197,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 841.8136216922871,
+        "y" : -1226.8596370845164
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "195",
+        "shared_name" : "EBI-744988",
+        "name" : "EBI-744988",
+        "SUID" : 195,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -1223.7807806209453,
+        "y" : -1171.3508785395945
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "193",
+        "shared_name" : "EBI-4314540",
+        "name" : "EBI-4314540",
+        "SUID" : 193,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -593.9891088680156,
+        "y" : -923.4787624507273
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "191",
+        "shared_name" : "EBI-4314501",
+        "name" : "EBI-4314501",
+        "SUID" : 191,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -564.5138891414531,
+        "y" : -1030.8466671138133
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "189",
+        "shared_name" : "EBI-8502656",
+        "name" : "EBI-8502656",
+        "SUID" : 189,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 1587.1050159259908,
+        "y" : 864.0897647709523
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "187",
+        "shared_name" : "EBI-64075384",
+        "name" : "EBI-64075384",
+        "SUID" : 187,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 1589.4266063495747,
+        "y" : 756.350415405718
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "185",
+        "shared_name" : "EBI-3910993",
+        "name" : "EBI-3910993",
+        "SUID" : 185,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -1070.779010601414,
+        "y" : -1053.778979125532
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "183",
+        "shared_name" : "EBI-6165894",
+        "name" : "EBI-6165894",
+        "SUID" : 183,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -1157.6546209529765,
+        "y" : -1273.0395382075633
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "181",
+        "shared_name" : "EBI-16355086",
+        "name" : "EBI-16355086",
+        "SUID" : 181,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 1689.4266063495747,
+        "y" : 864.0897647709523
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "179",
+        "shared_name" : "EBI-13350535",
+        "name" : "EBI-13350535",
+        "SUID" : 179,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 1691.7481967731587,
+        "y" : 756.350415405718
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "177",
+        "shared_name" : "EBI-2851995",
+        "name" : "EBI-2851995",
+        "SUID" : 177,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -1443.9344671443828,
+        "y" : 1071.8291141361867
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "175",
+        "shared_name" : "EBI-6932080",
+        "name" : "EBI-6932080",
+        "SUID" : 175,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -1441.6128767207988,
+        "y" : 964.0897647709523
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "173",
+        "shared_name" : "EBI-18164173",
+        "name" : "EBI-18164173",
+        "SUID" : 173,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -641.6128767207988,
+        "y" : 964.0897647709523
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "171",
+        "shared_name" : "EBI-2568233",
+        "name" : "EBI-2568233",
+        "SUID" : 171,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -353.00520307577926,
+        "y" : -515.1098507075633
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "169",
+        "shared_name" : "EBI-1222232",
+        "name" : "EBI-1222232",
+        "SUID" : 169,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -460.4220693782695,
+        "y" : -561.4761074214305
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "167",
+        "shared_name" : "EBI-25648039",
+        "name" : "EBI-25648039",
+        "SUID" : 167,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -1424.1412542537578,
+        "y" : -1081.1981075435008
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "165",
+        "shared_name" : "EBI-64073160",
+        "name" : "EBI-64073160",
+        "SUID" : 165,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -1340.354450054539,
+        "y" : -1162.559984984907
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "163",
+        "shared_name" : "EBI-9018182",
+        "name" : "EBI-9018182",
+        "SUID" : 163,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -1443.9344671443828,
+        "y" : -1216.866869750532
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "161",
+        "shared_name" : "EBI-15316524",
+        "name" : "EBI-15316524",
+        "SUID" : 161,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -1175.6160467342265,
+        "y" : -1072.4955623774852
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "159",
+        "shared_name" : "EBI-64073231",
+        "name" : "EBI-64073231",
+        "SUID" : 159,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -1101.2782171443828,
+        "y" : -1165.5818660884227
+      },
+      "selected" : false
+    } ],
+    "edges" : [ {
+      "data" : {
+        "id" : "1015",
+        "source" : "567",
+        "target" : "565",
+        "shared_name" : "EBI-2830349 (-) EBI-77613",
+        "name" : "EBI-2830349 (-) EBI-77613",
+        "interaction" : "-",
+        "SUID" : 1015,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "1017",
+        "source" : "565",
+        "target" : "569",
+        "shared_name" : "EBI-77613 (-) EBI-2622890",
+        "name" : "EBI-77613 (-) EBI-2622890",
+        "interaction" : "-",
+        "SUID" : 1017,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "1005",
+        "source" : "563",
+        "target" : "529",
+        "shared_name" : "EBI-1028658 (-) EBI-10199985",
+        "name" : "EBI-1028658 (-) EBI-10199985",
+        "interaction" : "-",
+        "SUID" : 1005,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "999",
+        "source" : "561",
+        "target" : "529",
+        "shared_name" : "EBI-2256711 (-) EBI-10199985",
+        "name" : "EBI-2256711 (-) EBI-10199985",
+        "interaction" : "-",
+        "SUID" : 999,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "993",
+        "source" : "557",
+        "target" : "559",
+        "shared_name" : "EBI-2809438 (-) EBI-1341",
+        "name" : "EBI-2809438 (-) EBI-1341",
+        "interaction" : "-",
+        "SUID" : 993,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "991",
+        "source" : "555",
+        "target" : "529",
+        "shared_name" : "EBI-2872467 (-) EBI-10199985",
+        "name" : "EBI-2872467 (-) EBI-10199985",
+        "interaction" : "-",
+        "SUID" : 991,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "989",
+        "source" : "553",
+        "target" : "253",
+        "shared_name" : "EBI-359610 (-) EBI-8007671",
+        "name" : "EBI-359610 (-) EBI-8007671",
+        "interaction" : "-",
+        "SUID" : 989,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "987",
+        "source" : "551",
+        "target" : "525",
+        "shared_name" : "EBI-311073 (-) EBI-2855119",
+        "name" : "EBI-311073 (-) EBI-2855119",
+        "interaction" : "-",
+        "SUID" : 987,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "983",
+        "source" : "551",
+        "target" : "525",
+        "shared_name" : "EBI-311073 (-) EBI-2855119",
+        "name" : "EBI-311073 (-) EBI-2855119",
+        "interaction" : "-",
+        "SUID" : 983,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "975",
+        "source" : "547",
+        "target" : "431",
+        "shared_name" : "EBI-2556545 (-) EBI-6163585",
+        "name" : "EBI-2556545 (-) EBI-6163585",
+        "interaction" : "-",
+        "SUID" : 975,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "973",
+        "source" : "541",
+        "target" : "545",
+        "shared_name" : "EBI-359977 (-) EBI-299451",
+        "name" : "EBI-359977 (-) EBI-299451",
+        "interaction" : "-",
+        "SUID" : 973,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "969",
+        "source" : "541",
+        "target" : "543",
+        "shared_name" : "EBI-359977 (-) EBI-358983",
+        "name" : "EBI-359977 (-) EBI-358983",
+        "interaction" : "-",
+        "SUID" : 969,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "985",
+        "source" : "539",
+        "target" : "549",
+        "shared_name" : "EBI-79306 (-) EBI-1052371",
+        "name" : "EBI-79306 (-) EBI-1052371",
+        "interaction" : "-",
+        "SUID" : 985,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "981",
+        "source" : "539",
+        "target" : "549",
+        "shared_name" : "EBI-79306 (-) EBI-1052371",
+        "name" : "EBI-79306 (-) EBI-1052371",
+        "interaction" : "-",
+        "SUID" : 981,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "1013",
+        "source" : "537",
+        "target" : "565",
+        "shared_name" : "EBI-46257296 (-) EBI-77613",
+        "name" : "EBI-46257296 (-) EBI-77613",
+        "interaction" : "-",
+        "SUID" : 1013,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "1011",
+        "source" : "537",
+        "target" : "565",
+        "shared_name" : "EBI-46257296 (-) EBI-77613",
+        "name" : "EBI-46257296 (-) EBI-77613",
+        "interaction" : "-",
+        "SUID" : 1011,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "967",
+        "source" : "537",
+        "target" : "539",
+        "shared_name" : "EBI-46257296 (-) EBI-79306",
+        "name" : "EBI-46257296 (-) EBI-79306",
+        "interaction" : "-",
+        "SUID" : 967,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "965",
+        "source" : "537",
+        "target" : "539",
+        "shared_name" : "EBI-46257296 (-) EBI-79306",
+        "name" : "EBI-46257296 (-) EBI-79306",
+        "interaction" : "-",
+        "SUID" : 965,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "963",
+        "source" : "533",
+        "target" : "535",
+        "shared_name" : "EBI-10303490 (-) EBI-722004",
+        "name" : "EBI-10303490 (-) EBI-722004",
+        "interaction" : "-",
+        "SUID" : 963,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "1007",
+        "source" : "529",
+        "target" : "563",
+        "shared_name" : "EBI-10199985 (-) EBI-1028658",
+        "name" : "EBI-10199985 (-) EBI-1028658",
+        "interaction" : "-",
+        "SUID" : 1007,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "997",
+        "source" : "529",
+        "target" : "561",
+        "shared_name" : "EBI-10199985 (-) EBI-2256711",
+        "name" : "EBI-10199985 (-) EBI-2256711",
+        "interaction" : "-",
+        "SUID" : 997,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "995",
+        "source" : "529",
+        "target" : "561",
+        "shared_name" : "EBI-10199985 (-) EBI-2256711",
+        "name" : "EBI-10199985 (-) EBI-2256711",
+        "interaction" : "-",
+        "SUID" : 995,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "971",
+        "source" : "529",
+        "target" : "239",
+        "shared_name" : "EBI-10199985 (-) EBI-2568294",
+        "name" : "EBI-10199985 (-) EBI-2568294",
+        "interaction" : "-",
+        "SUID" : 971,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "1003",
+        "source" : "525",
+        "target" : "535",
+        "shared_name" : "EBI-2855119 (-) EBI-722004",
+        "name" : "EBI-2855119 (-) EBI-722004",
+        "interaction" : "-",
+        "SUID" : 1003,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "1001",
+        "source" : "525",
+        "target" : "535",
+        "shared_name" : "EBI-2855119 (-) EBI-722004",
+        "name" : "EBI-2855119 (-) EBI-722004",
+        "interaction" : "-",
+        "SUID" : 1001,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "955",
+        "source" : "525",
+        "target" : "527",
+        "shared_name" : "EBI-2855119 (-) EBI-307924",
+        "name" : "EBI-2855119 (-) EBI-307924",
+        "interaction" : "-",
+        "SUID" : 955,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "953",
+        "source" : "521",
+        "target" : "523",
+        "shared_name" : "EBI-2927384 (-) EBI-1753538",
+        "name" : "EBI-2927384 (-) EBI-1753538",
+        "interaction" : "-",
+        "SUID" : 953,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "949",
+        "source" : "519",
+        "target" : "447",
+        "shared_name" : "EBI-2852679 (-) EBI-6256193",
+        "name" : "EBI-2852679 (-) EBI-6256193",
+        "interaction" : "-",
+        "SUID" : 949,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "945",
+        "source" : "519",
+        "target" : "447",
+        "shared_name" : "EBI-2852679 (-) EBI-6256193",
+        "name" : "EBI-2852679 (-) EBI-6256193",
+        "interaction" : "-",
+        "SUID" : 945,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "951",
+        "source" : "517",
+        "target" : "439",
+        "shared_name" : "EBI-702104 (-) EBI-538287",
+        "name" : "EBI-702104 (-) EBI-538287",
+        "interaction" : "-",
+        "SUID" : 951,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "947",
+        "source" : "517",
+        "target" : "439",
+        "shared_name" : "EBI-702104 (-) EBI-538287",
+        "name" : "EBI-702104 (-) EBI-538287",
+        "interaction" : "-",
+        "SUID" : 947,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "939",
+        "source" : "515",
+        "target" : "253",
+        "shared_name" : "EBI-490245 (-) EBI-8007671",
+        "name" : "EBI-490245 (-) EBI-8007671",
+        "interaction" : "-",
+        "SUID" : 939,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "937",
+        "source" : "511",
+        "target" : "513",
+        "shared_name" : "EBI-1033846 (-) EBI-1756009",
+        "name" : "EBI-1033846 (-) EBI-1756009",
+        "interaction" : "-",
+        "SUID" : 937,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "933",
+        "source" : "509",
+        "target" : "383",
+        "shared_name" : "EBI-25505481 (-) EBI-716404",
+        "name" : "EBI-25505481 (-) EBI-716404",
+        "interaction" : "-",
+        "SUID" : 933,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "931",
+        "source" : "505",
+        "target" : "507",
+        "shared_name" : "EBI-2841591 (-) EBI-2476339",
+        "name" : "EBI-2841591 (-) EBI-2476339",
+        "interaction" : "-",
+        "SUID" : 931,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "929",
+        "source" : "501",
+        "target" : "503",
+        "shared_name" : "EBI-3924922 (-) EBI-310731",
+        "name" : "EBI-3924922 (-) EBI-310731",
+        "interaction" : "-",
+        "SUID" : 929,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "927",
+        "source" : "499",
+        "target" : "499",
+        "shared_name" : "EBI-3916159 (-) EBI-3916159",
+        "name" : "EBI-3916159 (-) EBI-3916159",
+        "interaction" : "-",
+        "SUID" : 927,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "925",
+        "source" : "495",
+        "target" : "497",
+        "shared_name" : "EBI-2872294 (-) EBI-2835440",
+        "name" : "EBI-2872294 (-) EBI-2835440",
+        "interaction" : "-",
+        "SUID" : 925,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "921",
+        "source" : "493",
+        "target" : "491",
+        "shared_name" : "EBI-1755002 (-) EBI-1030755",
+        "name" : "EBI-1755002 (-) EBI-1030755",
+        "interaction" : "-",
+        "SUID" : 921,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "919",
+        "source" : "493",
+        "target" : "491",
+        "shared_name" : "EBI-1755002 (-) EBI-1030755",
+        "name" : "EBI-1755002 (-) EBI-1030755",
+        "interaction" : "-",
+        "SUID" : 919,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "917",
+        "source" : "491",
+        "target" : "493",
+        "shared_name" : "EBI-1030755 (-) EBI-1755002",
+        "name" : "EBI-1030755 (-) EBI-1755002",
+        "interaction" : "-",
+        "SUID" : 917,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "913",
+        "source" : "487",
+        "target" : "487",
+        "shared_name" : "EBI-14058448 (-) EBI-14058448",
+        "name" : "EBI-14058448 (-) EBI-14058448",
+        "interaction" : "-",
+        "SUID" : 913,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "905",
+        "source" : "483",
+        "target" : "481",
+        "shared_name" : "EBI-525939 (-) EBI-7188069",
+        "name" : "EBI-525939 (-) EBI-7188069",
+        "interaction" : "-",
+        "SUID" : 905,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "903",
+        "source" : "483",
+        "target" : "481",
+        "shared_name" : "EBI-525939 (-) EBI-7188069",
+        "name" : "EBI-525939 (-) EBI-7188069",
+        "interaction" : "-",
+        "SUID" : 903,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "901",
+        "source" : "481",
+        "target" : "483",
+        "shared_name" : "EBI-7188069 (-) EBI-525939",
+        "name" : "EBI-7188069 (-) EBI-525939",
+        "interaction" : "-",
+        "SUID" : 901,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "899",
+        "source" : "479",
+        "target" : "297",
+        "shared_name" : "EBI-518882 (-) EBI-495373",
+        "name" : "EBI-518882 (-) EBI-495373",
+        "interaction" : "-",
+        "SUID" : 899,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "889",
+        "source" : "475",
+        "target" : "477",
+        "shared_name" : "EBI-12509683 (-) EBI-1030834",
+        "name" : "EBI-12509683 (-) EBI-1030834",
+        "interaction" : "-",
+        "SUID" : 889,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "893",
+        "source" : "473",
+        "target" : "407",
+        "shared_name" : "EBI-296950 (-) EBI-5564336",
+        "name" : "EBI-296950 (-) EBI-5564336",
+        "interaction" : "-",
+        "SUID" : 893,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "891",
+        "source" : "473",
+        "target" : "407",
+        "shared_name" : "EBI-296950 (-) EBI-5564336",
+        "name" : "EBI-296950 (-) EBI-5564336",
+        "interaction" : "-",
+        "SUID" : 891,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "881",
+        "source" : "471",
+        "target" : "439",
+        "shared_name" : "EBI-1059294 (-) EBI-538287",
+        "name" : "EBI-1059294 (-) EBI-538287",
+        "interaction" : "-",
+        "SUID" : 881,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "977",
+        "source" : "469",
+        "target" : "547",
+        "shared_name" : "EBI-3048545 (-) EBI-2556545",
+        "name" : "EBI-3048545 (-) EBI-2556545",
+        "interaction" : "-",
+        "SUID" : 977,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "879",
+        "source" : "469",
+        "target" : "433",
+        "shared_name" : "EBI-3048545 (-) EBI-1045757",
+        "name" : "EBI-3048545 (-) EBI-1045757",
+        "interaction" : "-",
+        "SUID" : 879,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "979",
+        "source" : "467",
+        "target" : "547",
+        "shared_name" : "EBI-2371346 (-) EBI-2556545",
+        "name" : "EBI-2371346 (-) EBI-2556545",
+        "interaction" : "-",
+        "SUID" : 979,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "871",
+        "source" : "463",
+        "target" : "465",
+        "shared_name" : "EBI-64049958 (-) EBI-10049055",
+        "name" : "EBI-64049958 (-) EBI-10049055",
+        "interaction" : "-",
+        "SUID" : 871,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "935",
+        "source" : "459",
+        "target" : "465",
+        "shared_name" : "EBI-1035358 (-) EBI-10049055",
+        "name" : "EBI-1035358 (-) EBI-10049055",
+        "interaction" : "-",
+        "SUID" : 935,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "895",
+        "source" : "459",
+        "target" : "239",
+        "shared_name" : "EBI-1035358 (-) EBI-2568294",
+        "name" : "EBI-1035358 (-) EBI-2568294",
+        "interaction" : "-",
+        "SUID" : 895,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "863",
+        "source" : "455",
+        "target" : "203",
+        "shared_name" : "EBI-6189824 (-) EBI-2568401",
+        "name" : "EBI-6189824 (-) EBI-2568401",
+        "interaction" : "-",
+        "SUID" : 863,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "857",
+        "source" : "455",
+        "target" : "457",
+        "shared_name" : "EBI-6189824 (-) EBI-2568198",
+        "name" : "EBI-6189824 (-) EBI-2568198",
+        "interaction" : "-",
+        "SUID" : 857,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "853",
+        "source" : "451",
+        "target" : "453",
+        "shared_name" : "EBI-21507346 (-) EBI-12945620",
+        "name" : "EBI-21507346 (-) EBI-12945620",
+        "interaction" : "-",
+        "SUID" : 853,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "885",
+        "source" : "447",
+        "target" : "449",
+        "shared_name" : "EBI-6256193 (-) EBI-1172957",
+        "name" : "EBI-6256193 (-) EBI-1172957",
+        "interaction" : "-",
+        "SUID" : 885,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "845",
+        "source" : "447",
+        "target" : "449",
+        "shared_name" : "EBI-6256193 (-) EBI-1172957",
+        "name" : "EBI-6256193 (-) EBI-1172957",
+        "interaction" : "-",
+        "SUID" : 845,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "887",
+        "source" : "445",
+        "target" : "339",
+        "shared_name" : "EBI-2683468 (-) EBI-720783",
+        "name" : "EBI-2683468 (-) EBI-720783",
+        "interaction" : "-",
+        "SUID" : 887,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "849",
+        "source" : "445",
+        "target" : "445",
+        "shared_name" : "EBI-2683468 (-) EBI-2683468",
+        "name" : "EBI-2683468 (-) EBI-2683468",
+        "interaction" : "-",
+        "SUID" : 849,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "847",
+        "source" : "445",
+        "target" : "339",
+        "shared_name" : "EBI-2683468 (-) EBI-720783",
+        "name" : "EBI-2683468 (-) EBI-720783",
+        "interaction" : "-",
+        "SUID" : 847,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "841",
+        "source" : "445",
+        "target" : "445",
+        "shared_name" : "EBI-2683468 (-) EBI-2683468",
+        "name" : "EBI-2683468 (-) EBI-2683468",
+        "interaction" : "-",
+        "SUID" : 841,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "851",
+        "source" : "443",
+        "target" : "439",
+        "shared_name" : "EBI-5773557 (-) EBI-538287",
+        "name" : "EBI-5773557 (-) EBI-538287",
+        "interaction" : "-",
+        "SUID" : 851,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "943",
+        "source" : "439",
+        "target" : "517",
+        "shared_name" : "EBI-538287 (-) EBI-702104",
+        "name" : "EBI-538287 (-) EBI-702104",
+        "interaction" : "-",
+        "SUID" : 943,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "843",
+        "source" : "439",
+        "target" : "443",
+        "shared_name" : "EBI-538287 (-) EBI-5773557",
+        "name" : "EBI-538287 (-) EBI-5773557",
+        "interaction" : "-",
+        "SUID" : 843,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "839",
+        "source" : "439",
+        "target" : "443",
+        "shared_name" : "EBI-538287 (-) EBI-5773557",
+        "name" : "EBI-538287 (-) EBI-5773557",
+        "interaction" : "-",
+        "SUID" : 839,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "837",
+        "source" : "439",
+        "target" : "441",
+        "shared_name" : "EBI-538287 (-) EBI-80252",
+        "name" : "EBI-538287 (-) EBI-80252",
+        "interaction" : "-",
+        "SUID" : 837,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "835",
+        "source" : "435",
+        "target" : "437",
+        "shared_name" : "EBI-3946257 (-) EBI-724977",
+        "name" : "EBI-3946257 (-) EBI-724977",
+        "interaction" : "-",
+        "SUID" : 835,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "877",
+        "source" : "433",
+        "target" : "467",
+        "shared_name" : "EBI-1045757 (-) EBI-2371346",
+        "name" : "EBI-1045757 (-) EBI-2371346",
+        "interaction" : "-",
+        "SUID" : 877,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "833",
+        "source" : "431",
+        "target" : "433",
+        "shared_name" : "EBI-6163585 (-) EBI-1045757",
+        "name" : "EBI-6163585 (-) EBI-1045757",
+        "interaction" : "-",
+        "SUID" : 833,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "897",
+        "source" : "429",
+        "target" : "385",
+        "shared_name" : "EBI-9257341 (-) EBI-4314481",
+        "name" : "EBI-9257341 (-) EBI-4314481",
+        "interaction" : "-",
+        "SUID" : 897,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "829",
+        "source" : "429",
+        "target" : "201",
+        "shared_name" : "EBI-9257341 (-) EBI-725421",
+        "name" : "EBI-9257341 (-) EBI-725421",
+        "interaction" : "-",
+        "SUID" : 829,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "827",
+        "source" : "427",
+        "target" : "423",
+        "shared_name" : "EBI-2565102 (-) EBI-727477",
+        "name" : "EBI-2565102 (-) EBI-727477",
+        "interaction" : "-",
+        "SUID" : 827,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "941",
+        "source" : "423",
+        "target" : "423",
+        "shared_name" : "EBI-727477 (-) EBI-727477",
+        "name" : "EBI-727477 (-) EBI-727477",
+        "interaction" : "-",
+        "SUID" : 941,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "823",
+        "source" : "423",
+        "target" : "425",
+        "shared_name" : "EBI-727477 (-) EBI-750770",
+        "name" : "EBI-727477 (-) EBI-750770",
+        "interaction" : "-",
+        "SUID" : 823,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "819",
+        "source" : "421",
+        "target" : "421",
+        "shared_name" : "EBI-4315002 (-) EBI-4315002",
+        "name" : "EBI-4315002 (-) EBI-4315002",
+        "interaction" : "-",
+        "SUID" : 819,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "817",
+        "source" : "419",
+        "target" : "327",
+        "shared_name" : "EBI-524131 (-) EBI-1056653",
+        "name" : "EBI-524131 (-) EBI-1056653",
+        "interaction" : "-",
+        "SUID" : 817,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "815",
+        "source" : "415",
+        "target" : "417",
+        "shared_name" : "EBI-494743 (-) EBI-495538",
+        "name" : "EBI-494743 (-) EBI-495538",
+        "interaction" : "-",
+        "SUID" : 815,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "915",
+        "source" : "409",
+        "target" : "489",
+        "shared_name" : "EBI-2847071 (-) EBI-2623451",
+        "name" : "EBI-2847071 (-) EBI-2623451",
+        "interaction" : "-",
+        "SUID" : 915,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "809",
+        "source" : "409",
+        "target" : "281",
+        "shared_name" : "EBI-2847071 (-) EBI-10249550",
+        "name" : "EBI-2847071 (-) EBI-10249550",
+        "interaction" : "-",
+        "SUID" : 809,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "805",
+        "source" : "409",
+        "target" : "281",
+        "shared_name" : "EBI-2847071 (-) EBI-10249550",
+        "name" : "EBI-2847071 (-) EBI-10249550",
+        "interaction" : "-",
+        "SUID" : 805,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "797",
+        "source" : "409",
+        "target" : "281",
+        "shared_name" : "EBI-2847071 (-) EBI-10249550",
+        "name" : "EBI-2847071 (-) EBI-10249550",
+        "interaction" : "-",
+        "SUID" : 797,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "883",
+        "source" : "407",
+        "target" : "473",
+        "shared_name" : "EBI-5564336 (-) EBI-296950",
+        "name" : "EBI-5564336 (-) EBI-296950",
+        "interaction" : "-",
+        "SUID" : 883,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "803",
+        "source" : "405",
+        "target" : "407",
+        "shared_name" : "EBI-2339969 (-) EBI-5564336",
+        "name" : "EBI-2339969 (-) EBI-5564336",
+        "interaction" : "-",
+        "SUID" : 803,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "795",
+        "source" : "405",
+        "target" : "407",
+        "shared_name" : "EBI-2339969 (-) EBI-5564336",
+        "name" : "EBI-2339969 (-) EBI-5564336",
+        "interaction" : "-",
+        "SUID" : 795,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "793",
+        "source" : "403",
+        "target" : "201",
+        "shared_name" : "EBI-1391211 (-) EBI-725421",
+        "name" : "EBI-1391211 (-) EBI-725421",
+        "interaction" : "-",
+        "SUID" : 793,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "873",
+        "source" : "401",
+        "target" : "401",
+        "shared_name" : "EBI-1771314 (-) EBI-1771314",
+        "name" : "EBI-1771314 (-) EBI-1771314",
+        "interaction" : "-",
+        "SUID" : 873,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "791",
+        "source" : "401",
+        "target" : "279",
+        "shared_name" : "EBI-1771314 (-) EBI-2826725",
+        "name" : "EBI-1771314 (-) EBI-2826725",
+        "interaction" : "-",
+        "SUID" : 791,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "787",
+        "source" : "397",
+        "target" : "399",
+        "shared_name" : "EBI-7404021 (-) EBI-525675",
+        "name" : "EBI-7404021 (-) EBI-525675",
+        "interaction" : "-",
+        "SUID" : 787,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "783",
+        "source" : "395",
+        "target" : "395",
+        "shared_name" : "EBI-6691679 (-) EBI-6691679",
+        "name" : "EBI-6691679 (-) EBI-6691679",
+        "interaction" : "-",
+        "SUID" : 783,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "909",
+        "source" : "391",
+        "target" : "391",
+        "shared_name" : "EBI-1188108 (-) EBI-1188108",
+        "name" : "EBI-1188108 (-) EBI-1188108",
+        "interaction" : "-",
+        "SUID" : 909,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "781",
+        "source" : "391",
+        "target" : "393",
+        "shared_name" : "EBI-1188108 (-) EBI-2873748",
+        "name" : "EBI-1188108 (-) EBI-2873748",
+        "interaction" : "-",
+        "SUID" : 781,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "779",
+        "source" : "387",
+        "target" : "389",
+        "shared_name" : "EBI-2805248 (-) EBI-965864",
+        "name" : "EBI-2805248 (-) EBI-965864",
+        "interaction" : "-",
+        "SUID" : 779,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "907",
+        "source" : "385",
+        "target" : "385",
+        "shared_name" : "EBI-4314481 (-) EBI-4314481",
+        "name" : "EBI-4314481 (-) EBI-4314481",
+        "interaction" : "-",
+        "SUID" : 907,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "821",
+        "source" : "385",
+        "target" : "273",
+        "shared_name" : "EBI-4314481 (-) EBI-3914938",
+        "name" : "EBI-4314481 (-) EBI-3914938",
+        "interaction" : "-",
+        "SUID" : 821,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "923",
+        "source" : "383",
+        "target" : "383",
+        "shared_name" : "EBI-716404 (-) EBI-716404",
+        "name" : "EBI-716404 (-) EBI-716404",
+        "interaction" : "-",
+        "SUID" : 923,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "773",
+        "source" : "381",
+        "target" : "383",
+        "shared_name" : "EBI-747170 (-) EBI-716404",
+        "name" : "EBI-747170 (-) EBI-716404",
+        "interaction" : "-",
+        "SUID" : 773,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "911",
+        "source" : "379",
+        "target" : "485",
+        "shared_name" : "EBI-1268321 (-) EBI-745147",
+        "name" : "EBI-1268321 (-) EBI-745147",
+        "interaction" : "-",
+        "SUID" : 911,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "763",
+        "source" : "377",
+        "target" : "379",
+        "shared_name" : "EBI-1268284 (-) EBI-1268321",
+        "name" : "EBI-1268284 (-) EBI-1268321",
+        "interaction" : "-",
+        "SUID" : 763,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "757",
+        "source" : "371",
+        "target" : "373",
+        "shared_name" : "EBI-1580565 (-) EBI-714770",
+        "name" : "EBI-1580565 (-) EBI-714770",
+        "interaction" : "-",
+        "SUID" : 757,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "755",
+        "source" : "369",
+        "target" : "297",
+        "shared_name" : "EBI-518861 (-) EBI-495373",
+        "name" : "EBI-518861 (-) EBI-495373",
+        "interaction" : "-",
+        "SUID" : 755,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "753",
+        "source" : "365",
+        "target" : "367",
+        "shared_name" : "EBI-520729 (-) EBI-18539709",
+        "name" : "EBI-520729 (-) EBI-18539709",
+        "interaction" : "-",
+        "SUID" : 753,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "751",
+        "source" : "363",
+        "target" : "361",
+        "shared_name" : "EBI-1030956 (-) EBI-1030991",
+        "name" : "EBI-1030956 (-) EBI-1030991",
+        "interaction" : "-",
+        "SUID" : 751,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "749",
+        "source" : "361",
+        "target" : "359",
+        "shared_name" : "EBI-1030991 (-) EBI-1031024",
+        "name" : "EBI-1030991 (-) EBI-1031024",
+        "interaction" : "-",
+        "SUID" : 749,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "865",
+        "source" : "359",
+        "target" : "461",
+        "shared_name" : "EBI-1031024 (-) EBI-4314282",
+        "name" : "EBI-1031024 (-) EBI-4314282",
+        "interaction" : "-",
+        "SUID" : 865,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "807",
+        "source" : "359",
+        "target" : "411",
+        "shared_name" : "EBI-1031024 (-) EBI-1387782",
+        "name" : "EBI-1031024 (-) EBI-1387782",
+        "interaction" : "-",
+        "SUID" : 807,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "801",
+        "source" : "359",
+        "target" : "411",
+        "shared_name" : "EBI-1031024 (-) EBI-1387782",
+        "name" : "EBI-1031024 (-) EBI-1387782",
+        "interaction" : "-",
+        "SUID" : 801,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "799",
+        "source" : "359",
+        "target" : "411",
+        "shared_name" : "EBI-1031024 (-) EBI-1387782",
+        "name" : "EBI-1031024 (-) EBI-1387782",
+        "interaction" : "-",
+        "SUID" : 799,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "771",
+        "source" : "357",
+        "target" : "363",
+        "shared_name" : "EBI-4314301 (-) EBI-1030956",
+        "name" : "EBI-4314301 (-) EBI-1030956",
+        "interaction" : "-",
+        "SUID" : 771,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "747",
+        "source" : "357",
+        "target" : "359",
+        "shared_name" : "EBI-4314301 (-) EBI-1031024",
+        "name" : "EBI-4314301 (-) EBI-1031024",
+        "interaction" : "-",
+        "SUID" : 747,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "813",
+        "source" : "355",
+        "target" : "355",
+        "shared_name" : "EBI-718419 (-) EBI-718419",
+        "name" : "EBI-718419 (-) EBI-718419",
+        "interaction" : "-",
+        "SUID" : 813,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "785",
+        "source" : "355",
+        "target" : "279",
+        "shared_name" : "EBI-718419 (-) EBI-2826725",
+        "name" : "EBI-718419 (-) EBI-2826725",
+        "interaction" : "-",
+        "SUID" : 785,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "769",
+        "source" : "355",
+        "target" : "295",
+        "shared_name" : "EBI-718419 (-) EBI-4314442",
+        "name" : "EBI-718419 (-) EBI-4314442",
+        "interaction" : "-",
+        "SUID" : 769,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "741",
+        "source" : "351",
+        "target" : "351",
+        "shared_name" : "EBI-963338 (-) EBI-963338",
+        "name" : "EBI-963338 (-) EBI-963338",
+        "interaction" : "-",
+        "SUID" : 741,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "737",
+        "source" : "351",
+        "target" : "351",
+        "shared_name" : "EBI-963338 (-) EBI-963338",
+        "name" : "EBI-963338 (-) EBI-963338",
+        "interaction" : "-",
+        "SUID" : 737,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "739",
+        "source" : "347",
+        "target" : "349",
+        "shared_name" : "EBI-9680942 (-) EBI-299383",
+        "name" : "EBI-9680942 (-) EBI-299383",
+        "interaction" : "-",
+        "SUID" : 739,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "735",
+        "source" : "347",
+        "target" : "349",
+        "shared_name" : "EBI-9680942 (-) EBI-299383",
+        "name" : "EBI-9680942 (-) EBI-299383",
+        "interaction" : "-",
+        "SUID" : 735,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "731",
+        "source" : "343",
+        "target" : "297",
+        "shared_name" : "EBI-1044859 (-) EBI-495373",
+        "name" : "EBI-1044859 (-) EBI-495373",
+        "interaction" : "-",
+        "SUID" : 731,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "961",
+        "source" : "341",
+        "target" : "531",
+        "shared_name" : "EBI-2846607 (-) EBI-1028277",
+        "name" : "EBI-2846607 (-) EBI-1028277",
+        "interaction" : "-",
+        "SUID" : 961,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "729",
+        "source" : "341",
+        "target" : "341",
+        "shared_name" : "EBI-2846607 (-) EBI-2846607",
+        "name" : "EBI-2846607 (-) EBI-2846607",
+        "interaction" : "-",
+        "SUID" : 729,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "875",
+        "source" : "339",
+        "target" : "339",
+        "shared_name" : "EBI-720783 (-) EBI-720783",
+        "name" : "EBI-720783 (-) EBI-720783",
+        "interaction" : "-",
+        "SUID" : 875,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "723",
+        "source" : "337",
+        "target" : "327",
+        "shared_name" : "EBI-4314390 (-) EBI-1056653",
+        "name" : "EBI-4314390 (-) EBI-1056653",
+        "interaction" : "-",
+        "SUID" : 723,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "767",
+        "source" : "335",
+        "target" : "289",
+        "shared_name" : "EBI-2836676 (-) EBI-62841388",
+        "name" : "EBI-2836676 (-) EBI-62841388",
+        "interaction" : "-",
+        "SUID" : 767,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "719",
+        "source" : "333",
+        "target" : "267",
+        "shared_name" : "EBI-6267018 (-) EBI-1030170",
+        "name" : "EBI-6267018 (-) EBI-1030170",
+        "interaction" : "-",
+        "SUID" : 719,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "715",
+        "source" : "329",
+        "target" : "331",
+        "shared_name" : "EBI-13076860 (-) EBI-529023",
+        "name" : "EBI-13076860 (-) EBI-529023",
+        "interaction" : "-",
+        "SUID" : 715,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "713",
+        "source" : "325",
+        "target" : "327",
+        "shared_name" : "EBI-4314354 (-) EBI-1056653",
+        "name" : "EBI-4314354 (-) EBI-1056653",
+        "interaction" : "-",
+        "SUID" : 713,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "869",
+        "source" : "321",
+        "target" : "321",
+        "shared_name" : "EBI-742600 (-) EBI-742600",
+        "name" : "EBI-742600 (-) EBI-742600",
+        "interaction" : "-",
+        "SUID" : 869,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "709",
+        "source" : "321",
+        "target" : "171",
+        "shared_name" : "EBI-742600 (-) EBI-2568233",
+        "name" : "EBI-742600 (-) EBI-2568233",
+        "interaction" : "-",
+        "SUID" : 709,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "707",
+        "source" : "319",
+        "target" : "273",
+        "shared_name" : "EBI-15643544 (-) EBI-3914938",
+        "name" : "EBI-15643544 (-) EBI-3914938",
+        "interaction" : "-",
+        "SUID" : 707,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "759",
+        "source" : "317",
+        "target" : "375",
+        "shared_name" : "EBI-64073345 (-) EBI-2805262",
+        "name" : "EBI-64073345 (-) EBI-2805262",
+        "interaction" : "-",
+        "SUID" : 759,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "789",
+        "source" : "313",
+        "target" : "313",
+        "shared_name" : "EBI-5652260 (-) EBI-5652260",
+        "name" : "EBI-5652260 (-) EBI-5652260",
+        "interaction" : "-",
+        "SUID" : 789,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "703",
+        "source" : "313",
+        "target" : "315",
+        "shared_name" : "EBI-5652260 (-) EBI-16356454",
+        "name" : "EBI-5652260 (-) EBI-16356454",
+        "interaction" : "-",
+        "SUID" : 703,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "867",
+        "source" : "311",
+        "target" : "461",
+        "shared_name" : "EBI-4314328 (-) EBI-4314282",
+        "name" : "EBI-4314328 (-) EBI-4314282",
+        "interaction" : "-",
+        "SUID" : 867,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "699",
+        "source" : "309",
+        "target" : "311",
+        "shared_name" : "EBI-16427978 (-) EBI-4314328",
+        "name" : "EBI-16427978 (-) EBI-4314328",
+        "interaction" : "-",
+        "SUID" : 699,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "697",
+        "source" : "305",
+        "target" : "307",
+        "shared_name" : "EBI-11724451 (-) EBI-15596193",
+        "name" : "EBI-11724451 (-) EBI-15596193",
+        "interaction" : "-",
+        "SUID" : 697,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "693",
+        "source" : "301",
+        "target" : "251",
+        "shared_name" : "EBI-519169 (-) EBI-519945",
+        "name" : "EBI-519169 (-) EBI-519945",
+        "interaction" : "-",
+        "SUID" : 693,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "691",
+        "source" : "301",
+        "target" : "303",
+        "shared_name" : "EBI-519169 (-) EBI-54635718",
+        "name" : "EBI-519169 (-) EBI-54635718",
+        "interaction" : "-",
+        "SUID" : 691,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "689",
+        "source" : "297",
+        "target" : "299",
+        "shared_name" : "EBI-495373 (-) EBI-717441",
+        "name" : "EBI-495373 (-) EBI-717441",
+        "interaction" : "-",
+        "SUID" : 689,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "687",
+        "source" : "295",
+        "target" : "199",
+        "shared_name" : "EBI-4314442 (-) EBI-3919694",
+        "name" : "EBI-4314442 (-) EBI-3919694",
+        "interaction" : "-",
+        "SUID" : 687,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "685",
+        "source" : "291",
+        "target" : "293",
+        "shared_name" : "EBI-718785 (-) EBI-3912464",
+        "name" : "EBI-718785 (-) EBI-3912464",
+        "interaction" : "-",
+        "SUID" : 685,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "743",
+        "source" : "289",
+        "target" : "353",
+        "shared_name" : "EBI-62841388 (-) EBI-6897823",
+        "name" : "EBI-62841388 (-) EBI-6897823",
+        "interaction" : "-",
+        "SUID" : 743,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "683",
+        "source" : "289",
+        "target" : "255",
+        "shared_name" : "EBI-62841388 (-) EBI-1030190",
+        "name" : "EBI-62841388 (-) EBI-1030190",
+        "interaction" : "-",
+        "SUID" : 683,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "677",
+        "source" : "287",
+        "target" : "285",
+        "shared_name" : "EBI-12810028 (-) EBI-2313231",
+        "name" : "EBI-12810028 (-) EBI-2313231",
+        "interaction" : "-",
+        "SUID" : 677,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "1009",
+        "source" : "285",
+        "target" : "565",
+        "shared_name" : "EBI-2313231 (-) EBI-77613",
+        "name" : "EBI-2313231 (-) EBI-77613",
+        "interaction" : "-",
+        "SUID" : 1009,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "733",
+        "source" : "285",
+        "target" : "345",
+        "shared_name" : "EBI-2313231 (-) EBI-2855248",
+        "name" : "EBI-2313231 (-) EBI-2855248",
+        "interaction" : "-",
+        "SUID" : 733,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "681",
+        "source" : "285",
+        "target" : "287",
+        "shared_name" : "EBI-2313231 (-) EBI-12810028",
+        "name" : "EBI-2313231 (-) EBI-12810028",
+        "interaction" : "-",
+        "SUID" : 681,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "673",
+        "source" : "285",
+        "target" : "287",
+        "shared_name" : "EBI-2313231 (-) EBI-12810028",
+        "name" : "EBI-2313231 (-) EBI-12810028",
+        "interaction" : "-",
+        "SUID" : 673,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "679",
+        "source" : "283",
+        "target" : "281",
+        "shared_name" : "EBI-946223 (-) EBI-10249550",
+        "name" : "EBI-946223 (-) EBI-10249550",
+        "interaction" : "-",
+        "SUID" : 679,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "675",
+        "source" : "283",
+        "target" : "281",
+        "shared_name" : "EBI-946223 (-) EBI-10249550",
+        "name" : "EBI-946223 (-) EBI-10249550",
+        "interaction" : "-",
+        "SUID" : 675,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "671",
+        "source" : "281",
+        "target" : "283",
+        "shared_name" : "EBI-10249550 (-) EBI-946223",
+        "name" : "EBI-10249550 (-) EBI-946223",
+        "interaction" : "-",
+        "SUID" : 671,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "717",
+        "source" : "279",
+        "target" : "199",
+        "shared_name" : "EBI-2826725 (-) EBI-3919694",
+        "name" : "EBI-2826725 (-) EBI-3919694",
+        "interaction" : "-",
+        "SUID" : 717,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "667",
+        "source" : "279",
+        "target" : "269",
+        "shared_name" : "EBI-2826725 (-) EBI-4314807",
+        "name" : "EBI-2826725 (-) EBI-4314807",
+        "interaction" : "-",
+        "SUID" : 667,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "825",
+        "source" : "277",
+        "target" : "319",
+        "shared_name" : "EBI-2816428 (-) EBI-15643544",
+        "name" : "EBI-2816428 (-) EBI-15643544",
+        "interaction" : "-",
+        "SUID" : 825,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "705",
+        "source" : "277",
+        "target" : "317",
+        "shared_name" : "EBI-2816428 (-) EBI-64073345",
+        "name" : "EBI-2816428 (-) EBI-64073345",
+        "interaction" : "-",
+        "SUID" : 705,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "663",
+        "source" : "273",
+        "target" : "275",
+        "shared_name" : "EBI-3914938 (-) EBI-2873704",
+        "name" : "EBI-3914938 (-) EBI-2873704",
+        "interaction" : "-",
+        "SUID" : 663,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "745",
+        "source" : "269",
+        "target" : "355",
+        "shared_name" : "EBI-4314807 (-) EBI-718419",
+        "name" : "EBI-4314807 (-) EBI-718419",
+        "interaction" : "-",
+        "SUID" : 745,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "659",
+        "source" : "269",
+        "target" : "199",
+        "shared_name" : "EBI-4314807 (-) EBI-3919694",
+        "name" : "EBI-4314807 (-) EBI-3919694",
+        "interaction" : "-",
+        "SUID" : 659,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "721",
+        "source" : "267",
+        "target" : "335",
+        "shared_name" : "EBI-1030170 (-) EBI-2836676",
+        "name" : "EBI-1030170 (-) EBI-2836676",
+        "interaction" : "-",
+        "SUID" : 721,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "657",
+        "source" : "267",
+        "target" : "255",
+        "shared_name" : "EBI-1030170 (-) EBI-1030190",
+        "name" : "EBI-1030170 (-) EBI-1030190",
+        "interaction" : "-",
+        "SUID" : 657,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "653",
+        "source" : "265",
+        "target" : "263",
+        "shared_name" : "EBI-2816560 (-) EBI-1054562",
+        "name" : "EBI-2816560 (-) EBI-1054562",
+        "interaction" : "-",
+        "SUID" : 653,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "651",
+        "source" : "263",
+        "target" : "265",
+        "shared_name" : "EBI-1054562 (-) EBI-2816560",
+        "name" : "EBI-1054562 (-) EBI-2816560",
+        "interaction" : "-",
+        "SUID" : 651,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "655",
+        "source" : "259",
+        "target" : "261",
+        "shared_name" : "EBI-7151999 (-) EBI-21899250",
+        "name" : "EBI-7151999 (-) EBI-21899250",
+        "interaction" : "-",
+        "SUID" : 655,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "649",
+        "source" : "259",
+        "target" : "261",
+        "shared_name" : "EBI-7151999 (-) EBI-21899250",
+        "name" : "EBI-7151999 (-) EBI-21899250",
+        "interaction" : "-",
+        "SUID" : 649,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "669",
+        "source" : "257",
+        "target" : "243",
+        "shared_name" : "EBI-716505 (-) EBI-2565117",
+        "name" : "EBI-716505 (-) EBI-2565117",
+        "interaction" : "-",
+        "SUID" : 669,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "647",
+        "source" : "257",
+        "target" : "213",
+        "shared_name" : "EBI-716505 (-) EBI-2550735",
+        "name" : "EBI-716505 (-) EBI-2550735",
+        "interaction" : "-",
+        "SUID" : 647,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "831",
+        "source" : "253",
+        "target" : "385",
+        "shared_name" : "EBI-8007671 (-) EBI-4314481",
+        "name" : "EBI-8007671 (-) EBI-4314481",
+        "interaction" : "-",
+        "SUID" : 831,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "645",
+        "source" : "253",
+        "target" : "255",
+        "shared_name" : "EBI-8007671 (-) EBI-1030190",
+        "name" : "EBI-8007671 (-) EBI-1030190",
+        "interaction" : "-",
+        "SUID" : 645,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "643",
+        "source" : "249",
+        "target" : "251",
+        "shared_name" : "EBI-519208 (-) EBI-519945",
+        "name" : "EBI-519208 (-) EBI-519945",
+        "interaction" : "-",
+        "SUID" : 643,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "695",
+        "source" : "247",
+        "target" : "301",
+        "shared_name" : "EBI-519160 (-) EBI-519169",
+        "name" : "EBI-519160 (-) EBI-519169",
+        "interaction" : "-",
+        "SUID" : 695,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "641",
+        "source" : "247",
+        "target" : "249",
+        "shared_name" : "EBI-519160 (-) EBI-519208",
+        "name" : "EBI-519160 (-) EBI-519208",
+        "interaction" : "-",
+        "SUID" : 641,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "855",
+        "source" : "243",
+        "target" : "455",
+        "shared_name" : "EBI-2565117 (-) EBI-6189824",
+        "name" : "EBI-2565117 (-) EBI-6189824",
+        "interaction" : "-",
+        "SUID" : 855,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "639",
+        "source" : "243",
+        "target" : "245",
+        "shared_name" : "EBI-2565117 (-) EBI-3918416",
+        "name" : "EBI-2565117 (-) EBI-3918416",
+        "interaction" : "-",
+        "SUID" : 639,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "637",
+        "source" : "241",
+        "target" : "241",
+        "shared_name" : "EBI-2805156 (-) EBI-2805156",
+        "name" : "EBI-2805156 (-) EBI-2805156",
+        "interaction" : "-",
+        "SUID" : 637,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "711",
+        "source" : "239",
+        "target" : "323",
+        "shared_name" : "EBI-2568294 (-) EBI-297082",
+        "name" : "EBI-2568294 (-) EBI-297082",
+        "interaction" : "-",
+        "SUID" : 711,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "765",
+        "source" : "237",
+        "target" : "245",
+        "shared_name" : "EBI-4314733 (-) EBI-3918416",
+        "name" : "EBI-4314733 (-) EBI-3918416",
+        "interaction" : "-",
+        "SUID" : 765,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "701",
+        "source" : "237",
+        "target" : "237",
+        "shared_name" : "EBI-4314733 (-) EBI-4314733",
+        "name" : "EBI-4314733 (-) EBI-4314733",
+        "interaction" : "-",
+        "SUID" : 701,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "633",
+        "source" : "237",
+        "target" : "239",
+        "shared_name" : "EBI-4314733 (-) EBI-2568294",
+        "name" : "EBI-4314733 (-) EBI-2568294",
+        "interaction" : "-",
+        "SUID" : 633,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "631",
+        "source" : "233",
+        "target" : "235",
+        "shared_name" : "EBI-1032551 (-) EBI-458344",
+        "name" : "EBI-1032551 (-) EBI-458344",
+        "interaction" : "-",
+        "SUID" : 631,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "727",
+        "source" : "229",
+        "target" : "339",
+        "shared_name" : "EBI-2550721 (-) EBI-720783",
+        "name" : "EBI-2550721 (-) EBI-720783",
+        "interaction" : "-",
+        "SUID" : 727,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "811",
+        "source" : "227",
+        "target" : "413",
+        "shared_name" : "EBI-12684511 (-) EBI-525714",
+        "name" : "EBI-12684511 (-) EBI-525714",
+        "interaction" : "-",
+        "SUID" : 811,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "661",
+        "source" : "227",
+        "target" : "271",
+        "shared_name" : "EBI-12684511 (-) EBI-2554508",
+        "name" : "EBI-12684511 (-) EBI-2554508",
+        "interaction" : "-",
+        "SUID" : 661,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "625",
+        "source" : "227",
+        "target" : "229",
+        "shared_name" : "EBI-12684511 (-) EBI-2550721",
+        "name" : "EBI-12684511 (-) EBI-2550721",
+        "interaction" : "-",
+        "SUID" : 625,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "623",
+        "source" : "225",
+        "target" : "199",
+        "shared_name" : "EBI-2821415 (-) EBI-3919694",
+        "name" : "EBI-2821415 (-) EBI-3919694",
+        "interaction" : "-",
+        "SUID" : 623,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "621",
+        "source" : "221",
+        "target" : "223",
+        "shared_name" : "EBI-4314412 (-) EBI-3910563",
+        "name" : "EBI-4314412 (-) EBI-3910563",
+        "interaction" : "-",
+        "SUID" : 621,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "615",
+        "source" : "217",
+        "target" : "219",
+        "shared_name" : "EBI-16578656 (-) EBI-2805465",
+        "name" : "EBI-16578656 (-) EBI-2805465",
+        "interaction" : "-",
+        "SUID" : 615,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "613",
+        "source" : "215",
+        "target" : "215",
+        "shared_name" : "EBI-4314670 (-) EBI-4314670",
+        "name" : "EBI-4314670 (-) EBI-4314670",
+        "interaction" : "-",
+        "SUID" : 613,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "957",
+        "source" : "213",
+        "target" : "529",
+        "shared_name" : "EBI-2550735 (-) EBI-10199985",
+        "name" : "EBI-2550735 (-) EBI-10199985",
+        "interaction" : "-",
+        "SUID" : 957,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "725",
+        "source" : "213",
+        "target" : "339",
+        "shared_name" : "EBI-2550735 (-) EBI-720783",
+        "name" : "EBI-2550735 (-) EBI-720783",
+        "interaction" : "-",
+        "SUID" : 725,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "611",
+        "source" : "213",
+        "target" : "211",
+        "shared_name" : "EBI-2550735 (-) EBI-9071715",
+        "name" : "EBI-2550735 (-) EBI-9071715",
+        "interaction" : "-",
+        "SUID" : 611,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "635",
+        "source" : "211",
+        "target" : "239",
+        "shared_name" : "EBI-9071715 (-) EBI-2568294",
+        "name" : "EBI-9071715 (-) EBI-2568294",
+        "interaction" : "-",
+        "SUID" : 635,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "959",
+        "source" : "209",
+        "target" : "529",
+        "shared_name" : "EBI-2568341 (-) EBI-10199985",
+        "name" : "EBI-2568341 (-) EBI-10199985",
+        "interaction" : "-",
+        "SUID" : 959,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "861",
+        "source" : "209",
+        "target" : "459",
+        "shared_name" : "EBI-2568341 (-) EBI-1035358",
+        "name" : "EBI-2568341 (-) EBI-1035358",
+        "interaction" : "-",
+        "SUID" : 861,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "607",
+        "source" : "209",
+        "target" : "211",
+        "shared_name" : "EBI-2568341 (-) EBI-9071715",
+        "name" : "EBI-2568341 (-) EBI-9071715",
+        "interaction" : "-",
+        "SUID" : 607,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "605",
+        "source" : "205",
+        "target" : "207",
+        "shared_name" : "EBI-12923856 (-) EBI-3922712",
+        "name" : "EBI-12923856 (-) EBI-3922712",
+        "interaction" : "-",
+        "SUID" : 605,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "603",
+        "source" : "201",
+        "target" : "203",
+        "shared_name" : "EBI-725421 (-) EBI-2568401",
+        "name" : "EBI-725421 (-) EBI-2568401",
+        "interaction" : "-",
+        "SUID" : 603,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "601",
+        "source" : "199",
+        "target" : "197",
+        "shared_name" : "EBI-3919694 (-) EBI-64055792",
+        "name" : "EBI-3919694 (-) EBI-64055792",
+        "interaction" : "-",
+        "SUID" : 601,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "597",
+        "source" : "197",
+        "target" : "199",
+        "shared_name" : "EBI-64055792 (-) EBI-3919694",
+        "name" : "EBI-64055792 (-) EBI-3919694",
+        "interaction" : "-",
+        "SUID" : 597,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "595",
+        "source" : "197",
+        "target" : "199",
+        "shared_name" : "EBI-64055792 (-) EBI-3919694",
+        "name" : "EBI-64055792 (-) EBI-3919694",
+        "interaction" : "-",
+        "SUID" : 595,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "617",
+        "source" : "195",
+        "target" : "165",
+        "shared_name" : "EBI-744988 (-) EBI-64073160",
+        "name" : "EBI-744988 (-) EBI-64073160",
+        "interaction" : "-",
+        "SUID" : 617,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "775",
+        "source" : "193",
+        "target" : "385",
+        "shared_name" : "EBI-4314540 (-) EBI-4314481",
+        "name" : "EBI-4314540 (-) EBI-4314481",
+        "interaction" : "-",
+        "SUID" : 775,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "777",
+        "source" : "191",
+        "target" : "385",
+        "shared_name" : "EBI-4314501 (-) EBI-4314481",
+        "name" : "EBI-4314501 (-) EBI-4314481",
+        "interaction" : "-",
+        "SUID" : 777,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "609",
+        "source" : "191",
+        "target" : "191",
+        "shared_name" : "EBI-4314501 (-) EBI-4314501",
+        "name" : "EBI-4314501 (-) EBI-4314501",
+        "interaction" : "-",
+        "SUID" : 609,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "591",
+        "source" : "191",
+        "target" : "193",
+        "shared_name" : "EBI-4314501 (-) EBI-4314540",
+        "name" : "EBI-4314501 (-) EBI-4314540",
+        "interaction" : "-",
+        "SUID" : 591,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "589",
+        "source" : "187",
+        "target" : "189",
+        "shared_name" : "EBI-64075384 (-) EBI-8502656",
+        "name" : "EBI-64075384 (-) EBI-8502656",
+        "interaction" : "-",
+        "SUID" : 589,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "583",
+        "source" : "179",
+        "target" : "181",
+        "shared_name" : "EBI-13350535 (-) EBI-16355086",
+        "name" : "EBI-13350535 (-) EBI-16355086",
+        "interaction" : "-",
+        "SUID" : 583,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "581",
+        "source" : "175",
+        "target" : "177",
+        "shared_name" : "EBI-6932080 (-) EBI-2851995",
+        "name" : "EBI-6932080 (-) EBI-2851995",
+        "interaction" : "-",
+        "SUID" : 581,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "579",
+        "source" : "173",
+        "target" : "173",
+        "shared_name" : "EBI-18164173 (-) EBI-18164173",
+        "name" : "EBI-18164173 (-) EBI-18164173",
+        "interaction" : "-",
+        "SUID" : 579,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "859",
+        "source" : "171",
+        "target" : "459",
+        "shared_name" : "EBI-2568233 (-) EBI-1035358",
+        "name" : "EBI-2568233 (-) EBI-1035358",
+        "interaction" : "-",
+        "SUID" : 859,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "629",
+        "source" : "171",
+        "target" : "201",
+        "shared_name" : "EBI-2568233 (-) EBI-725421",
+        "name" : "EBI-2568233 (-) EBI-725421",
+        "interaction" : "-",
+        "SUID" : 629,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "627",
+        "source" : "171",
+        "target" : "231",
+        "shared_name" : "EBI-2568233 (-) EBI-2806056",
+        "name" : "EBI-2568233 (-) EBI-2806056",
+        "interaction" : "-",
+        "SUID" : 627,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "577",
+        "source" : "169",
+        "target" : "171",
+        "shared_name" : "EBI-1222232 (-) EBI-2568233",
+        "name" : "EBI-1222232 (-) EBI-2568233",
+        "interaction" : "-",
+        "SUID" : 577,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "575",
+        "source" : "167",
+        "target" : "165",
+        "shared_name" : "EBI-25648039 (-) EBI-64073160",
+        "name" : "EBI-25648039 (-) EBI-64073160",
+        "interaction" : "-",
+        "SUID" : 575,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "619",
+        "source" : "165",
+        "target" : "195",
+        "shared_name" : "EBI-64073160 (-) EBI-744988",
+        "name" : "EBI-64073160 (-) EBI-744988",
+        "interaction" : "-",
+        "SUID" : 619,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "573",
+        "source" : "163",
+        "target" : "165",
+        "shared_name" : "EBI-9018182 (-) EBI-64073160",
+        "name" : "EBI-9018182 (-) EBI-64073160",
+        "interaction" : "-",
+        "SUID" : 573,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "761",
+        "source" : "159",
+        "target" : "375",
+        "shared_name" : "EBI-64073231 (-) EBI-2805262",
+        "name" : "EBI-64073231 (-) EBI-2805262",
+        "interaction" : "-",
+        "SUID" : 761,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "665",
+        "source" : "159",
+        "target" : "277",
+        "shared_name" : "EBI-64073231 (-) EBI-2816428",
+        "name" : "EBI-64073231 (-) EBI-2816428",
+        "interaction" : "-",
+        "SUID" : 665,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "599",
+        "source" : "159",
+        "target" : "195",
+        "shared_name" : "EBI-64073231 (-) EBI-744988",
+        "name" : "EBI-64073231 (-) EBI-744988",
+        "interaction" : "-",
+        "SUID" : 599,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "593",
+        "source" : "159",
+        "target" : "195",
+        "shared_name" : "EBI-64073231 (-) EBI-744988",
+        "name" : "EBI-64073231 (-) EBI-744988",
+        "interaction" : "-",
+        "SUID" : 593,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "587",
+        "source" : "159",
+        "target" : "185",
+        "shared_name" : "EBI-64073231 (-) EBI-3910993",
+        "name" : "EBI-64073231 (-) EBI-3910993",
+        "interaction" : "-",
+        "SUID" : 587,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "585",
+        "source" : "159",
+        "target" : "183",
+        "shared_name" : "EBI-64073231 (-) EBI-6165894",
+        "name" : "EBI-64073231 (-) EBI-6165894",
+        "interaction" : "-",
+        "SUID" : 585,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "571",
+        "source" : "159",
+        "target" : "161",
+        "shared_name" : "EBI-64073231 (-) EBI-15316524",
+        "name" : "EBI-64073231 (-) EBI-15316524",
+        "interaction" : "-",
+        "SUID" : 571,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    } ]
+  }
+}
