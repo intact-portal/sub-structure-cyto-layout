@@ -1,7 +1,17 @@
 #!/bin/bash
 set -e
 
-# Build the project
+# Ensure we're on main branch
+CURRENT_BRANCH=$(git branch --show-current)
+if [ "$CURRENT_BRANCH" != "main" ]; then
+    echo "Error: Deploy must be run from main branch. Current branch: $CURRENT_BRANCH"
+    exit 1
+fi
+
+# Clean and build the project
+echo "Cleaning dist folder..."
+rm -rf dist
+
 echo "Building..."
 npm run build
 
