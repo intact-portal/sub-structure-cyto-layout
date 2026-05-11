@@ -1,13 +1,13 @@
 /tmp
 /out-tsc
-/dist
+# /dist - uncommented for GitHub Pages deployment
 package-lock.json
 .idea/
 
 
 /node_modules
 # Angular specific
-/dist/
+# /dist/ - uncommented for GitHub Pages deployment
 /out-tsc/
 /tmp/
 /coverage/

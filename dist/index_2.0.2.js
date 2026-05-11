@@ -1,0 +1,1066 @@
+class VNode {
+}
+class VEdge {
+    // 构造函数
+    constructor(source, target) {
+        this.source = source;
+        this.target = target;
+    }
+}
+let vnodes = [];
+let vedges = [];
+/////////////////////////////////////////////////////////////////////////////////////////////////
+/**
+ * 结构增强版力导向布局
+ */
+function ForceLayout(options) {
+    this.options = options;
+    this.cy = options.cy;
+    this.eles = options.eles;
+}
+///////////////判断两个node数组是否相同，不用考虑顺序
+function areNodesEqual(arr1, arr2) {
+    // 1. 长度不等，肯定不相同
+    if (arr1.length !== arr2.length)
+        return false;
+    // 2. 提取所有 ID 并放入 Set
+    const ids1 = new Set(arr1.map(node => node.id()));
+    // 3. 检查 arr2 中的每个 ID 是否都在 Set 中
+    return arr2.every(node => ids1.has(node.id()));
+}
+////////////////sum length of all edges ////////////////
+function totalEdgeLength(edges) {
+    let total = 0;
+    edges.forEach(edge => {
+        const s = edge.source();
+        const t = edge.target();
+        if (s && t) {
+            const dx = (t.position().x || 0) - (s.position().x || 0);
+            const dy = (t.position().y || 0) - (s.position().y || 0);
+            const length = Math.sqrt(dx * dx + dy * dy);
+            total += length;
+        }
+    });
+    return total;
+}
+function Length(nodes, node) {
+    let total = 0;
+    nodes.forEach(n => {
+        if (n.id() !== node.id()) {
+            const dx = (n.position().x || 0) - (node.position().x || 0);
+            const dy = (n.position().y || 0) - (node.position().y || 0);
+            const length = Math.sqrt(dx * dx + dy * dy);
+            total += length;
+        }
+    });
+    return total;
+}
+/////////////// get node similarity matrix. ///////////////
+// ///////////If two nodes have same amount and same neighbors, they are likely to be high similarity,
+// ///////////value from 0-1//
+function getSimilarityMatrix(nodes) {
+    let matrix = Array.from({ length: nodes.length }, () => Array(nodes.length).fill(0));
+    nodes.forEach((n1, index1) => {
+        nodes.forEach((n2, index2) => {
+            const neighbors1 = n1.neighborhood().nodes();
+            const degree1 = neighbors1.length;
+            const neighbors2 = n2.neighborhood().nodes();
+            const degree2 = neighbors2.length;
+            const count = neighbors1.intersection(neighbors2).length;
+            const val = count / Math.min(degree1, degree2);
+            matrix[index1][index2] = val;
+            matrix[index2][index1] = val;
+        });
+    });
+    return matrix;
+}
+/**
+ * 将 Node 数组排列成矩形矩阵
+ * @param nodes Cytoscape 节点数组
+ * @param center 矩形中心坐标
+ * @param dirVector 长边（行进）方向向量
+ * @param rowSpacing 行与行之间的距离
+ * @param colSpacing 同一行内点与点的距离
+ * @param cols 每行固定的点数（不传则自动计算为接近正方形的比例）
+ */
+function layoutRectangular(nodes, center, dirVector, rowSpacing = 60, colSpacing = 80, cols) {
+    const n = nodes.length;
+    if (n === 0)
+        return;
+    // 1. Determine Grid Dimensions
+    // 'finalCols' will be the number of nodes in the "Vertical Line"
+    let finalCols = cols || Math.ceil(Math.sqrt(n));
+    if (n < 8)
+        finalCols = n;
+    const rows = Math.ceil(n / finalCols);
+    // 2. Normalize Vectors
+    const mag = Math.sqrt(Math.pow(dirVector.x, 2) + Math.pow(dirVector.y, 2)) || 1;
+    const uForward = { x: dirVector.x / mag, y: dirVector.y / mag };
+    const uSide = { x: -uForward.y, y: uForward.x }; // Perpendicular (Vertical) axis
+    // 3. Calculate Total Bounds for Centering
+    const totalForwardDepth = (rows - 1) * rowSpacing;
+    nodes.forEach((node, i) => {
+        const r = Math.floor(i / finalCols); // Row index (Depth)
+        const c = i % finalCols; // Column index (Side-to-Side)
+        // Handle centering for the last row if it's incomplete
+        const isLastRow = r === rows - 1;
+        const nodesInThisRow = isLastRow ? (n % finalCols || finalCols) : finalCols;
+        // 4. Calculate Offsets
+        // Move "Forward" along the dirVector
+        const offsetForward = (r * rowSpacing) - (totalForwardDepth / 2);
+        // Move "Side-to-Side" along the perpendicular axis
+        const currentRowWidth = (nodesInThisRow - 1) * colSpacing;
+        const offsetSide = (c * colSpacing) - (currentRowWidth / 2);
+        // 5. Apply Position
+        // Final position = Center + (Forward Offset * Forward Unit) + (Side Offset * Side Unit)
+        node.position({
+            x: center.x + (offsetForward * uForward.x) + (offsetSide * uSide.x),
+            y: center.y + (offsetForward * uForward.y) + (offsetSide * uSide.y)
+        });
+    });
+}
+ForceLayout.prototype.identifyStructures = function (nodes) {
+    // 0. 重置所有标记
+    nodes.data('structType', 'Normal');
+    nodes.data('structColor', '#999999');
+    nodes.data('groupId', null); // 新增：重置分组 ID for cycle
+    nodes.data('innerId', null); // index inner a circle
+    nodes.data('parallelGroupId', null);
+    ///////////////////////////////// 1. 锁定【星型结构】(逻辑保持不变) ///////////
+    let starIndex = 0;
+    nodes.forEach((node) => {
+        const degree = node.degree();
+        const neighbors = node.neighborhood().nodes();
+        const leafNeighbors = neighbors.filter((n) => n.degree() === 1);
+        if (leafNeighbors.length >= 3 && degree >= 3) {
+            node.data('structType', 'Star-Center');
+            node.data('structColor', '#F48FB1');
+            node.data('groupId', 'Star_' + starIndex);
+            leafNeighbors.forEach((leaf) => {
+                leaf.data('structType', 'Star-Member');
+                leaf.data('structColor', '#F48FB1');
+                leaf.data('groupId', 'Star_' + starIndex);
+            });
+            starIndex++;
+        }
+    });
+    ///////////////////////////// 2. 识别环状结构 (Cycle) - 迭代 DFS 版 /////////////////
+    const visited = new Set();
+    const allCycles = []; // 每个子数组代表一个独立的环
+    if (1) {
+        //degree >= 2 means possible in a cycle
+        const normalNodes = nodes.toArray().filter((n) => n.data('structType') === 'Normal' && n.degree() >= 2);
+        const seenCycles = new Set();
+        // To avoid duplicate cycles (like A-B-C and B-C-A), we sort and stringify for a check
+        console.log("normalNodes:" + normalNodes.length);
+        normalNodes.forEach((startNode, startIndex) => {
+            // console.log("startIndex:" + startIndex);
+            // We only find cycles where startNode is the node with the lowest index
+            // This is a massive optimization to prevent finding the same cycle N times
+            const startId = startNode.id();
+            const findCycles = (u, parent, path) => {
+                const neighbors = u.neighborhood().nodes().toArray().filter((n) => n.data('structType') === 'Normal');
+                for (const v of neighbors) {
+                    const vId = v.id();
+                    // 1. Found a cycle back to our specific START node
+                    // console.log("path-length:"+path.length+" startId:"+startId);
+                    // console.log(path);
+                    if (vId === startId && path.length >= 3) {
+                        const cycle = [...path];
+                        const sortedKey = [...cycle].sort().join(',');
+                        if (!seenCycles.has(sortedKey)) {
+                            allCycles.push(cycle);
+                            seenCycles.add(sortedKey);
+                        }
+                        continue;
+                    }
+                    // 2. Optimization: only visit nodes with higher index than startNode
+                    // and nodes NOT already in the current path
+                    const vIdx = normalNodes.findIndex(node => node.id() === vId); // index in nodes array
+                    if (vIdx > startIndex && !path.includes(vId)) {
+                        // define circle has less than 30 nodes, this is for large graph efficiency
+                        // if(path.length < 10) {
+                        findCycles(v, u, [...path, vId]);
+                        // }
+                    }
+                }
+            };
+            findCycles(startNode, null, [startId]);
+        });
+    }
+    console.log("All Cycles:", allCycles);
+    // --- 2. 二次过滤：去掉重合度 >= 2 的环 ---
+    console.log("allCycles:", allCycles.length);
+    const filteredCycles = [];
+    allCycles.sort((a, b) => b.length - a.length);
+    // 建议先按环的大小排序，通常保留“小环”更有意义（基础环往往更短）
+    allCycles.forEach((currentCycle) => {
+        var _a, _b, _c, _d, _e, _f, _g, _h;
+        const currentSet = new Set(currentCycle);
+        // 检查当前环是否与已保存的任何一个环有 2 个以上节点重合
+        const isRedundant = filteredCycles.some(existingCycle => {
+            let overlapCount = 0;
+            for (const nodeId of existingCycle) {
+                if (currentSet.has(nodeId)) {
+                    overlapCount++;
+                }
+                // 性能优化：一旦发现重合点达到 2 个，立即停止计数
+                if (overlapCount >= 2)
+                    return true;
+            }
+            return false;
+        });
+        if ((!isRedundant && currentCycle.length > 2 && currentCycle.length != 4)) {
+            filteredCycles.push(currentCycle);
+        }
+        if ((!isRedundant && currentCycle.length == 4)) {
+            const subNodes = currentCycle.map(id => nodes.toArray().find(n => n.id() === id));
+            // console.log("subNodes[1]:",subNodes[1]?.degree(false));
+            // console.log("subNodes[2]:",subNodes[2]?.degree(false));
+            // console.log("subNodes[3]:",subNodes[3]?.degree(false));
+            if (!((((_a = subNodes[0]) === null || _a === void 0 ? void 0 : _a.degree(false)) == 2 && ((_b = subNodes[2]) === null || _b === void 0 ? void 0 : _b.degree(false)) == 2 &&
+                ((_c = subNodes[1]) === null || _c === void 0 ? void 0 : _c.degree(false)) != 2 && ((_d = subNodes[3]) === null || _d === void 0 ? void 0 : _d.degree(false)) != 2) ||
+                (((_e = subNodes[0]) === null || _e === void 0 ? void 0 : _e.degree(false)) == 2 && ((_f = subNodes[2]) === null || _f === void 0 ? void 0 : _f.degree(false)) == 2 &&
+                    ((_g = subNodes[1]) === null || _g === void 0 ? void 0 : _g.degree(false)) == 2 && ((_h = subNodes[3]) === null || _h === void 0 ? void 0 : _h.degree(false)) == 2))) {
+                filteredCycles.push(currentCycle);
+            }
+        }
+    });
+    console.log("filteredCycles:", filteredCycles.length);
+    let circleIndex = 1; // why 1 works ????
+    filteredCycles.forEach((currentCycle) => {
+        let innerIndex = 0;
+        currentCycle.forEach((circle_node) => {
+            nodes.forEach((node) => {
+                if (node.data('structType') === 'Normal' && node.id() === circle_node) {
+                    node.data('structType', 'Cycle');
+                    node.data('structColor', '#2196F3');
+                    node.data('groupId', 'Cycle_' + circleIndex);
+                    node.data('innerId', innerIndex);
+                    innerIndex++;
+                }
+            });
+        });
+        circleIndex++;
+    });
+    console.log("检测到的环总数:", filteredCycles.length);
+    console.log("具体环的信息:", filteredCycles);
+    const chains = [];
+    const processedNodeIds = new Set(); // 避免重复处理
+    if (1) {
+        nodes.forEach((node) => {
+            if (node.id() == 561) {
+                console.log(node.id() + ' degree:' + node.degree());
+            }
+        });
+    }
+    // 2. 找出所有的叶子节点 (Normal 类型且度数为 1)
+    const leafNodes = nodes.filter((n) => n.data('structType') === 'Normal' && n.degree() === 1
+    // n.degree() === 1
+    );
+    console.log('num of leaf-node:' + leafNodes.length);
+    let chainId = 0;
+    leafNodes.forEach((leaf) => {
+        // console.log('leaves:'+leaf.id());
+        if (processedNodeIds.has(leaf.id()))
+            return;
+        const currentChainNodes = [];
+        let currentNode = leaf;
+        let nodeId = 0;
+        // 3. 沿着链向内溯源
+        while (currentNode) {
+            currentChainNodes.push(currentNode);
+            processedNodeIds.add(currentNode.id());
+            // 寻找下一个邻居
+            const neighbors = currentNode.neighborhood().nodes().filter((n) => n.data('structType') === 'Normal' && !processedNodeIds.has(n.id()));
+            // 链的延续条件：
+            // 1. 只有一个未访问的 Normal 邻居
+            // 2. 且该邻居的度数不能太高（如果度数 > 2，说明到了分叉点，链结束）
+            if (neighbors.length === 1) {
+                const nextNode = neighbors[0];
+                // 如果下一个节点是分叉点 (degree > 2)，我们把它作为链的终点，但停止继续延伸
+                if (nextNode.degree() > 2) {
+                    // 可选：是否将分叉点也计入链中？通常不计入，以保持链的独立性
+                    break;
+                }
+                currentNode = nextNode;
+            }
+            else {
+                // 没有邻居或有多个邻居（分叉），链结束
+                currentNode = null;
+                // chainId++;
+                // nodeId = 0;
+            }
+        }
+        // 4. 保存找到的链
+        if (currentChainNodes.length >= 2) {
+            nodeId = 0;
+            currentChainNodes.forEach((node) => {
+                node.data('structType', 'Chain');
+                node.data('structColor', '#FFF176');
+                node.data('groupId', 'Chain_' + chainId);
+                node.data('innerId', nodeId);
+                nodeId++;
+            });
+            chainId++;
+            chains.push({
+                chainId: `chain_${leaf.id()}`, // 以叶子节点 ID 命名
+                nodes: currentChainNodes
+            });
+        }
+        else {
+            /////////////////////////////// leafs that not in a chain ///////////////////////////
+            currentChainNodes.forEach((node) => {
+                node.data('structType', 'LeafButNotChain');
+                node.data('structColor', '#aaa');
+                node.data('groupId', null);
+                node.data('innerId', null);
+                nodeId++;
+                // console.log('leafNode', node.id());
+            });
+        }
+    });
+    /////////////////////////////// 找出平行/钻石结构 Parallel ///////////////////////////////////
+    if (1) {
+        // let diamonds = [];
+        let parallelId = 0;
+        //任意两个点是否有共同的neighbor
+        for (let i = 0; i < nodes.length; i++) {
+            let nodeVec = [];
+            let terminalVec = [];
+            const u = nodes[i];
+            const u1 = u.neighborhood().nodes();
+            if (u.data('structType') === 'Normal') {
+                for (let j = 0; j < nodes.length; j++) {
+                    if (i === j)
+                        continue;
+                    const v = nodes[j];
+                    if (v.data('structType') === 'Normal') {
+                        const v1 = v.neighborhood().nodes();
+                        if (areNodesEqual(v1, u1) && v1.length >= 2 && u1.length >= 2) {
+                            if (nodeVec.length === 0) {
+                                nodeVec.push(u);
+                            }
+                            nodeVec.push(v);
+                        }
+                    }
+                }
+            }
+            if (nodeVec.length >= 2) {
+                nodeVec.forEach(v => {
+                    v.data('structType', 'Parallel');
+                    v.data('structColor', '#50C878');
+                    v.data('groupId', 'Parallel' + parallelId);
+                    v.data('parallelGroupId', 'Parallel' + parallelId);
+                });
+                u1.forEach(v => {
+                    v.data('parallelGroupId', 'Parallel' + parallelId);
+                });
+                parallelId++;
+            }
+        }
+        if (0) {
+            console.log("@@@@@@@@@@");
+            nodes.forEach((node) => {
+                console.log(node.id() + ' ' + node.data('structType') + ' ' + node.data('parallelGroupId'));
+            });
+        }
+    }
+    console.log("检测到的链总数:", chains.length);
+    console.log("具体链信息:", chains);
+};
+ForceLayout.prototype.run = function () {
+    var _a, _b, _c, _d;
+    // 1. Run removal logic first
+    const seenPairs = new Set();
+    const toRemove = this.eles.edges().filter((edge) => {
+        const sourceId = edge.source().id();
+        const targetId = edge.target().id();
+        if (sourceId === targetId)
+            return true;
+        const pairKey = [sourceId, targetId].sort().join('---');
+        if (seenPairs.has(pairKey))
+            return true;
+        seenPairs.add(pairKey);
+        return false;
+    });
+    this.cy.remove(toRemove);
+    // 2. NOW define your collections to get the updated state
+    const nodes = this.cy.nodes(); // Fetch from cy to get current state
+    const edges = this.cy.edges();
+    console.log("Updated num of nodes: " + nodes.length);
+    console.log("Updated num of edges: " + edges.length);
+    // 1. 识别结构 (标记 structType 并通过 components 划分独立环)
+    this.identifyStructures(nodes);
+    if (1) {
+        nodes.forEach((n) => {
+            if (n.data('structType') === 'Normal' ||
+                n.data('structType') === 'LeafButNotChain') {
+                let nodesarray = [];
+                nodesarray.push(n);
+                vnodes.push({
+                    type: 'Normal',
+                    id: n.id(),
+                    center_x: n.data.x,
+                    center_y: n.data.y,
+                    radius: 1,
+                    rotate_angle: 0,
+                    nodes: nodesarray
+                });
+            }
+            else if (n.data('structType') === 'Cycle') {
+                let flag = true;
+                vnodes.forEach((vp) => {
+                    if (vp.type === 'Cycle' && vp.id === n.data('groupId')) {
+                        vp.nodes.push(n);
+                        flag = false;
+                    }
+                });
+                if (flag) { //还没保存过
+                    let nodesarray = [];
+                    nodesarray.push(n);
+                    vnodes.push({
+                        type: 'Cycle',
+                        id: n.data("groupId"),
+                        center_x: n.data.x,
+                        center_y: n.data.y,
+                        radius: 1,
+                        rotate_angle: 0,
+                        nodes: nodesarray
+                    });
+                }
+            }
+            else if (n.data('structType') === 'Chain') {
+                let flag = true;
+                vnodes.forEach((vp) => {
+                    if (vp.type === 'Chain' && vp.id === n.data('groupId')) {
+                        vp.nodes.push(n);
+                        flag = false;
+                    }
+                });
+                if (flag) { //还没保存过
+                    let nodesarray = [];
+                    nodesarray.push(n);
+                    vnodes.push({
+                        type: 'Chain',
+                        id: n.data("groupId"),
+                        center_x: n.data.x,
+                        center_y: n.data.y,
+                        radius: 1,
+                        rotate_angle: 0,
+                        nodes: nodesarray
+                    });
+                }
+            }
+            else if (n.data('structType') === 'Parallel') {
+                let flag = true;
+                vnodes.forEach((vp) => {
+                    if (vp.type === 'Parallel' && vp.id === n.data('groupId')) {
+                        vp.nodes.push(n);
+                        flag = false;
+                    }
+                });
+                if (flag) { //还没保存过
+                    let nodesarray = [];
+                    nodesarray.push(n);
+                    vnodes.push({
+                        type: 'Parallel',
+                        id: n.data("groupId"),
+                        center_x: n.data.x,
+                        center_y: n.data.y,
+                        radius: 1,
+                        rotate_angle: 0,
+                        nodes: nodesarray
+                    });
+                }
+            }
+            else if (n.data('structType') == 'Star-Center' || n.data('structType') == 'Star-Member') {
+                let flag = true;
+                vnodes.forEach((vp) => {
+                    if (vp.type === 'Star' && vp.id === n.data('groupId')) {
+                        vp.nodes.push(n);
+                        flag = false;
+                    }
+                });
+                if (flag) { //还没保存过
+                    let nodesarray = [];
+                    nodesarray.push(n);
+                    vnodes.push({
+                        type: 'Star',
+                        id: n.data("groupId"),
+                        center_x: n.data.x,
+                        center_y: n.data.y,
+                        radius: 1,
+                        rotate_angle: 0,
+                        nodes: nodesarray
+                    });
+                }
+            }
+        });
+    }
+    //为虚拟节点建好连接边
+    if (1) {
+        const edgePairs = [];
+        for (const edge of edges) {
+            let s = edge.source().id();
+            let t = edge.target().id();
+            let count = 0;
+            insideBreak: for (let i = 0; i < vnodes.length; i++) {
+                const v1 = vnodes[i];
+                count = 0;
+                if (!v1.nodes)
+                    continue;
+                v1.nodes.forEach((node) => {
+                    if (node.id() === s || node.id() === t) {
+                        count++;
+                    }
+                });
+                if (count == 2) {
+                    break insideBreak;
+                }
+            }
+            if (count != 2) { // counts==2 means the edge is inside of vnode
+                edgePairs.push({
+                    source: edge.source().id(),
+                    target: edge.target().id()
+                });
+            }
+        }
+        console.log("getting virtual edges...");
+        for (let i = 0; i < vnodes.length - 1; i++) {
+            const v1 = vnodes[i];
+            for (let j = i + 1; j < vnodes.length; j++) {
+                // console.log('i:'+i+'   j:' + j);
+                const v2 = vnodes[j];
+                if (!v1.nodes || !v2.nodes)
+                    continue;
+                if (1) {
+                    let flag = false;
+                    const nodeVec1 = v1.nodes;
+                    const nodeVec2 = v2.nodes;
+                    foundEdge: for (const n1 of nodeVec1) {
+                        if (n1.data("structType") != 'Star-Member') { // save time
+                            for (const n2 of nodeVec2) {
+                                if (n2.data("structType") != 'Star-Member') {
+                                    for (const edge of edgePairs) {
+                                        const source = edge.source;
+                                        const target = edge.target;
+                                        // Logic fix: Checking both directions for an undirected link
+                                        if ((n1.id() === source && n2.id() === target) || (n2.id() === source && n1.id() === target)) {
+                                            flag = true;
+                                            break foundEdge; // Successfully stops ALL three loops
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    if (flag) {
+                        let vedge = new VEdge(v1, v2);
+                        vedges.push(vedge);
+                    }
+                }
+            }
+        }
+    }
+    ///////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////// 更新虚拟节点的中心 //////////////////////////
+    vnodes.forEach((v1) => {
+        if (v1.nodes && v1.nodes.length > 0) {
+            const sumX = v1.nodes.reduce((acc, curr) => acc + (curr.position().x || 0), 0);
+            const sumY = v1.nodes.reduce((acc, curr) => acc + (curr.position().y || 0), 0);
+            v1.center_x = sumX / v1.nodes.length;
+            v1.center_y = sumY / v1.nodes.length;
+        }
+        else {
+            v1.center_x = v1.center_x || 0;
+            v1.center_y = v1.center_y || 0;
+        }
+    });
+    /////////////////////////////////////////////////////////////////////////////
+    // initialial position draft layout;
+    if (0) {
+        const IDEAL_LENGTH = 100;
+        const REPULSION = 10000;
+        const SPRING_K = 0.15;
+        const ITERATIONS = 200;
+        const ANGULAR_STRENGTH = 0.2;
+        const CENTER_GRAVITY = 0.01;
+        for (let iter = 0; iter <= ITERATIONS; iter++) {
+            console.log('iter:' + iter);
+            // 1. Initialize displacements for this frame
+            const disp = new Map();
+            nodes.forEach((n) => disp.set(n.id(), { x: 0, y: 0 }));
+            const cooling = Math.pow(1 - iter / ITERATIONS, 2);
+            /* ---------- 2. 边弹簧力 attraction ---------- */
+            if (1) {
+                edges.forEach((e) => {
+                    const s = e.source();
+                    const t = e.target();
+                    if (s != t) {
+                        if (!s || !t) {
+                            console.log('no edge');
+                            return;
+                        }
+                        let dx = t.position().x - s.position().x;
+                        let dy = t.position().y - s.position().y;
+                        let dist = Math.sqrt(dx * dx + dy * dy) || 1;
+                        const delta = dist - IDEAL_LENGTH;
+                        const force = SPRING_K * delta * (delta > 0 ? 2.0 : 1.0);
+                        const fx = force * dx / dist;
+                        const fy = force * dy / dist;
+                        s.position('x', s.position().x + fx);
+                        s.position('y', s.position().y + fy);
+                        t.position('x', t.position().x - fx);
+                        t.position('y', t.position().y - fy);
+                    }
+                });
+            }
+            /* ---------- 1. 节点斥力 repulsion ---------- */
+            if (1) {
+                for (let i = 0; i < nodes.length; i++) {
+                    for (let j = i + 1; j < nodes.length; j++) {
+                        const n1 = nodes[i];
+                        const n2 = nodes[j];
+                        const dx = n1.position().x - n2.position().x;
+                        const dy = n1.position().y - n2.position().y;
+                        const dist = Math.sqrt(dx * dx + dy * dy) || 1; //at least 1
+                        if (dist < IDEAL_LENGTH * 10) {
+                            let force = REPULSION / (dist * dist);
+                            const fx = force * dx / dist;
+                            const fy = force * dy / dist;
+                            nodes[i].position().x = n1.position().x + fx;
+                            nodes[i].position().y = n1.position().y + fy;
+                            nodes[j].position().x = n2.position().x - fx;
+                            nodes[j].position().y = n2.position().y - fy;
+                        }
+                    }
+                }
+            }
+            /* ---------- 1. ANGULAR FORCE (Star-like distribution)  ---------- */
+            if (1) {
+                const adj = new Map();
+                edges.forEach((e) => {
+                    if (!adj.has(e.source().id()))
+                        adj.set(e.source().id(), []);
+                    if (!adj.has(e.target().id()))
+                        adj.set(e.target().id(), []);
+                    adj.get(e.source().id()).push(e.target());
+                    adj.get(e.target().id()).push(e.source());
+                });
+                nodes.forEach((node) => {
+                    const neighbors = adj.get(node.id()) || [];
+                    if (neighbors.length < 2)
+                        return;
+                    // Get current angles of all neighbors
+                    let angles = neighbors.map(nb => {
+                        var _a, _b;
+                        return ({
+                            node: nb,
+                            angle: Math.atan2(((_a = nb.position()) === null || _a === void 0 ? void 0 : _a.y) - node.position().y, ((_b = nb.position()) === null || _b === void 0 ? void 0 : _b.x) - node.position().x)
+                        });
+                    });
+                    // Sort angles to find adjacent edges
+                    angles.sort((a, b) => a.angle - b.angle);
+                    // Push neighbor angles away from each other
+                    for (let i = 0; i < angles.length; i++) {
+                        const next = (i + 1) % angles.length;
+                        let diff = angles[next].angle - angles[i].angle;
+                        if (diff < 0)
+                            diff += Math.PI * 2; // Wrap around circle
+                        const optimalDiff = (Math.PI * 2) / angles.length;
+                        const adjustment = (diff - optimalDiff) * ANGULAR_STRENGTH * cooling;
+                        // Apply rotational shift to the neighbor positions
+                        const moveAngle = angles[i].angle + adjustment;
+                        const dist = Math.sqrt(Math.pow(angles[i].node.position().x - node.position().x, 2) +
+                            Math.pow(angles[i].node.position().y - node.position().y, 2));
+                        angles[i].node.position().x = node.position().x + Math.cos(moveAngle) * dist;
+                        angles[i].node.position().y = node.position().y + Math.sin(moveAngle) * dist;
+                    }
+                });
+            }
+            /* ---------- D. Final Movement Application ---------- */
+            if (1) {
+                nodes.forEach((node) => {
+                    if (node.data('structType') === 'Star-Center')
+                        return;
+                    const d = disp.get(node.id());
+                    const limit = 30 * cooling; // Speed limit prevents "jitter"
+                    const moveX = Math.max(-limit, Math.min(limit, d.x));
+                    const moveY = Math.max(-limit, Math.min(limit, d.y));
+                    node.position({
+                        x: node.position('x') + moveX,
+                        y: node.position('y') + moveY
+                    });
+                });
+            }
+        }
+    }
+    ////////////////////////////////////////////////////////////////////////
+    if (1) {
+        const IDEAL_LENGTH = 100;
+        const REPULSION = 50000; // Increased for better separation
+        const SPRING_K = 0.2;
+        const ITERATIONS = 200;
+        const CENTER_GRAVITY = 0.05; // Pulls the cluster toward (0,0) or center
+        for (let iter = 0; iter < ITERATIONS; iter++) {
+            console.log('iter:' + iter);
+            // 1. Initialize displacements (Prevents directional bias)
+            const disp = new Map();
+            vnodes.forEach(n => disp.set(n.id, { x: 0, y: 0 }));
+            // 2. Adaptive Cooling: Gradually slows down movement
+            const cooling = Math.pow(1 - iter / ITERATIONS, 2);
+            /* ---------- A. Repulsion Force ---------- */
+            for (let i = 0; i < vnodes.length; i++) {
+                for (let j = i + 1; j < vnodes.length; j++) {
+                    const n1 = vnodes[i];
+                    const n2 = vnodes[j];
+                    const dx = n1.center_x - n2.center_x;
+                    const dy = n1.center_y - n2.center_y;
+                    const distSq = dx * dx + dy * dy || 0.1;
+                    const dist = Math.sqrt(distSq);
+                    // Distance clipping: Large networks don't need global repulsion
+                    if (dist > IDEAL_LENGTH * 5)
+                        continue;
+                    const len1 = (_b = (_a = n1.nodes) === null || _a === void 0 ? void 0 : _a.length) !== null && _b !== void 0 ? _b : 1;
+                    const len2 = (_d = (_c = n2.nodes) === null || _c === void 0 ? void 0 : _c.length) !== null && _d !== void 0 ? _d : 1;
+                    const ratio = Math.max(len1, len2) / 3;
+                    const force = (REPULSION * ratio) / distSq;
+                    const fx = (force * dx) / dist;
+                    const fy = (force * dy) / dist;
+                    n1.center_x += fx;
+                    n1.center_y += fy;
+                    n2.center_x -= fx;
+                    n2.center_y -= fy;
+                }
+            }
+            /* ---------- B. Attraction Force ---------- */
+            vedges.forEach(e => {
+                const s = e.source;
+                const t = e.target;
+                const dx = t.center_x - s.center_x;
+                const dy = t.center_y - s.center_y;
+                const dist = Math.sqrt(dx * dx + dy * dy) || 0.1;
+                const ratio = Math.max(s.nodes.length, t.nodes.length) / 3;
+                const delta = dist - (IDEAL_LENGTH * ratio);
+                // Logarithmic-style spring for large distance snapping
+                const force = SPRING_K * delta * (delta > 0 ? 1.5 : 1.0);
+                const fx = (force * dx) / dist;
+                const fy = (force * dy) / dist;
+                s.center_x += fx;
+                s.center_y += fy;
+                t.center_x -= fx;
+                t.center_y -= fy;
+            });
+            /* ---------- C. Global Centering Gravity ---------- */
+            // vnodes.forEach(n => {
+            //     // Keeps the large network from drifting apart
+            //     disp.get(n.id)!.x += (0 - n.center_x) * CENTER_GRAVITY;
+            //     disp.get(n.id)!.y += (0 - n.center_y) * CENTER_GRAVITY;
+            // });
+            //
+            // /* ---------- D. Final Movement Application ---------- */
+            // vnodes.forEach(n => {
+            //     const d = disp.get(n.id)!;
+            //
+            //     // Velocity Limiter: Prevents nodes from "teleporting"
+            //     const maxMove = 30 * cooling;
+            //     const currentMove = Math.sqrt(d.x * d.x + d.y * d.y) || 1;
+            //
+            //     n.center_x += (d.x / currentMove) * Math.min(currentMove, maxMove);
+            //     n.center_y += (d.y / currentMove) * Math.min(currentMove, maxMove);
+            // });
+        }
+    }
+    /////////////////////  删除之后变成虚拟节点 vnode 的layout ////////////////
+    if (0) {
+        vnodes.forEach((v) => {
+            if (v.type == 'Cycle') {
+                // 1. 检查 nodes 是否存在且不为空
+                if (v.nodes && v.nodes.length > 0) {
+                    v.nodes.sort((a, b) => {
+                        var _a, _b;
+                        // 假设 innerId 是数字。如果是字符串，可以使用 localeCompare
+                        const idA = (_a = a.data('innerId')) !== null && _a !== void 0 ? _a : 0;
+                        const idB = (_b = b.data('innerId')) !== null && _b !== void 0 ? _b : 0;
+                        return idA - idB; // 升序排序
+                    });
+                }
+                // 2. 根据节点数量计算标准半径 (保证节点间距接近 k)
+                const count = v.nodes.length;
+                const k = 100;
+                const radius = (count * k) / (2 * Math.PI);
+                let center_x = 0;
+                let center_y = 0;
+                v.nodes.forEach((n, i) => {
+                    center_x += n.position().x;
+                    center_y += n.position().y;
+                });
+                center_x /= v.nodes.length;
+                center_y /= v.nodes.length;
+                v.center_x = center_x;
+                v.center_y = center_y;
+                // 3. 排序以防止节点在圆周上闪烁
+                const sorted = v.nodes;
+                const sortedReverse = sorted.slice().reverse();
+                let reverseFlag = false;
+                let minTotalLength = 10e10;
+                let bestRotate = 0; //找出最好的旋转角度
+                //clockwise
+                for (let rotate = 0; rotate < 360; rotate = rotate + 10) {
+                    // 4. 强行覆盖坐标：这是形成“绝对圆”的物理保障
+                    sorted.forEach((n, i) => {
+                        const angle = (i / count) * 2 * Math.PI + rotate;
+                        n.position({
+                            x: v.center_x + Math.cos(angle) * radius,
+                            y: v.center_y + Math.sin(angle) * radius
+                        });
+                    });
+                    const totalLength = totalEdgeLength(edges);
+                    if (minTotalLength > totalLength) {
+                        minTotalLength = totalLength;
+                        bestRotate = rotate;
+                    }
+                }
+                //anti-clockwise
+                for (let rotate = 0; rotate < 360; rotate = rotate + 10) {
+                    // 4. 强行覆盖坐标：这是形成“绝对圆”的物理保障
+                    sortedReverse.forEach((n, i) => {
+                        const angle = (i / count) * 2 * Math.PI + rotate;
+                        n.position({
+                            x: v.center_x + Math.cos(angle) * radius,
+                            y: v.center_y + Math.sin(angle) * radius
+                        });
+                    });
+                    const totalLength = totalEdgeLength(edges);
+                    if (minTotalLength > totalLength) {
+                        reverseFlag = true;
+                        minTotalLength = totalLength;
+                        bestRotate = rotate;
+                    }
+                }
+                // 4. 强行覆盖坐标：这是形成“绝对圆”的物理保障
+                if (!reverseFlag) {
+                    sorted.forEach((n, i) => {
+                        const angle = (i / count) * 2 * Math.PI + bestRotate;
+                        n.position({
+                            x: v.center_x + Math.cos(angle) * radius,
+                            y: v.center_y + Math.sin(angle) * radius
+                        });
+                    });
+                }
+                else {
+                    sortedReverse.forEach((n, i) => {
+                        const angle = (i / count) * 2 * Math.PI + bestRotate;
+                        n.position({
+                            x: v.center_x + Math.cos(angle) * radius,
+                            y: v.center_y + Math.sin(angle) * radius
+                        });
+                    });
+                }
+            }
+            else if (v.type == 'Star') {
+                if (1) {
+                    const allMemberNode = v.nodes.filter((node) => node.data('structType') !== 'Star-Center');
+                    const ringSpacing = 100;
+                    const baseNodesInFirstRing = 6;
+                    const centerNode = v.nodes.filter((node) => node.data('structType') == 'Star-Center');
+                    let center_x = 0;
+                    let center_y = 0;
+                    v.nodes.forEach((n, i) => {
+                        center_x += n.position().x;
+                        center_y += n.position().y;
+                    });
+                    center_x /= v.nodes.length;
+                    center_y /= v.nodes.length;
+                    v.nodes.forEach((n, i) => {
+                        if (n.data('structType') == 'Star-Center') {
+                            n.position({
+                                x: center_x,
+                                y: center_y
+                            });
+                        }
+                    });
+                    // 1. Pre-calculate how many nodes go into each ring
+                    const rings = [];
+                    let tempNodes = [...allMemberNode];
+                    let currentRingSize = baseNodesInFirstRing;
+                    while (tempNodes.length > 0) {
+                        // Take the next chunk of nodes for this ring
+                        rings.push(tempNodes.splice(0, currentRingSize));
+                        // Increase capacity for the next ring
+                        currentRingSize += baseNodesInFirstRing;
+                    }
+                    // 2. Position the nodes ring by ring like a pie
+                    rings.forEach((ringNodes, ringIdx) => {
+                        const ringNumber = ringIdx + 1;
+                        const radius = ringNumber * ringSpacing;
+                        const totalInThisRing = ringNodes.length; // This is the key for even distribution
+                        ringNodes.forEach((node, nodeIdx) => {
+                            // Evenly distribute based on actual count in THIS ring
+                            let angle = (nodeIdx / totalInThisRing) * 2 * Math.PI;
+                            // Stagger every other ring
+                            if (ringNumber % 2 === 0) {
+                                angle += (Math.PI / totalInThisRing);
+                            }
+                            node.position({
+                                x: center_x + Math.cos(angle) * radius,
+                                y: center_y + Math.sin(angle) * radius
+                            });
+                        });
+                    });
+                }
+            }
+            else if (v.type == 'Chain') {
+                // 1. 依然使用临时对象按 groupId 归类节点
+                const chainGroups = {};
+                v.nodes.forEach((node) => {
+                    if (node.data('structType') == 'Chain') {
+                        const groupId = node.data('groupId');
+                        if (!chainGroups[groupId]) {
+                            chainGroups[groupId] = [];
+                        }
+                        if (node.degree() === 1) { //把链子的叶节点放在第一位，用于标记哪个是链的叶节点
+                            chainGroups[groupId].unshift(node); //将元素插入到数组的开头，并将原本的元素依次后移。
+                        }
+                        else {
+                            chainGroups[groupId].push(node);
+                        }
+                    }
+                });
+                const finalGroups2 = Object.keys(chainGroups).map(key => {
+                    const group = chainGroups[key];
+                    return group.sort((a, b) => Number(a.data('innerId')) - Number(b.data('innerId')));
+                });
+                for (const groupId in chainGroups) {
+                    if (chainGroups.hasOwnProperty(groupId)) {
+                        const gNodes = chainGroups[groupId];
+                        const count = gNodes.length;
+                        if (count >= 2) {
+                            // 1. 计算当前时刻的算术平均中心 (质心)
+                            let cx = 0, cy = 0;
+                            gNodes.forEach((n) => {
+                                cx += n.position().x;
+                                cy += n.position().y;
+                            });
+                            cx /= count;
+                            cy /= count;
+                            // 2. 根据节点数量计算标准半径 (保证节点间距接近 k)
+                            const miniMumRadius = 150;
+                            const radius = Math.max((count * 100) / (2 * Math.PI), miniMumRadius);
+                            // 3. 排序以防止节点在圆周上闪
+                            const sorted = gNodes.slice(1);
+                            let neighborN = null;
+                            edges.forEach((e) => {
+                                if (e.source().id() == gNodes[gNodes.length - 1].id()) {
+                                    neighborN = e.target();
+                                }
+                                if (e.target().id() == gNodes[gNodes.length - 1].id()) {
+                                    neighborN = e.source();
+                                }
+                            });
+                            ///////////////////////////////////////////////////
+                            // 4. 需要旋转，找出最好的旋转角度
+                            let minTotalLength = 10e10;
+                            let bestRotate = 0; //找出最好的旋转角度
+                            for (let rotate = 0; rotate < 360; rotate = rotate + 10) {
+                                // 4. 强行覆盖坐标：这是形成“绝对圆”的物理保障
+                                sorted.forEach((n, i) => {
+                                    const angle = (i / count) * 2 * Math.PI + rotate;
+                                    n.position({
+                                        x: cx + Math.cos(angle) * radius,
+                                        y: cy + Math.sin(angle) * radius
+                                    });
+                                });
+                                const totalLength = totalEdgeLength(edges);
+                                // const totalLength = Length(gNodes, neighborN);
+                                if (minTotalLength > totalLength) {
+                                    minTotalLength = totalLength;
+                                    bestRotate = rotate;
+                                }
+                            }
+                            // 4. 强行覆盖坐标：这是形成“绝对圆”的物理保障
+                            sorted.forEach((n, i) => {
+                                const angle = (i / count) * 2 * Math.PI + bestRotate;
+                                n.position({
+                                    x: cx + Math.cos(angle) * radius,
+                                    y: cy + Math.sin(angle) * radius
+                                });
+                            });
+                            ///////////////////////////////////////////////////
+                            gNodes[0].position({
+                                x: cx,
+                                y: cy
+                            });
+                        }
+                    }
+                }
+            }
+            else if (v.type == 'Parallel') {
+                let endVec = [];
+                nodes.forEach((n, i) => {
+                    if (n.data('parallelGroupId') == v.id && n.data('structType') != 'Parallel') {
+                        //提取同一个group的端节点
+                        endVec.push(n);
+                    }
+                });
+                let center_x = 0;
+                let center_y = 0;
+                endVec.forEach((n, i) => {
+                    center_x += n.position().x;
+                    center_y += n.position().y;
+                });
+                center_x /= endVec.length;
+                center_y /= endVec.length;
+                v.center_x = center_x;
+                v.center_y = center_y;
+                if (endVec.length >= 2) { //应该>=2，否则就错误
+                    //有node数组，将里面的所有node在两个点n1,n2中点垂线上均匀分布
+                    const p1 = endVec[0].position();
+                    const p2 = endVec[1].position();
+                    const diff = { x: p1.x - p2.x, y: p1.y - p2.y };
+                    layoutRectangular(v.nodes, { x: center_x, y: center_y }, diff);
+                }
+            }
+        });
+    }
+    if (1) {
+        console.log("num of virtual edges:", vedges.length);
+        console.log('num of sudo-nodes:', vnodes.length);
+        let maxDis = 0;
+        let minDist = 10e10;
+        let minS = 0;
+        let minT = 0;
+        let avgDis = 0;
+        edges.forEach((e) => {
+            const s = e.source();
+            const t = e.target();
+            const distance = Math.sqrt(Math.pow(s.position().x - t.position().x, 2) +
+                Math.pow(s.position().y - t.position().y, 2));
+            if (maxDis < distance) {
+                maxDis = distance;
+            }
+            if (minDist > distance) {
+                minDist = distance;
+                minS = s.id();
+                minT = t.id();
+            }
+            avgDis += distance;
+        });
+        console.log("maxDis:", maxDis);
+        console.log("avgDis:", avgDis / edges.length);
+        console.log("minDist:", minDist, "  minS:", minS, " minT:", minT);
+    }
+    console.log(5);
+    this.cy.fit(null, 50);
+    this.cy.emit('layoutstop');
+    return this;
+};
+ForceLayout.prototype.stop = function () {
+    return this;
+};
+export default function register(cytoscape) {
+    if (!cytoscape)
+        return;
+    cytoscape('layout', 'ForceLayout', ForceLayout);
+}
