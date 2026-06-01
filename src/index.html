@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Structure Recognition Layout</title>
+  <link rel="icon" type="image/x-icon" href="./favicon.ico">
   <script src="./cytoscape.min.js"></script>
   <style>
     /* 新增：设置 body 为 flex 容器，实现水平并排 */
@@ -191,6 +192,20 @@
       gap: 8px;
       margin-top: 12px;
     }
+
+    /* Step list styling */
+    #step-list-content > div {
+      border-bottom: 1px solid #e0e0e0;
+      transition: background 0.2s;
+    }
+
+    #step-list-content > div:hover {
+      background: #f0f0f0 !important;
+    }
+
+    #step-list-content > div:last-child {
+      border-bottom: none;
+    }
   </style>
 </head>
 <body>
@@ -210,6 +225,37 @@
     Render Time: --
   </div>
 
+  <div id="step-controls" class="panel controls-panel" style="border-left: 4px solid #9C27B0;">
+    <h3>Step-by-Step Mode</h3>
+    <div class="control-item">
+      <label style="flex-direction: row; gap: 8px;">
+        <input type="checkbox" id="STEP_BY_STEP"> Enable Step-by-Step
+      </label>
+    </div>
+    <div id="step-navigation" style="display: none; margin-top: 10px;">
+      <div style="display: flex; gap: 5px; margin-bottom: 10px;">
+        <button class="btn" onclick="goToFirstStep()" id="firstStepBtn" disabled style="flex: 1; white-space: nowrap;">⏮</button>
+        <button class="btn" onclick="fasterPrevStepUI()" id="fasterPrevStepBtn" disabled style="flex: 1;">◀◀</button>
+        <button class="btn" onclick="prevStepUI()" id="prevStepBtn" disabled style="flex: 1;">◀</button>
+        <button class="btn" onclick="nextStepUI()" id="nextStepBtn" disabled style="flex: 1;">▶</button>
+        <button class="btn" onclick="fasterNextStepUI()" id="fasterNextStepBtn" disabled style="flex: 1;">▶▶</button>
+        <button class="btn" onclick="goToLastStep()" id="lastStepBtn" disabled style="flex: 1; white-space: nowrap;">⏭</button>
+      </div>
+      <div style="margin-bottom: 10px; font-size: 12px; padding: 8px; background: #f0f0f0; border-radius: 4px;">
+        <div><strong>Current Step:</strong> <span id="currentStepDisplay">-</span></div>
+        <div style="margin-top: 4px;"><strong>Description:</strong> <span id="currentStepDesc" style="color: #666;">-</span></div>
+      </div>
+      <button class="btn btn-secondary" onclick="listAllSteps()" style="width: 100%;">Show All Steps</button>
+      <button class="btn" onclick="clearVirtualNodesUI()" style="width: 100%; margin-top: 5px; background: #FF5722;">Clear Virtual Nodes</button>
+    </div>
+  </div>
+
+  <div id="step-list" class="panel stats-panel" style="border-left: 4px solid #FF9800; display: none;">
+    <strong>All Steps:</strong>
+    <div id="step-list-content" style="margin-top: 8px; font-size: 11px; line-height: 1.6; max-height: 250px; overflow-y: auto;">
+    </div>
+  </div>
+
   <div id="controls" class="panel controls-panel">
     <h3>
       Parameters
@@ -223,8 +269,8 @@
         <input type="range" id="IDEAL_LENGTH" min="50" max="1000" value="100" step="10">
       </div>
       <div class="control-item">
-        <label>Repulsion Force <span class="value-display" id="val-REPULSION">10000</span></label>
-        <input type="range" id="REPULSION" min="1000" max="30000" value="10000" step="1000">
+        <label>Repulsion Force <span class="value-display" id="val-REPULSION">100</span></label>
+        <input type="range" id="REPULSION" min="0" max="500" value="100" step="10">
       </div>
       <div class="control-item">
         <label>Spring Strength <span class="value-display" id="val-SPRING_K">0.15</span></label>
@@ -278,6 +324,7 @@
 
   let cy = null;
   let currentParams = {};
+  let currentLayout = null; // Store the layout instance
 
   const DEFAULT_PARAMS = {
     IDEAL_LENGTH: 100, REPULSION: 10000, SPRING_K: 0.15, ITERATIONS: 300,
@@ -288,7 +335,8 @@
     PARALLEL_GAP: 80, LEAF_NODE_DISTANCE: 200, VNODE_RADIUS_MULTIPLIER: 0.2,
     VNODE_IDEAL_LENGTH: 100, VNODE_REPULSION: 10000, VNODE_SPRING_K: 0.15,
     VNODE_ITERATIONS: 600, VNODE_ANGULAR_STRENGTH: 0.1, SPREAD_V_NODES: true,
-    SUBSTRUCTURE_LAYOUT: true, ENABLE_INITIAL_FORCE_LAYOUT: false
+    SUBSTRUCTURE_LAYOUT: true, ENABLE_INITIAL_FORCE_LAYOUT: false,
+    STEP_BY_STEP: false
   };
 
   currentParams = { ...DEFAULT_PARAMS };
@@ -305,7 +353,12 @@
 
     document.querySelectorAll('input[type="checkbox"]').forEach(input => {
       input.addEventListener('change', (e) => {
-        currentParams[input.id] = e.target.checked;
+        if (input.id === 'STEP_BY_STEP') {
+          currentParams.STEP_BY_STEP = e.target.checked;
+          document.getElementById('step-navigation').style.display = e.target.checked ? 'block' : 'none';
+        } else {
+          currentParams[input.id] = e.target.checked;
+        }
       });
     });
 
@@ -357,13 +410,10 @@
     statsEl.innerHTML = '<span style="color:#2196F3">Loading...</span>';
 
     try {
-      // Try regular file first
-      let response = await fetch(`./data/${fileName}`);
-
-      // If 404, try gzipped version
-      if (!response.ok) {
-        response = await fetch(`./data/${fileName}.gz`);
-        if (!response.ok) throw new Error(`Failed to load ${fileName}`);
+      if(0) {
+        // Always load gzipped version
+        const response = await fetch(`./data/${fileName}.gz`);
+        if (!response.ok) throw new Error(`Failed to load ${fileName}.gz`);
 
         // Decompress gzipped content
         const blob = await response.blob();
@@ -373,9 +423,15 @@
         const text = await decompressedBlob.text();
         const data = JSON.parse(text);
         renderCytoscape(data);
-      } else {
-        // Regular file
+      }
+      if(1){
+        const response = await fetch(`./data/${fileName}`);
+        if (!response.ok) throw new Error(`Failed to load ${fileName}`);
+
+        // 2. 直接将响应内容解析为 JSON 对象（不再需要解轻压）
         const data = await response.json();
+
+        // 3. 渲染图表
         renderCytoscape(data);
       }
     } catch (err) {
@@ -417,8 +473,26 @@
       elements: data.elements || data,
       style: [
         { selector: 'node[structColor]', style: { 'background-color': 'data(structColor)' } },
-        { selector: 'node', style: { 'label': 'data(id)', 'color': '#333', 'font-size': '20px', 'width': 50, 'height': 50 } },
-        { selector: 'edge', style: { 'width': 5, 'line-color': '#aaa', 'curve-style': 'haystack' } }
+        { selector: 'node', style: {
+          'label': 'data(id)', 'color': '#333', 'font-size': '20px', 'width': 50, 'height': 50
+          }
+        },
+        // Virtual node styling
+        { selector: '.virtual-node', style: {
+          'label': 'data(label)',
+          'text-valign': 'center',
+          'text-halign': 'center',
+          'font-size': '10px',
+          'font-weight': 'bold',
+          'shape': 'ellipse',
+          'z-index': 0
+        }},
+        // Virtual edge styling
+        { selector: '.virtual-edge', style: {
+          'curve-style': 'bezier',
+          'z-index': 0
+        }},
+        { selector: 'edge', style: { 'width': 8, 'line-color': '#aaa', 'curve-style': 'haystack', 'z-index': 1 } }
       ]
     });
 
@@ -435,21 +509,148 @@
     applyLayout();
   }
 
-  window.applyLayout = function() {
+  // Step navigation functions
+  window.nextStepUI = function() {
+    if (currentLayout && currentLayout.nextStep) {
+      currentLayout.nextStep();
+      updateStepDisplay();
+    }
+  };
+
+  window.prevStepUI = function() {
+    if (currentLayout && currentLayout.prevStep) {
+      currentLayout.prevStep();
+      updateStepDisplay();
+    }
+  };
+
+  window.fasterNextStepUI = function() {
+    if (currentLayout && currentLayout.goToStep && currentLayout.steps) {
+      const targetIndex = Math.min(currentLayout.currentStepIndex + 10, currentLayout.steps.length - 1);
+      currentLayout.goToStep(targetIndex);
+      updateStepDisplay();
+    }
+  };
+
+  window.fasterPrevStepUI = function() {
+    if (currentLayout && currentLayout.goToStep) {
+      const targetIndex = Math.max(currentLayout.currentStepIndex - 10, 0);
+      currentLayout.goToStep(targetIndex);
+      updateStepDisplay();
+    }
+  };
+
+  window.goToFirstStep = function() {
+    if (currentLayout && currentLayout.goToStep) {
+      currentLayout.goToStep(0);
+      updateStepDisplay();
+    }
+  };
+
+  window.goToLastStep = function() {
+    if (currentLayout && currentLayout.steps && currentLayout.goToStep) {
+      currentLayout.goToStep(currentLayout.steps.length - 1);
+      updateStepDisplay();
+    }
+  };
+
+  window.listAllSteps = function() {
+    if (!currentLayout || !currentLayout.steps || currentLayout.steps.length === 0) {
+      alert('No steps available. Run the layout with Step-by-Step mode enabled first.');
+      return;
+    }
+
+    const stepListPanel = document.getElementById('step-list');
+    const stepListContent = document.getElementById('step-list-content');
+
+    if (stepListPanel.style.display === 'none') {
+      let html = '';
+      currentLayout.steps.forEach((step, index) => {
+        const current = index === currentLayout.currentStepIndex ? ' 👉' : '';
+        const hasVNodes = step.virtualNodes && step.virtualNodes.length > 0 ? ' 🔵' : '';
+        html += `<div style="padding: 4px; cursor: pointer; ${index === currentLayout.currentStepIndex ? 'background: #ffe082;' : ''}" onclick="goToStepByIndex(${index})">
+          <strong>[${index}]</strong> ${step.stepName}${current}${hasVNodes}<br>
+          <span style="color: #666; font-size: 10px;">${step.description}</span>
+        </div>`;
+      });
+      stepListContent.innerHTML = html;
+      stepListPanel.style.display = 'block';
+    } else {
+      stepListPanel.style.display = 'none';
+    }
+  };
+
+  window.goToStepByIndex = function(index) {
+    if (currentLayout && currentLayout.goToStep) {
+      currentLayout.goToStep(index);
+      updateStepDisplay();
+      // Refresh the list to update highlighting
+      const stepListPanel = document.getElementById('step-list');
+      if (stepListPanel.style.display !== 'none') {
+        stepListPanel.style.display = 'none';
+        window.listAllSteps();
+      }
+    }
+  };
+
+  window.clearVirtualNodesUI = function() {
+    if (currentLayout && currentLayout.clearVirtualNodes) {
+      currentLayout.clearVirtualNodes();
+    }
+  };
+
+  function updateStepDisplay() {
+    if (!currentLayout || !currentLayout.steps || currentLayout.steps.length === 0) {
+      return;
+    }
+
+    const currentStep = currentLayout.steps[currentLayout.currentStepIndex];
+    document.getElementById('currentStepDisplay').textContent =
+      `${currentLayout.currentStepIndex + 1} / ${currentLayout.steps.length}: ${currentStep.stepName}`;
+    document.getElementById('currentStepDesc').textContent = currentStep.description;
+
+    // Update button states
+    document.getElementById('firstStepBtn').disabled = currentLayout.currentStepIndex === 0;
+    document.getElementById('fasterPrevStepBtn').disabled = currentLayout.currentStepIndex === 0;
+    document.getElementById('prevStepBtn').disabled = currentLayout.currentStepIndex === 0;
+    document.getElementById('nextStepBtn').disabled = currentLayout.currentStepIndex === currentLayout.steps.length - 1;
+    document.getElementById('fasterNextStepBtn').disabled = currentLayout.currentStepIndex === currentLayout.steps.length - 1;
+    document.getElementById('lastStepBtn').disabled = currentLayout.currentStepIndex === currentLayout.steps.length - 1;
+  }
+
+  window.applyLayout = async function() {
     if (!cy) return;
 
-    // 给每个节点随机初始位置
-    const spread = 500;
-    cy.nodes().forEach(node => {
-      node.position({ x: Math.random() * spread, y: Math.random() * spread });
-    });
+    if(0) {
+      // 给每个节点随机初始位置
+      const spread = 500;
+      cy.nodes().forEach(node => {
+        node.position({x: Math.random() * spread, y: Math.random() * spread});
+      });
+    }
 
     if (cy) cy.resize();
 
-    cy.layout({
+    // Create and run layout
+    currentLayout = cy.layout({
       name: 'ForceLayout',
       params: currentParams
-    }).run();
+    });
+
+    // Listen for layout completion
+    cy.one('layoutstop', () => {
+      if (currentParams.STEP_BY_STEP && currentLayout.steps && currentLayout.steps.length > 0) {
+        // Enable step navigation buttons
+        document.getElementById('firstStepBtn').disabled = false;
+        document.getElementById('fasterNextStepBtn').disabled = false;
+        document.getElementById('nextStepBtn').disabled = false;
+        document.getElementById('lastStepBtn').disabled = false;
+        updateStepDisplay();
+        console.log(`✅ Step-by-step mode: ${currentLayout.steps.length} steps captured`);
+      }
+    });
+
+    currentLayout.run();
   };
 
   window.resetParameters = function() {
