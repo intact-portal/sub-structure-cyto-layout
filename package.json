@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc && cp src/index.html dist/index.html && cp node_modules/cytoscape/dist/cytoscape.min.js dist/ && cp -r data dist/data && touch dist/.nojekyll",
-    "dev": "npm run build && concurrently \"tsc --watch\" \"http-server dist -p 8080 -c-1\"",
+    "dev": "npm run build && concurrently \"tsc --watch\" \"node watch.js\" \"http-server dist -p 8080 -c-1\"",
     "deploy": "./deploy.sh"
   },
   "devDependencies": {

@@ -40,6 +40,20 @@ export interface LayoutParameters {
     SPREAD_V_NODES: boolean;
     SUBSTRUCTURE_LAYOUT: boolean;
     ENABLE_INITIAL_FORCE_LAYOUT: boolean;
+
+    // Step-by-step mode
+    STEP_BY_STEP: boolean;
+}
+
+// Step snapshot for debugging and visualization
+export interface LayoutStep {
+    stepNumber: number;
+    stepName: string;
+    description: string;
+    nodePositions: { [nodeId: string]: { x: number; y: number } };
+    virtualNodes?: VNode[];
+    virtualEdges?: VEdge[];
+    metadata?: any;
 }
 
 // @ts-ignore
@@ -73,13 +87,16 @@ export const DEFAULT_PARAMS: LayoutParameters = {
 //    VNODE_IDEAL_LENGTH: 100,
     VNODE_REPULSION: 10000,
     VNODE_SPRING_K: 0.15,
-    VNODE_ITERATIONS: 600,
+    VNODE_ITERATIONS: 1000,
     VNODE_ANGULAR_STRENGTH: 0.1,
 
     // Layout control flags
     SPREAD_V_NODES: true,
     SUBSTRUCTURE_LAYOUT: true,
     ENABLE_INITIAL_FORCE_LAYOUT: false,
+
+    // Step-by-step mode
+    STEP_BY_STEP: false,
 };
 
 class VNode {
@@ -95,11 +112,14 @@ class VNode {
 class VEdge {
     source: any;
     target: any;
+    weight: any;  // weight is number of edges between source node and target node,
+                  // normally is 1, but can be 2 or more for like parallel edges
 
     // 构造函数
-    constructor(source: any, target: any) {
+    constructor(source: any, target: any, weight: any=1) {
         this.source = source;
         this.target = target;
+        this.weight = weight;
     }
 }
 
@@ -119,7 +139,59 @@ function ForceLayout(this: any, options: any) {
     // Instance-specific arrays instead of global
     this.vnodes = [];
     this.vedges = [];
+
+    // Step-by-step mode data
+    this.steps = [];
+    this.currentStepIndex = -1;
 }
+
+/**
+ * Capture a snapshot of the current layout state
+ */
+ForceLayout.prototype.captureStep = function (stepName: string, description: string, metadata?: any) {
+    if (!this.params.STEP_BY_STEP) return;
+
+    const nodes = this.cy.nodes();
+    const nodePositions: { [nodeId: string]: { x: number; y: number } } = {};
+
+    nodes.forEach((node: NodeSingular) => {
+        nodePositions[node.id()] = {
+            x: node.position().x,
+            y: node.position().y
+        };
+    });
+
+    // Deep clone virtual nodes and edges if they exist
+    const virtualNodes = this.vnodes.length > 0 ? JSON.parse(JSON.stringify(this.vnodes.map((v: VNode) => ({
+        id: v.id,
+        type: v.type,
+        center_x: v.center_x,
+        center_y: v.center_y,
+        radius: v.radius,
+        rotate_angle: v.rotate_angle,
+        nodeIds: v.nodes?.map((n: any) => n.id()) || []
+    })))) : undefined;
+
+    const virtualEdges = this.vedges.length > 0 ? JSON.parse(JSON.stringify(this.vedges.map((e: VEdge) => ({
+        source: e.source.id,
+        target: e.target.id
+    })))) : undefined;
+
+    const step: LayoutStep = {
+        stepNumber: this.steps.length,
+        stepName,
+        description,
+        nodePositions,
+        virtualNodes,
+        virtualEdges,
+        metadata
+    };
+
+    this.steps.push(step);
+    this.currentStepIndex = this.steps.length - 1;
+
+    console.log(`[Step ${step.stepNumber}] ${stepName}: ${description}`);
+};
 
 ///////////////判断两个node数组是否相同，不用考虑顺序
 function areNodesEqual(arr1: cytoscape.NodeCollection, arr2: cytoscape.NodeCollection):
@@ -201,7 +273,7 @@ function layoutRectangular(
     center: { x: number, y: number },
     dirVector: { x: number, y: number },
     rowSpacing: number = 60,
-    colSpacing: number = 80,
+    colSpacing: number = 60,
     cols?: number
 ){
     const n = nodes.length;
@@ -210,12 +282,12 @@ function layoutRectangular(
     // 1. Determine Grid Dimensions
     // 'finalCols' will be the number of nodes in the "Vertical Line"
     let finalCols = cols || Math.ceil(Math.sqrt(n));
-    if (n < 7) finalCols = n;
+    if (n < 3) finalCols = n;
 
     const rows = Math.ceil(n / finalCols);
 
     // 2. Normalize Vectors
-    const mag = Math.sqrt(dirVector.x ** 2 + dirVector.y ** 2) || 1;
+    const mag = Math.max(Math.sqrt(dirVector.x ** 2 + dirVector.y ** 2), 1);
     const uForward = { x: dirVector.x / mag, y: dirVector.y / mag };
     const uSide = { x: -uForward.y, y: uForward.x }; // Perpendicular (Vertical) axis
 
@@ -279,13 +351,12 @@ ForceLayout.prototype.identifyStructures = function (nodes: NodeCollection) {
         }
     });
 
-    ///////////////////////////// 2. 识别环状结构 (Cycle) - 迭代 DFS 版 /////////////////
-
+    ///////////////////////////// 2. detecting Cycle - by DFS algorithm /////////////////
 
     const visited = new Set<string>();
-    const allCycles: string[][] = [];  // 每个子数组代表一个独立的环
+    const allCycles: string[][] = [];  // each sub-array represents an independent cycle
     if(1){
-            //degree >= 2 means possible in a cycle
+        //degree >= 2 means possible in a cycle
             const normalNodes = nodes.toArray().filter((n: any) => n.data('structType') === 'Normal' && n.degree() >= 2);
             const seenCycles = new Set<string>();
 
@@ -293,7 +364,7 @@ ForceLayout.prototype.identifyStructures = function (nodes: NodeCollection) {
             console.log("normalNodes:" + normalNodes.length);
 
             normalNodes.forEach((startNode: any, startIndex: number) => {
-                // console.log("startIndex:" + startIndex);
+                console.log(normalNodes.length+" startIndex:" + startIndex);
                 // We only find cycles where startNode is the node with the lowest index
                 // This is a massive optimization to prevent finding the same cycle N times
                 const startId = startNode.id();
@@ -303,12 +374,13 @@ ForceLayout.prototype.identifyStructures = function (nodes: NodeCollection) {
                         n.data('structType') === 'Normal'
                     );
 
-                    for (const v of neighbors) {
-                        const vId = v.id();
-                        // 1. Found a cycle back to our specific START node
-                        // console.log("path-length:"+path.length+" startId:"+startId);
-                        // console.log(path);
-                        if (vId === startId && path.length >= params.MIN_CYCLE_LENGTH) {
+                    if(neighbors.length < 8) { //如果一个节点的邻居太多，那很有可能不在某个环上，这里主要为了效率，否则会一直卡在这里
+                        for (const v of neighbors) {
+                            const vId = v.id();
+                            // 1. Found a cycle back to our specific START node
+                            // console.log("path-length:"+path.length+" startId:"+startId);
+                            // console.log(path);
+                            if (vId === startId && path.length >= params.MIN_CYCLE_LENGTH) {
                                 const cycle = [...path];
                                 const sortedKey = [...cycle].sort().join(',');
                                 if (!seenCycles.has(sortedKey)) {
@@ -316,26 +388,91 @@ ForceLayout.prototype.identifyStructures = function (nodes: NodeCollection) {
                                     seenCycles.add(sortedKey);
                                 }
                                 continue;
-                        }
+                            }
 
-                        // 2. Optimization: only visit nodes with higher index than startNode
-                        // and nodes NOT already in the current path
-                        const vIdx = normalNodes.findIndex(node => node.id() === vId); // index in nodes array
+                            // 2. Optimization: only visit nodes with higher index than startNode
+                            // and nodes NOT already in the current path
+                            const vIdx = normalNodes.findIndex(node => node.id() === vId); // index in nodes array
 
-                        if (vIdx > startIndex && !path.includes(vId)) {
-                            // define circle has less than 30 nodes, this is for large graph efficiency
-                            // if(path.length < 10) {
+                            if (vIdx > startIndex && !path.includes(vId)) {
+                                // define circle has less than 30 nodes, this is for large graph efficiency
+                                // if(path.length < 5) {
                                 findCycles(v, u, [...path, vId]);
-                            // }
+                                // }
+                            }
                         }
                     }
                 };
 
                 findCycles(startNode, null, [startId]);
             });
-        }
+    }
+    if(0){
+        // 1. 预先将节点映射为索引 Map，把 O(N) 的 findIndex 降为 O(1)
+        const normalNodes = nodes.toArray().filter((n: any) => n.data('structType') === 'Normal' && n.degree() >= 2);
+        const nodeToIndexMap = new Map<string, number>();
+        normalNodes.forEach((node: any, idx: number) => {
+            nodeToIndexMap.set(node.id(), idx);
+        });
 
-        console.log("All Cycles:", allCycles);
+        const seenCycles = new Set<string>();
+        const MAX_CYCLE_LENGTH = 15; // 大图中务必限制最大深度，否则任何算法都会在稠密图里卡死
+
+        console.log("normalNodes:" + normalNodes.length);
+
+        normalNodes.forEach((startNode: any, startIndex: number) => {
+            const startId = startNode.id();
+
+            // 使用 Set 代替 path.includes(vId)，将查找复杂度从 O(L) 降到 O(1)
+            const pathSet = new Set<string>([startId]);
+
+            const findCycles = (u: any, path: string[]) => {
+                // 大图效率核心：严格限制递归深度
+                if (path.length > MAX_CYCLE_LENGTH) return;
+
+                // 预先转为数组，避免在循环中高频触发迭代器产生垃圾回收
+                const neighbors = u.neighborhood().nodes().toArray();
+
+                for (const v of neighbors) {
+                    if (v.data('structType') !== 'Normal') continue;
+
+                    const vId = v.id();
+
+                    // 1. 发现环
+                    if (vId === startId) {
+                        if (path.length >= params.MIN_CYCLE_LENGTH) {
+                            // 已经通过 startIndex 保证了唯一性，这里排序只为了双重保险
+                            const sortedKey = [...path].sort().join(',');
+                            if (!seenCycles.has(sortedKey)) {
+                                allCycles.push([...path]);
+                                seenCycles.add(sortedKey);
+                            }
+                        }
+                        continue;
+                    }
+
+                    // 2. O(1) 阻断：只访问比 startNode 索引大的节点，且不在当前路径中
+                    const vIdx = nodeToIndexMap.get(vId);
+                    if (vIdx !== undefined && vIdx > startIndex && !pathSet.has(vId)) {
+
+                        // 3. 进栈（避免每一层都用 [...path] 拷贝数组，改用回溯修改同一数组）
+                        path.push(vId);
+                        pathSet.add(vId);
+
+                        findCycles(v, path);
+
+                        // 4. 出栈（回溯恢复状态）
+                        path.pop();
+                        pathSet.delete(vId);
+                    }
+                }
+            };
+
+            findCycles(startNode, [startId]);
+        });
+    }
+
+    console.log("All Cycles:", allCycles);
 
 
     // --- 2. 二次过滤：去掉重合度 >= 2 的环 ---
@@ -554,6 +691,7 @@ ForceLayout.prototype.identifyStructures = function (nodes: NodeCollection) {
 };
 
 ForceLayout.prototype.run = function () {
+
     const params = this.params;
 
 // 1. 获取用户传入的 boundingBox，如果没有传，则默认为 cy 容器的大小
@@ -585,57 +723,38 @@ ForceLayout.prototype.run = function () {
     const nodes = this.cy.nodes(); // Fetch from cy to get current state
     const edges = this.cy.edges();
 
-    console.log("Updated num of nodes: " + nodes.length);
-    console.log("Updated num of edges: " + edges.length);
+    console.log("num of nodes: " + nodes.length);
+    console.log("num of edges: " + edges.length);
+
+    // Capture initial state
+    this.captureStep('Initial', 'Initial node positions before any layout', { nodeCount: nodes.length, edgeCount: edges.length });
 
     // 1. 识别结构 (标记 structType 并通过 components 划分独立环)
     this.identifyStructures(nodes);
+    this.captureStep('Structure Detection', 'Structures identified (Stars, Cycles, Chains, Parallel)', {
+        stars: nodes.filter((n: any) => n.data('structType')?.startsWith('Star')).length,
+        cycles: nodes.filter((n: any) => n.data('structType') === 'Cycle').length,
+        chains: nodes.filter((n: any) => n.data('structType') === 'Chain').length,
+        parallel: nodes.filter((n: any) => n.data('structType') === 'Parallel').length
+    });
 
     // initialial position draft layout;
-    if (params.ENABLE_INITIAL_FORCE_LAYOUT) {
+    // if (params.ENABLE_INITIAL_FORCE_LAYOUT) {
+    if(0){
         const IDEAL_LENGTH = params.IDEAL_LENGTH;
         const REPULSION = params.REPULSION;
         const SPRING_K = params.SPRING_K;
         const ITERATIONS = params.ITERATIONS;
+
         const ANGULAR_STRENGTH = params.ANGULAR_STRENGTH;
         const CENTER_GRAVITY = params.CENTER_GRAVITY;
 
         for (let iter = 0; iter <= ITERATIONS; iter++) {
-            console.log('iter:'+iter);
             // 1. Initialize displacements for this frame
             const disp = new Map<string, { x: number, y: number }>();
             nodes.forEach((n: { id: () => string; }) => disp.set(n.id(), { x: 0, y: 0 }));
 
             const cooling = Math.pow(1 - iter / ITERATIONS, 2);
-            /* ---------- 2. 边弹簧力 attraction ---------- */
-            if(1) {
-                edges.forEach((e: { source: () => any; target: () => any; }) => {
-                    const s = e.source();
-                    const t = e.target();
-
-                    if(s!=t) {
-                        if (!s || !t) {
-                            console.log('no edge');
-                            return;
-                        }
-
-                        let dx = t.position().x - s.position().x;
-                        let dy = t.position().y - s.position().y;
-                        let dist = Math.sqrt(dx * dx + dy * dy) || 1;
-
-                        const delta = dist - IDEAL_LENGTH;
-                        const force = SPRING_K * delta * (delta > 0 ? 2.0 : 1.0);
-
-                        const fx = force * dx / dist;
-                        const fy = force * dy / dist;
-
-                        s.position('x', s.position().x + fx);
-                        s.position('y', s.position().y + fy);
-                        t.position('x', t.position().x - fx);
-                        t.position('y', t.position().y - fy);
-                    }
-                });
-            }
 
             /* ---------- 1. 节点斥力 repulsion ---------- */
             if(1) {
@@ -646,7 +765,7 @@ ForceLayout.prototype.run = function () {
 
                         const dx = n1.position().x - n2.position().x;
                         const dy = n1.position().y - n2.position().y;
-                        const dist = Math.sqrt(dx * dx + dy * dy) || 1; //at least 1
+                        const dist = Math.max(Math.sqrt(dx * dx + dy * dy), 1);
 
                         if(dist<IDEAL_LENGTH*5) {
                             let force = REPULSION / (dist * dist);
@@ -661,6 +780,36 @@ ForceLayout.prototype.run = function () {
                         }
                     }
                 }
+            }
+
+            /* ---------- 2. 边弹簧力 attraction ---------- */
+            if(1) {
+                edges.forEach((e: { source: () => any; target: () => any; }) => {
+                    const s = e.source();
+                    const t = e.target();
+
+                    if(s!=t) {
+                        if (!s || !t) {
+                            console.log('no edge');
+                            return;
+                        }
+
+                        let dx = t.position().x - s.position().x;
+                        let dy = t.position().y - s.position().y;
+                        let dist = Math.max(Math.sqrt(dx * dx + dy * dy), 1);
+
+                        const delta = dist - IDEAL_LENGTH;
+                        const force = SPRING_K * delta * (delta > 0 ? 2.0 : 1.0);
+
+                        const fx = force * dx / dist;
+                        const fy = force * dy / dist;
+
+                        s.position('x', s.position().x + fx);
+                        s.position('y', s.position().y + fy);
+                        t.position('x', t.position().x - fx);
+                        t.position('y', t.position().y - fy);
+                    }
+                });
             }
 
             /* ---------- 1. ANGULAR FORCE (Star-like distribution)  ---------- */
@@ -728,13 +877,15 @@ ForceLayout.prototype.run = function () {
                     });
                 });
             }
+
         }
+        this.captureStep('Initial Force Layout', 'After initial force-directed layout', { iterations: ITERATIONS });
     }
 
+    //************ 将每种类型分类保存到二维数组中 *///////////
     if(1) {
         nodes.forEach((n: any) => {
-            if (n.data('structType') === 'Normal' ||
-                n.data('structType') === 'LeafButNotChain') {
+            if (n.data('structType') === 'Normal' || n.data('structType') === 'LeafButNotChain') {
                 let nodesarray: any[] = [];
                 nodesarray.push(n);
                 this.vnodes.push({
@@ -746,7 +897,7 @@ ForceLayout.prototype.run = function () {
                     rotate_angle: 0,
                     nodes: nodesarray
                 } as VNode);
-            } else if (n.data('structType') === 'Cycle') {
+            }else if (n.data('structType') === 'Cycle') {
                 let flag = true;
                 this.vnodes.forEach((vp: any) => {
                     if (vp.type === 'Cycle' && vp.id === n.data('groupId')) {
@@ -838,6 +989,7 @@ ForceLayout.prototype.run = function () {
             }
         });
     }
+    this.captureStep('Virtual Nodes Created', 'Virtual nodes created for structures', { vnodeCount: this.vnodes.length });
 
     //为虚拟节点建好连接边
     if(1) {
@@ -862,7 +1014,6 @@ ForceLayout.prototype.run = function () {
                         break insideBreak;
                     }
                 }
-
             if(count!=2) {  // counts==2 means the edge is inside of vnode
                 edgePairs.push({
                     source: edge.source().id(),
@@ -870,7 +1021,7 @@ ForceLayout.prototype.run = function () {
                 });
             }
         }
-        console.log("getting virtual edges...");
+
         for (let i = 0; i < this.vnodes.length-1; i++) {
             const v1 = this.vnodes[i];
             for (let j = i + 1; j < this.vnodes.length; j++) {
@@ -879,36 +1030,35 @@ ForceLayout.prototype.run = function () {
                 if (!v1.nodes || !v2.nodes) continue;
 
                 if(1) {
-                    let flag = false;
                     const nodeVec1 = v1.nodes;
                     const nodeVec2 = v2.nodes;
-                    foundEdge:
-                        for (const n1 of nodeVec1) {
-                            if(n1.data("structType")!='Star-Member') {    // save time
-                                for (const n2 of nodeVec2) {
-                                    if(n2.data("structType")!='Star-Member') {
-                                        for (const edge of edgePairs) {
-                                            const source = edge.source;
-                                            const target = edge.target;
+                    let numConnect = 0;
+                    for (const n1 of nodeVec1) {
+                        if(n1.data("structType")!='Star-Member') {    // save time
+                            for (const n2 of nodeVec2) {
+                                if(n2.data("structType")!='Star-Member') {
+                                    for (const edge of edgePairs) {
+                                        const source = edge.source;
+                                        const target = edge.target;
 
                                             // Logic fix: Checking both directions for an undirected link
-                                            if ((n1.id() === source && n2.id() === target) || (n2.id() === source && n1.id() === target)) {
-                                                flag = true;
-                                                break foundEdge; // Successfully stops ALL three loops
-                                            }
+                                        if ((n1.id() === source && n2.id() === target) || (n2.id() === source && n1.id() === target)) {
+                                                numConnect++;
                                         }
                                     }
                                 }
                             }
                         }
-                    if (flag) {
-                        let vedge = new VEdge(v1, v2);
-                        this.vedges.push(vedge);
+                    }
+                    if (numConnect>0) {
+                        let vedgeT = new VEdge(v1, v2,numConnect);
+                        this.vedges.push(vedgeT);
                     }
                 }
             }
         }
     }
+    this.captureStep('Virtual Edges Created', 'Virtual edges created between virtual nodes', { vedgeCount: this.vedges.length });
     ///////////////////////////////////////////////////////////////////////////
 
     ///////////////////////////////// 更新虚拟节点的中心 //////////////////////////
@@ -925,46 +1075,118 @@ ForceLayout.prototype.run = function () {
         }
     });
 
-    //////////////////////////////// 更新半径 ///////////////////////////////////////////////
-    this.vnodes.forEach((v1: any) => {
-        // if(v1.type=='Normal') {
-        //     v1.radius = 1;
-        // }
-        // if(v1.type=='Cycle') {
-        //     v1.radius = 1;
-        // }
-        // if(v1.type=='Chain') {
-        //     v1.radius = 1;
-        // }
-        // if(v1.type=='Parallel') {
-        //     v1.radius = 1;
-        // }
-        if(v1.type=='Star') {
-            v1.radius = params.STAR_RING_SPACING * Math.ceil((-3 + Math.sqrt(9 + 12 * v1.nodes.length)) / 6);
-        }else if (v1.nodes && v1.nodes.length > 0) {
-            v1.radius = Math.max(v1.nodes.length * params.VNODE_RADIUS_MULTIPLIER, 1) * params.IDEAL_LENGTH;
-        }
-    });
+    //////////////////////////////// 更新半径 update radius for virtual nodes /////////////////////////////
+    if(1) {
+        this.vnodes.forEach((v1: any) => {
+            if (v1.type == 'Star') {
+                const allMemberNode = v1.nodes.filter((node: {
+                    data: (arg0: string) => string;
+                }) => node.data('structType') !== 'Star-Center');
+                const ringSpacing = params.STAR_RING_SPACING;
+                const baseNodesInFirstRing = params.STAR_BASE_NODES_PER_RING;
 
-    /////////////////////////////对虚拟节点的网络用force- layout布局
+                // 1. Pre-calculate how many nodes go into each ring
+                const rings: any[][] = [];
+                let tempNodes = [...allMemberNode];
+                let currentRingSize = baseNodesInFirstRing;
+
+                while (tempNodes.length > 0) {
+                    // Take the next chunk of nodes for this ring
+                    rings.push(tempNodes.splice(0, currentRingSize));
+                    // Increase capacity for the next ring
+                    currentRingSize += baseNodesInFirstRing;
+                }
+                v1.radius = (rings.length + 0) * ringSpacing;
+            }else if(v1.type == 'Cycle'){
+                const count = v1.nodes.length;
+                const k = params.CYCLE_NODE_SPACING;
+                v1.radius = (count * k) / (2 * Math.PI);
+            }else if(v1.type == 'Parallel'){
+                // v1.radius = 300;
+                const n = v1.nodes.length;
+                if (n === 0) {
+                    v1.radius = 0;
+                } else {
+                    // 1. 镜像原布局函数的行列核心逻辑
+                    let finalCols = Math.ceil(Math.sqrt(n));
+                    if (n < 3) finalCols = n;
+                    const rows = Math.ceil(n / finalCols);
+
+                    // 2. 定义好你在布局里传入的间距（假设都用 60）
+                    const colSpacing = 60;
+                    const rowSpacing = 60;
+
+                    // 3. 计算网格的长和宽（边缘中心距）
+                    const totalWidth = (finalCols - 1) * colSpacing;
+                    const totalHeight = (rows - 1) * rowSpacing;
+
+                    // 4. 使用勾股定理计算中心到顶角的距离，并加上单个节点自身的安全留白（比如 20）
+                    const nodeSelfRadius = 20;
+                    v1.radius = Math.sqrt((totalWidth / 2) ** 2 + (totalHeight / 2) ** 2) + nodeSelfRadius;
+                }
+            }else if(v1.type == 'Chain'){
+                const count = v1.nodes.length;
+                const miniMumRadius = params.CHAIN_MIN_RADIUS;
+                v1.radius = Math.max((count * params.CYCLE_NODE_SPACING) / (2 * Math.PI), miniMumRadius);
+
+            }else{
+                v1.radius=10;
+            }
+
+            console.log('v1.type:' + v1.type + '\tv1.radius:' + v1.radius);
+        });
+    }
+
+    this.captureStep('Virtual Nodes Positioned', 'Virtual node centers and radii calculated', null);
+
+    //******************** virtual node force layout ************************
     if (1) {
         const IDEAL_LENGTH = params.IDEAL_LENGTH;
+        // const IDEAL_LENGTH=3000;
+
         const REPULSION = params.REPULSION;
         const SPRING_K = params.SPRING_K;
         const ITERATIONS = params.ITERATIONS;
+        // const ITERATIONS =2000;
         const ANGULAR_STRENGTH = params.ANGULAR_STRENGTH;
         const USE_ANGULAR_FORCE = params.USE_ANGULAR_FORCE;
 
         console.log('ITERATIONS:'+ITERATIONS);
-        for (let iter = 0; iter < ITERATIONS; iter++) {
+        var colisionFlag=true;
+        let iter=0;
+        var maxAttractMove = 10e10;
+        var maxRepulsetMove = 10e10;
+        var maxDist = 10e10;
+        var numOfCollision=0;
 
+        while (iter<ITERATIONS && maxAttractMove>25) {
+            iter++;
+
+            ////////////////////// 将node放在对应的virtual node的位置上
+            if(1){
+                this.vnodes.forEach((v: any) => {
+                    v.nodes.forEach((n: any) => {
+                        n.position().x = v.center_x + Math.random() * 5;
+                        n.position().y = v.center_y + Math.random() * 5;
+                    })
+                });
+            }
+
+            // if(iter%5==0){
+                this.captureStep('Virtual Nodes Positioned step '+iter, 'Virtual node centers and radii calculated', null);
+            // }
+
+            console.log('iter:'+iter+' '+colisionFlag+' maxAttractMove:'+maxAttractMove+' maxRepulsionMove:'+maxRepulsetMove+' numberOfCollision:'+numOfCollision);
+            maxAttractMove = -10e10;
+            maxRepulsetMove = -10e10;
+            maxDist = -10e10;
             // 1. Initialize Displacement Map (Crucial for stability)
             const disp = new Map<string, { x: number, y: number }>();
             this.vnodes.forEach((n: VNode) => disp.set(n.id, { x: 0, y: 0 }));
 
             // Global cooling factor: starts at 1.0, ends at 0.0
             const cooling = Math.pow(1 - iter / ITERATIONS, 2);
-
+            
             /* ---------- A. Attraction (Spring) with Radius ---------- */
             this.vedges.forEach((e: VEdge) => {
                 const s = e.source;
@@ -973,7 +1195,7 @@ ForceLayout.prototype.run = function () {
 
                 const dx = t.center_x - s.center_x;
                 const dy = t.center_y - s.center_y;
-                const centerDist = Math.sqrt(dx * dx + dy * dy) || 1;
+                const centerDist = Math.max(Math.sqrt(dx * dx + dy * dy), 1);
 
                 // The "Actual Gap" between the surfaces of the nodes
                 const surfaceDist = centerDist - (s.radius + t.radius);
@@ -989,77 +1211,51 @@ ForceLayout.prototype.run = function () {
                 s.center_y += fy;
                 t.center_x -= fx;
                 t.center_y -= fy;
+
+                maxAttractMove=Math.max(maxAttractMove,Math.abs(fx),Math.abs(fy));
             });
 
-            /* ---------- B. Repulsion (Volume-Aware) ---------- */
-            for (let i = 0; i < this.vnodes.length; i++) {
-                for (let j = i + 1; j < this.vnodes.length; j++) {
-                    const n1 = this.vnodes[i];
-                    const n2 = this.vnodes[j];
+            /* ---------- B. Repulsion ---------- */
+            let maxMoveX=-1;
+            let maxMoveY=-1;
+            let maxMoveIndex=-1;
+            if(1) {
+                for (let i = 0; i < this.vnodes.length; i++) {
+                    for (let j = i + 1; j < this.vnodes.length; j++) {
+                        const n1 = this.vnodes[i];
+                        const n2 = this.vnodes[j];
 
-                    const dx = n1.center_x - n2.center_x;
-                    const dy = n1.center_y - n2.center_y;
+                        const dx = n1.center_x - n2.center_x;
+                        const dy = n1.center_y - n2.center_y;
 
-                    const centerDist = Math.sqrt(dx * dx + dy * dy) || 1;
+                        const centerDist = Math.sqrt(dx * dx + dy * dy) || 1;
 
-                    const minDistance = n1.radius + n2.radius;
-                    // const minDistance = 2*(n1.radius + n2.radius);
+                        const minDistance = n1.radius + n2.radius;
 
-                    let force = 0;
-                    if (centerDist < minDistance) {
-                        // COLLISION: Violent push to separate overlapping nodes
-                        force = REPULSION * 2 / centerDist;
-                    } else if(centerDist < 4*minDistance) {
-                        // NORMAL: Repulsion based on surface-to-surface gap
-                        const gap = centerDist - minDistance;
-                        // As gap approaches 0, force increases
-                        force = REPULSION / (gap * gap + 10);
-                    }else{
-                        force=0.1;
+                        let force = 0;
+                        if (centerDist < minDistance) {
+                            // COLLISION: Violent push to separate overlapping nodes
+                            force = REPULSION * 2 / centerDist;
+                        } else if (centerDist < 4 * minDistance) {
+                            // NORMAL: Repulsion based on surface-to-surface gap
+                            const gap = centerDist - minDistance;
+                            // As gap approaches 0, force increases
+                            force = REPULSION / (gap * gap + 10);
+                        } else {
+                            force = 0.0;
+                        }
+
+                        const fx = (force * dx) / centerDist;
+                        const fy = (force * dy) / centerDist;
+
+                        this.vnodes[i].center_x += fx;
+                        this.vnodes[i].center_y += fy;
+                        this.vnodes[j].center_x -= fx;
+                        this.vnodes[j].center_y -= fy;
+
+                        maxRepulsetMove=Math.max(maxRepulsetMove,Math.abs(fx),Math.abs(fy));
                     }
-
-                    const fx = (force * dx) / centerDist;
-                    const fy = (force * dy) / centerDist;
-
-                    this.vnodes[i].center_x += fx;
-                    this.vnodes[i].center_y += fy;
-                    this.vnodes[j].center_x -= fx;
-                    this.vnodes[j].center_y -= fy;
                 }
-            }
-
-            if(0){
-                this.vnodes.forEach((v1: any) => {
-                    if(v1.id==375) {
-                        console.log(v1.id,' pos:',v1.center_x,v1.center_y);
-                    }
-                })
-            }
-
-            /* ---------- star Repulsion (Volume-Aware) ---------- */
-            if(0){
-                const CENTER_GRAVITY=0.01;
-                this.vnodes.forEach((n: VNode) => {
-                    const dx = n.center_x - centerX;
-                    const dy = n.center_y - centerY;
-                    const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-
-                    if (n.type === 'Star') {
-                        // --- 离心力：让 Star 节点往外走 ---
-                        // 目标半径设为屏幕短边的一半（约 0.8 倍，留出边缘）
-                        const targetRadius = Math.min(width, height) * 0.4;
-                        const strength = 0.05; // 离心力强度
-
-                        // 如果距离中心太近，就往外推；如果太远，就往回拉
-                        const factor = (dist - targetRadius) * strength;
-                        n.center_x -= (dx / dist) * factor * cooling;
-                        n.center_y -= (dy / dist) * factor * cooling;
-                    } else {
-                        // --- 向心力：让普通节点往中间聚 ---
-                        n.center_x -= dx * CENTER_GRAVITY * cooling;
-                        n.center_y -= dy * CENTER_GRAVITY * cooling;
-                    }
-                });
             }
 
             if(USE_ANGULAR_FORCE) {
@@ -1107,23 +1303,108 @@ ForceLayout.prototype.run = function () {
                     }
                 });
             }
+        }
 
+        //********************** 避免冲突
+        if(1){
+            console.log('Anti-collision')
+            colisionFlag = true;
+            numOfCollision = 0;
+            const padding = 30;
+            let iter = 0;
+            while (colisionFlag) {
+                iter++;
+                colisionFlag = false;
+                for (let i = 0; i < this.vnodes.length; i++) {
+                    for (let j = i + 1; j < this.vnodes.length; j++) {
+                        const n1 = this.vnodes[i];
+                        const n2 = this.vnodes[j];
+
+                        // 1.1 计算当前的物理中心距离
+                        let dx = n1.center_x - n2.center_x;
+                        let dy = n1.center_y - n2.center_y;
+
+                        // 【优化 1】如果两点完全重合，人为制造一个微小的随机距离，防止 NaN 或分不开
+                        if (dx === 0 && dy === 0) {
+                            dx = (Math.random() - 0.5) * 0.1;
+                            dy = (Math.random() - 0.5) * 0.1;
+                        }
+
+                        const centerDist = Math.max(Math.sqrt(dx * dx + dy * dy), 1);
+
+                        const r1 = n1.radius;
+                        const r2 = n2.radius;
+                        const minDistance = r1 + r2;
+
+                        if (centerDist < (minDistance+padding)) {
+                            colisionFlag = true;
+                            numOfCollision++;
+
+                            // 1.2 计算重叠的物理长度
+                            const overlap = minDistance + padding - centerDist;
+
+                            // 1.3 计算归一化的方向向量
+                            let nx = dx / centerDist;
+                            let ny = dy / centerDist;
+
+                            // 【优化 2】引入随机扰动系数（Jitter），打破轴向死锁和震荡
+                            // 随着碰撞总次数增加，震荡风险变高，我们可以让随机扰动逐渐加大
+                            const jitterScale = 0.05; // 扰动强度，可根据实际效果微调
+                            const randomAngle = Math.random() * Math.PI * 2;
+
+                            // 将随机方向融合到原本的方向向量中
+                            nx = nx * 0.95 + Math.cos(randomAngle) * jitterScale;
+                            ny = ny * 0.95 + Math.sin(randomAngle) * jitterScale;
+
+                            // 重新归一化，确保推开的总步长比例正确
+                            const mag = Math.max(Math.sqrt(nx * nx + ny * ny), 1);
+                            nx /= mag;
+                            ny /= mag;
+
+                            // 1.4 两个节点各向相反方向推开（各承担 50%）
+                            const moveDistance = overlap / 2;
+
+                            n1.center_x += nx * moveDistance;
+                            n1.center_y += ny * moveDistance;
+
+                            n2.center_x -= nx * moveDistance;
+                            n2.center_y -= ny * moveDistance;
+                        }
+                    }
+                }
+
+                // 【优化 3】安全阀：如果迭代次数过多（通常在节点极度密集时发生），直接退出
+                if (numOfCollision > 500000) {
+                    console.warn("避免死循环：已通过截断解决高密度震荡");
+                    break;
+                }
+
+                this.captureStep('Anti-collision', 'Eliminate all collisions ' + iter, { iterations: ITERATIONS });
+
+            }
+            this.captureStep('Anti-collision', 'Eliminate all collisions', { iterations: ITERATIONS });
+
+        }
+
+        this.captureStep('Virtual Node Layout', 'Force-directed layout applied to virtual nodes', { iterations: ITERATIONS });
+    }
+
+    /////////////////////////////////////////////////////////////////////////////
+    if(1) {
+        if (params.SPREAD_V_NODES) {
+            this.vnodes.forEach((v: any) => {
+                v.nodes.forEach((n: any) => {
+                    n.position().x = v.center_x + Math.random() * 5;
+                    n.position().y = v.center_y + Math.random() * 5;
+                })
+            });
+            this.captureStep('Nodes Spread to VNode Centers', 'Real nodes spread to their virtual node centers', null);
         }
     }
 
-    //////////////////////////////// /////////////////////////////////////////////
-    if (params.SPREAD_V_NODES) {
-        this.vnodes.forEach((v: any) => {
-            v.nodes.forEach((n: any) => {
-                n.position().x = v.center_x + Math.random() * 5;
-                n.position().y = v.center_y + Math.random() * 5;
-            })
-        });
-    }
-
-    /////////////////////  删除之后变成虚拟节点 vnode 的layout ////////////////
-    if (params.SUBSTRUCTURE_LAYOUT) {
-    // if (0) {
+    /////////////////////  删除之后变成只有虚拟节点 vnode 的layout ////////////////
+    // if (params.SUBSTRUCTURE_LAYOUT) {
+    if (1) {
         const IDEAL_LENGTH = params.LEAF_NODE_DISTANCE;
         this.vnodes.forEach((v: any) => {
             if (v.type == 'Cycle') {
@@ -1389,11 +1670,12 @@ ForceLayout.prototype.run = function () {
                 // console.log('ssss');
             }
         })
+        this.captureStep('Substructure Layout', 'Individual structures laid out (Cycles, Stars, Chains, Parallel)', null);
     }
 
     if(1) {
+        console.log('num of virtual nodes:', this.vnodes.length);
         console.log("num of virtual edges:", this.vedges.length);
-        console.log('num of sudo-nodes:', this.vnodes.length);
         let maxDis = 0;
         let maxS=0;
         let maxT=0;
@@ -1423,25 +1705,214 @@ ForceLayout.prototype.run = function () {
         console.log("avgDis:", avgDis / edges.length);
     }
 
-    if(1){
+    if(0){
         nodes.forEach((n1: any) => {
-            nodes.forEach((n2: any) => {
-                if(n1.id()=='2660' && n2.id()=='2602') {
-                    let dist=Math.sqrt((n1.position().x-n2.position().x)*(n1.position().x-n2.position().x)
-                        +(n1.position().y-n2.position().y)*(n1.position().y-n2.position().y));
-                    console.log(n1.id(),'->',n2.id(),':',dist);
-                }
-            })
+            console.log(n1.id(), n1.degree(), n1.data('structType'),n1.position());
         })
     }
 
+    this.captureStep('Final', 'Final layout complete', null);
+
     this.cy.fit(null, 50);
     this.cy.emit('layoutstop');
+
+    // Expose steps for external access
+    if (this.params.STEP_BY_STEP && this.steps.length > 0) {
+        console.log(`Step-by-step mode: Captured ${this.steps.length} steps`);
+        console.log('Access steps via layout.steps or use layout.goToStep(n)');
+    }
 
     return this;
 };
 
 ForceLayout.prototype.stop = function () {
+    return this;
+};
+
+
+/**
+ * 改进版布局：让 'star' 类型的节点倾向于分布在外围
+ */
+
+/**
+ * Navigate to a specific step in step-by-step mode
+ */
+ForceLayout.prototype.goToStep = function (stepIndex: number) {
+    if (!this.params.STEP_BY_STEP || this.steps.length === 0) {
+        console.warn('Step-by-step mode is not enabled or no steps have been captured');
+        return this;
+    }
+
+    if (stepIndex < 0 || stepIndex >= this.steps.length) {
+        console.error(`Invalid step index: ${stepIndex}. Valid range: 0-${this.steps.length - 1}`);
+        return this;
+    }
+
+    const step = this.steps[stepIndex];
+    this.currentStepIndex = stepIndex;
+
+    // Restore node positions
+    const nodes = this.cy.nodes();
+    nodes.forEach((node: NodeSingular) => {
+        const pos = step.nodePositions[node.id()];
+        if (pos) {
+            node.position({ x: pos.x, y: pos.y });
+        }
+    });
+
+    // Visualize virtual nodes if they exist at this step
+    this.visualizeVirtualNodes(step);
+
+    console.log(`[Step ${step.stepNumber}/${this.steps.length - 1}] ${step.stepName}: ${step.description}`);
+    if (step.metadata) {
+        console.log('Metadata:', step.metadata);
+    }
+
+    this.cy.fit(null, 50);
+    return this;
+};
+
+/**
+ * Go to the next step
+ */
+ForceLayout.prototype.nextStep = function () {
+    if (this.currentStepIndex < this.steps.length - 1) {
+        return this.goToStep(this.currentStepIndex + 1);
+    } else {
+        console.log('Already at the last step');
+        return this;
+    }
+};
+
+/**
+ * Go to the previous step
+ */
+ForceLayout.prototype.prevStep = function () {
+    if (this.currentStepIndex > 0) {
+        return this.goToStep(this.currentStepIndex - 1);
+    } else {
+        console.log('Already at the first step');
+        return this;
+    }
+};
+
+/**
+ * Get information about all steps
+ */
+ForceLayout.prototype.listSteps = function () {
+    if (!this.params.STEP_BY_STEP || this.steps.length === 0) {
+        console.log('No steps available');
+        return [];
+    }
+
+    console.log(`Total steps: ${this.steps.length}`);
+    this.steps.forEach((step: LayoutStep, index: number) => {
+        const current = index === this.currentStepIndex ? ' ← CURRENT' : '';
+        console.log(`  [${index}] ${step.stepName}: ${step.description}${current}`);
+    });
+
+    return this.steps.map((s: LayoutStep) => ({
+        stepNumber: s.stepNumber,
+        stepName: s.stepName,
+        description: s.description,
+        hasVirtualNodes: !!s.virtualNodes,
+        hasVirtualEdges: !!s.virtualEdges
+    }));
+};
+
+/**
+ * Visualize virtual nodes and edges on the canvas
+ */
+ForceLayout.prototype.visualizeVirtualNodes = function (step: LayoutStep) {
+    // Remove previous virtual node visualizations
+    this.cy.$('.virtual-node, .virtual-edge').remove();
+
+    if (!step.virtualNodes || step.virtualNodes.length === 0) {
+        return;
+    }
+
+    const virtualElements: any[] = [];
+
+    // Add virtual nodes as semi-transparent overlay nodes
+    step.virtualNodes.forEach((vnode: any) => {
+        virtualElements.push({
+            group: 'nodes',
+            data: {
+                id: `vnode_${vnode.id}`,
+                label: `VNode: ${vnode.type}`,
+                isVirtual: true
+            },
+            position: {
+                x: vnode.center_x,
+                y: vnode.center_y
+            },
+            classes: 'virtual-node',
+            style: {
+                'width': vnode.radius * 2,
+                'height': vnode.radius * 2,
+                'background-color': this.getVirtualNodeColor(vnode.type),
+                'background-opacity': 0.3,
+                'border-width': 2,
+                'border-color': this.getVirtualNodeColor(vnode.type),
+                'border-opacity': 0.6,
+                'label': `V:${vnode.type}`,
+                'font-size': 8,
+                'text-valign': 'center',
+                'text-halign': 'center',
+                'color': '#000',
+                'text-opacity': 0.7
+            }
+        });
+    });
+
+    // Add virtual edges
+    if (step.virtualEdges && step.virtualEdges.length > 0) {
+        step.virtualEdges.forEach((vedge: any, idx: number) => {
+            virtualElements.push({
+                group: 'edges',
+                data: {
+                    id: `vedge_${idx}`,
+                    source: `vnode_${vedge.source}`,
+                    target: `vnode_${vedge.target}`,
+                    isVirtual: true
+                },
+                classes: 'virtual-edge',
+                style: {
+                    'width': 2,
+                    'line-color': '#ff9800',
+                    'line-style': 'dashed',
+                    'opacity': 0.5
+                }
+            });
+        });
+    }
+
+    // Add virtual elements to the graph
+    if (virtualElements.length > 0) {
+        this.cy.add(virtualElements);
+        console.log(`Visualized ${step.virtualNodes.length} virtual nodes and ${step.virtualEdges?.length || 0} virtual edges`);
+    }
+};
+
+/**
+ * Get color for virtual node based on type
+ */
+ForceLayout.prototype.getVirtualNodeColor = function (type: string) {
+    const colorMap: { [key: string]: string } = {
+        'Normal': '#999999',
+        'Cycle': '#2196F3',
+        'Star': '#F48FB1',
+        'Chain': '#FFF176',
+        'Parallel': '#50C878'
+    };
+    return colorMap[type] || '#999999';
+};
+
+/**
+ * Clear all virtual node visualizations
+ */
+ForceLayout.prototype.clearVirtualNodes = function () {
+    this.cy.$('.virtual-node, .virtual-edge').remove();
     return this;
 };
 
