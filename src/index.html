@@ -36,7 +36,8 @@
       flex-grow: 1;
       height: 100vh;
       display: block;
-      background: #f9f9f9;
+      /*background: #f9f9f9;*/
+      background: #ffffff;
     }
 
     .panel {
@@ -266,23 +267,23 @@
       <h4>Force-Directed</h4>
       <div class="control-item">
         <label>Ideal Edge Length <span class="value-display" id="val-IDEAL_LENGTH">100</span></label>
-        <input type="range" id="IDEAL_LENGTH" min="50" max="1000" value="100" step="10">
+        <input type="range" id="IDEAL_LENGTH" min="50" max="5000" value="100" step="100">
       </div>
       <div class="control-item">
-        <label>Repulsion Force <span class="value-display" id="val-REPULSION">100</span></label>
-        <input type="range" id="REPULSION" min="0" max="500" value="100" step="10">
+        <label>Repulsion Force <span class="value-display" id="val-REPULSION">300</span></label>
+        <input type="range" id="REPULSION" min="0" max="500" value="300" step="10">
       </div>
       <div class="control-item">
         <label>Spring Strength <span class="value-display" id="val-SPRING_K">0.15</span></label>
         <input type="range" id="SPRING_K" min="0.01" max="0.5" value="0.15" step="0.01">
       </div>
       <div class="control-item">
-        <label>Iterations <span class="value-display" id="val-ITERATIONS">200</span></label>
-        <input type="range" id="ITERATIONS" min="50" max="500" value="200" step="50">
+        <label>Iterations <span class="value-display" id="val-ITERATIONS">600</span></label>
+        <input type="range" id="ITERATIONS" min="50" max="1000" value="600" step="50">
       </div>
       <div class="control-item">
         <label>Angular Strength <span class="value-display" id="val-ANGULAR_STRENGTH">0.2</span></label>
-        <input type="range" id="ANGULAR_STRENGTH" min="0" max="1" value="0.2" step="0.05">
+        <input type="range" id="ANGULAR_STRENGTH" min="0" max="10" value="0.2" step="0.05">
       </div>
     </div>
 
@@ -304,9 +305,34 @@
 
     <div class="controls-section">
       <h4>Layout Options</h4>
+
+      <div class="control-item">
+        <label>Select layout Algorithm</label>
+
+        <label style="flex-direction: row; justify-content: flex-start; gap: 6px;">
+          <input
+                  type="radio"
+                  name="LAYOUT_ALGORITHM"
+                  value="MY_ForceLayout"
+                  checked
+          >
+          Force Layout
+        </label>
+
+        <label style="flex-direction: row; justify-content: flex-start; gap: 6px;">
+          <input
+                  type="radio"
+                  name="LAYOUT_ALGORITHM"
+                  value="MY_StressLayout"
+          >
+          Stress Layout
+        </label>
+      </div>
+
       <div class="control-item"><label style="flex-direction: row; gap: 8px;"><input type="checkbox" id="USE_ANGULAR_FORCE" checked> Use Angular Force</label></div>
-      <div class="control-item"><label style="flex-direction: row; gap: 8px;"><input type="checkbox" id="SUBSTRUCTURE_LAYOUT" checked> Substructure Layout</label></div>
+      <div class="control-item"><label style="flex-direction: row; gap: 8px;"><input type="checkbox" id="SUBSTRUCTURE_LAYOUT" unchecked> Only Substructure Layout</label></div>
       <div class="control-item"><label style="flex-direction: row; gap: 8px;"><input type="checkbox" id="ENABLE_INITIAL_FORCE_LAYOUT"> Initial Force Layout</label></div>
+      <div class="control-item"><label style="flex-direction: row; gap: 8px;"><input type="checkbox" id="RANDOMIZE_INITIAL_POSITION" > Randomize Initial Position</label></div>
     </div>
 
     <div class="btn-group">
@@ -327,16 +353,18 @@
   let currentLayout = null; // Store the layout instance
 
   const DEFAULT_PARAMS = {
-    IDEAL_LENGTH: 100, REPULSION: 10000, SPRING_K: 0.15, ITERATIONS: 300,
+    IDEAL_LENGTH: 100, REPULSION: 300, SPRING_K: 0.15, ITERATIONS: 600,
     ANGULAR_STRENGTH: 0.2, CENTER_GRAVITY: 0.01, USE_ANGULAR_FORCE: true,
+    RANDOMIZE_INITIAL_POSITION: false,
     MIN_STAR_LEAVES: 3, MIN_CYCLE_LENGTH: 3, MAX_CYCLE_LENGTH: 30,
     MIN_CHAIN_LENGTH: 2, MIN_PARALLEL_NEIGHBORS: 2, CYCLE_NODE_SPACING: 100,
     STAR_RING_SPACING: 100, STAR_BASE_NODES_PER_RING: 6, CHAIN_MIN_RADIUS: 150,
     PARALLEL_GAP: 80, LEAF_NODE_DISTANCE: 200, VNODE_RADIUS_MULTIPLIER: 0.2,
     VNODE_IDEAL_LENGTH: 100, VNODE_REPULSION: 10000, VNODE_SPRING_K: 0.15,
-    VNODE_ITERATIONS: 600, VNODE_ANGULAR_STRENGTH: 0.1, SPREAD_V_NODES: true,
-    SUBSTRUCTURE_LAYOUT: true, ENABLE_INITIAL_FORCE_LAYOUT: false,
-    STEP_BY_STEP: false
+    VNODE_ITERATIONS: 1000, VNODE_ANGULAR_STRENGTH: 0.1, SPREAD_V_NODES: true,
+    SUBSTRUCTURE_LAYOUT: false, ENABLE_INITIAL_FORCE_LAYOUT: false,
+    STEP_BY_STEP: false,
+    LAYOUT_ALGORITHM: 'MY_ForceLayout'
   };
 
   currentParams = { ...DEFAULT_PARAMS };
@@ -361,6 +389,18 @@
         }
       });
     });
+
+    document.querySelectorAll('input[name="LAYOUT_ALGORITHM"]')
+            .forEach(input => {
+              input.addEventListener('change', (e) => {
+                currentParams.LAYOUT_ALGORITHM = e.target.value;
+
+                console.log(
+                        'Selected layout:',
+                        currentParams.LAYOUT_ALGORITHM
+                );
+              });
+            });
 
     // 监听文件选择
     document.getElementById('fileInput').addEventListener('change', handleFileSelect);
@@ -506,6 +546,7 @@
       statsEl.innerHTML = `<strong>Nodes:</strong> ${nodeCount} | <strong>Edges:</strong> ${edgeCount}<br><strong>Render Time:</strong> ${duration} ms`;
     });
 
+    initialPositions=null;
     applyLayout();
   }
 
@@ -526,7 +567,7 @@
 
   window.fasterNextStepUI = function() {
     if (currentLayout && currentLayout.goToStep && currentLayout.steps) {
-      const targetIndex = Math.min(currentLayout.currentStepIndex + 10, currentLayout.steps.length - 1);
+      const targetIndex = Math.min(currentLayout.currentStepIndex + 20, currentLayout.steps.length - 1);
       currentLayout.goToStep(targetIndex);
       updateStepDisplay();
     }
@@ -534,7 +575,7 @@
 
   window.fasterPrevStepUI = function() {
     if (currentLayout && currentLayout.goToStep) {
-      const targetIndex = Math.max(currentLayout.currentStepIndex - 10, 0);
+      const targetIndex = Math.max(currentLayout.currentStepIndex - 20, 0);
       currentLayout.goToStep(targetIndex);
       updateStepDisplay();
     }
@@ -618,18 +659,49 @@
     document.getElementById('lastStepBtn').disabled = currentLayout.currentStepIndex === currentLayout.steps.length - 1;
   }
 
+  let initialPositions = null;
+
+  function saveInitialPositions() {
+    initialPositions = {};
+    cy.nodes().forEach(node => {
+      initialPositions[node.id()] = {
+        x: node.position('x'),
+        y: node.position('y')
+      };
+    });
+  }
+
+  function restoreInitialPositions() {
+    if (!initialPositions) return;
+
+    cy.nodes().forEach(node => {
+      const pos = initialPositions[node.id()];
+      if (pos) {
+        node.position({
+          x: pos.x,
+          y: pos.y
+        });
+      }
+    });
+  }
+
   window.applyLayout = async function() {
     if (!cy) return;
 
-    if(0) {
-      // 给每个节点随机初始位置
+    if(1) {
+      // radomize the positions of nodes
       const spread = 500;
       cy.nodes().forEach(node => {
         node.position({x: Math.random() * spread, y: Math.random() * spread});
       });
     }
 
-    if (cy) cy.resize();
+    if (!initialPositions) {
+      saveInitialPositions();
+    }
+    restoreInitialPositions();
+
+    cy.resize();
 
     // Create and run layout
     currentLayout = cy.layout({
@@ -666,6 +738,7 @@
         }
       }
     });
+    initialPositions=null;
     applyLayout();
   };
 

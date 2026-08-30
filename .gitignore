@@ -52,3 +52,6 @@ yarn-error.log*
 /src/index_save.html
 /src/index_save1.html
 /data/
+.DS_Store
+public/data/6_36115835.cyjs
+public/data/*.cyjs
