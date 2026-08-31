@@ -628,18 +628,6 @@ ForceLayout.prototype.identifyStructures = function (nodes: NodeCollection) {
     console.log("num of chains: ", chains.length);
 };
 
-interface NetworkInfo {
-    component: cytoscape.Collection;
-    nodes: cytoscape.Collection;
-
-    index: number;
-    nodeCount: number;
-
-    width: number;
-    height: number;
-
-    bb: cytoscape.BoundingBox12;
-}
 
 ForceLayout.prototype.run = function () {
 
@@ -655,14 +643,26 @@ ForceLayout.prototype.run = function () {
     const START_Y = 100;   // 起始 Y
     let currentX = START_X;
 
+    interface NetworkInfo {
+        component: cytoscape.Collection;
+        nodes: cytoscape.Collection;
+
+        index: number;
+        nodeCount: number;
+
+        width: number;
+        height: number;
+
+        bb: cytoscape.BoundingBox12;
+    }
     const networkInfos: NetworkInfo[] = [];
 
     components.forEach((component: any, index: any) => {
         const nodes = component.nodes();
         const edges = component.edges();
 
-        this.vnodes = [];
-        this.vedges = [];
+        this.vnodes=[];
+        this.vedges=[];
 
         console.log(`independent net: ${index + 1}`);
 
@@ -826,173 +826,74 @@ ForceLayout.prototype.run = function () {
             });
         }
         this.captureStep('Virtual Nodes Created', 'Virtual nodes created for structures', {vnodeCount: this.vnodes.length});
-        console.log("#####");
-        //construct virtual edges for virtual nodes
+
+        //为虚拟节点建好连接边
         if (1) {
-
-            // --------------------------------------------------------
-            // 1. 建立：真实 Node ID -> VNode
-            // --------------------------------------------------------
-
-            const nodeToVNode = new Map<string, VNode>();
-
-            for (const vnode of this.vnodes) {
-
-                if (!vnode.nodes) continue;
-
-                for (const node of vnode.nodes) {
-
-                    // Star-Member 是否需要参与 VNode edge 建立，
-                    // 保持和你原来的逻辑一致：
-                    //
-                    // 原代码在真正建立 edge 时：
-                    // if (n1.data("structType") != 'Star-Member')
-                    //
-                    // 因此这里可以直接忽略 Star-Member。
-                    if (node.data("structType") === "Star-Member") {
-                        continue;
-                    }
-
-                    nodeToVNode.set(node.id(), vnode);
-                }
-            }
-
-
-            // --------------------------------------------------------
-            // 2. 遍历真实 Edge
-            //
-            // 直接确定：
-            //
-            // realNode1 -> VNode1
-            // realNode2 -> VNode2
-            //
-            // 然后：
-            //
-            // VNode1 <-> VNode2 : connectionCount++
-            // --------------------------------------------------------
-
-            const connectionMap =
-                new Map<string, {
-                    source: VNode;
-                    target: VNode;
-                    count: number;
-                }>();
-
+            const edgePairs: { source: string; target: string }[] = [];
 
             for (const edge of edges) {
+                let s = edge.source().id();
+                let t = edge.target().id();
+                let count = 0;
 
-                const sourceNode = edge.source();
-                const targetNode = edge.target();
-
-                const sourceId = sourceNode.id();
-                const targetId = targetNode.id();
-
-                const sourceVNode =
-                    nodeToVNode.get(sourceId);
-
-                const targetVNode =
-                    nodeToVNode.get(targetId);
-
-
-                // 如果找不到对应 VNode，跳过
-                if (!sourceVNode || !targetVNode) {
-                    continue;
-                }
-
-
-                // ----------------------------------------------------
-                // Edge 在同一个 VNode 内部
-                //
-                // 原来的逻辑：
-                //
-                // count == 2
-                //
-                // 表示 edge 两端都在同一个 vnode，
-                // 因此不建立 virtual edge。
-                // ----------------------------------------------------
-
-                if (sourceVNode === targetVNode) {
-                    continue;
-                }
-
-
-                // ----------------------------------------------------
-                // 为了保证：
-                //
-                // A -> B
-                // B -> A
-                //
-                // 被认为是同一条 VEdge
-                //
-                // 使用 vnode index / id 建立唯一 key
-                // ----------------------------------------------------
-
-                const id1 = sourceVNode.id;
-                const id2 = targetVNode.id;
-
-                const key =
-                    id1 < id2
-                        ? `${id1}---${id2}`
-                        : `${id2}---${id1}`;
-
-
-                const existing =
-                    connectionMap.get(key);
-
-
-                if (existing) {
-
-                    existing.count++;
-
-                } else {
-
-                    connectionMap.set(key, {
-                        source:
-                            id1 < id2
-                                ? sourceVNode
-                                : targetVNode,
-
-                        target:
-                            id1 < id2
-                                ? targetVNode
-                                : sourceVNode,
-
-                        count: 1
+                insideBreak:
+                    for (let i = 0; i < this.vnodes.length; i++) {
+                        const v1 = this.vnodes[i];
+                        count = 0;
+                        if (!v1.nodes) continue;
+                        v1.nodes.forEach((node: any) => {
+                            if (node.id() === s || node.id() === t) {
+                                count++;
+                            }
+                        })
+                        if (count == 2) {
+                            break insideBreak;
+                        }
+                    }
+                if (count != 2) {  // counts==2 means the edge is inside of vnode
+                    edgePairs.push({
+                        source: edge.source().id(),
+                        target: edge.target().id()
                     });
                 }
             }
 
+            for (let i = 0; i < this.vnodes.length - 1; i++) {
+                const v1 = this.vnodes[i];
+                for (let j = i + 1; j < this.vnodes.length; j++) {
+                    // console.log('i:'+i+'   j:' + j);
+                    const v2 = this.vnodes[j];
+                    if (!v1.nodes || !v2.nodes) continue;
 
-            // --------------------------------------------------------
-            // 3. 根据 connectionMap 创建 VEdge
-            // --------------------------------------------------------
+                    if (1) {
+                        const nodeVec1 = v1.nodes;
+                        const nodeVec2 = v2.nodes;
+                        let numConnect = 0;
+                        for (const n1 of nodeVec1) {
+                            if (n1.data("structType") != 'Star-Member') {    // save time
+                                for (const n2 of nodeVec2) {
+                                    if (n2.data("structType") != 'Star-Member') {
+                                        for (const edge of edgePairs) {
+                                            const source = edge.source;
+                                            const target = edge.target;
 
-            connectionMap.forEach(
-                ({
-                     source,
-                     target,
-                     count
-                 }) => {
-
-                    const vedge =
-                        new VEdge(
-                            source,
-                            target,
-                            count
-                        );
-
-                    this.vedges.push(vedge);
+                                            // Logic fix: Checking both directions for an undirected link
+                                            if ((n1.id() === source && n2.id() === target) || (n2.id() === source && n1.id() === target)) {
+                                                numConnect++;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        if (numConnect > 0) {
+                            let vedgeT = new VEdge(v1, v2, numConnect);
+                            this.vedges.push(vedgeT);
+                        }
+                    }
                 }
-            );
-
-
-            console.log(
-                `Virtual edges created: ${this.vedges.length}`
-            );
+            }
         }
-
-
-        console.log("@@@@@@");
         this.captureStep('Virtual Edges Created', 'Virtual edges created between virtual nodes', {vedgeCount: this.vedges.length});
         ///////////////////////////////////////////////////////////////////////////
 
@@ -1017,7 +918,7 @@ ForceLayout.prototype.run = function () {
                 v1.center_y = v1.center_y || 0;
             }
         });
-        console.log("00000");
+
         //////////////////////////////// 更新半径 update radius for virtual nodes /////////////////////////////
         if (1) {
             this.vnodes.forEach((v1: any) => {
@@ -1079,7 +980,6 @@ ForceLayout.prototype.run = function () {
 
         this.captureStep('Virtual Nodes Positioned', 'Virtual node centers and radii calculated', null);
 
-        console.log("1111");
         //******************** virtual node force layout ************************
         if (layout_algorithm === 'MY_ForceLayout') {
             const IDEAL_LENGTH = params.IDEAL_LENGTH;
@@ -2075,22 +1975,6 @@ ForceLayout.prototype.run = function () {
             this.captureStep('Substructure Layout', 'Individual structures laid out (Cycles, Stars, Chains, Parallel)', null);
         }
 
-        if (nodes.length == 2) {
-            nodes[0].position().x = 0;
-            nodes[0].position().y = 0;
-            nodes[1].position().x = 100;
-            nodes[1].position().y = 0;
-        }
-
-        if (nodes.length == 3) {
-            nodes[0].position().x = 0;
-            nodes[0].position().y = 0;
-            nodes[1].position().x = 100;
-            nodes[1].position().y = 0;
-            nodes[2].position().x = 50;
-            nodes[2].position().y = 90;
-        }
-
         if (1) {
             let maxDis = 0;
             let maxS = 0;
@@ -2121,29 +2005,75 @@ ForceLayout.prototype.run = function () {
             console.log("avgDis:", avgDis / edges.length);
         }
 
+        console.log(`========== 独立网络 ${index + 1} ==========`);
+        console.log('nodes:', nodes.map(
+            (node: cytoscape.NodeSingular) => node.id()
+        ));
+
+        console.log('edges:', component.edges().map(
+            (edge: cytoscape.EdgeSingular) => edge.id()
+        ));
+
+        // Bounding Box
+        console.log('Bounding Box:', bb);
+
+        console.log('x1:', bb.x1);
+        console.log('y1:', bb.y1);
+        console.log('x2:', bb.x2);
+        console.log('y2:', bb.y2);
+
+        console.log('width:', bb.w);
+        console.log('height:', bb.h);
+
+        console.log('------------------------------------------');
+
+
+        // =====================================
+        // 2. 获取当前 component 的 bounding box, 同时有多个网络，需要对齐
+        // =====================================
         const bb2 = nodes.boundingBox();
 
-        networkInfos.push({
+        console.log(`独立网络 ${index + 1}`);
+        console.log('nodes:', nodes.map(
+            (node: cytoscape.NodeSingular) => node.id()
+        ));
 
-            component: component,
+        console.log('edges:', component.edges().map(
+            (edge: cytoscape.EdgeSingular) => edge.id()
+        ));
 
-            nodes: nodes,
+        console.log('bounding box:', bb2);
 
-            index: index,
 
-            nodeCount: nodes.length,
+        // =====================================
+        // 3. 将 component 移动到目标位置
+        // =====================================
 
-            width: bb2.w,
+        const targetX = currentX;
+        const targetY = START_Y;
 
-            height: bb2.h,
+        const dx = targetX - bb2.x1;
+        const dy = targetY - bb2.y1;
 
-            bb: bb2
+        nodes.forEach((node: cytoscape.NodeSingular) => {
+
+            const pos = node.position();
+
+            node.position({
+                x: pos.x + dx,
+                y: pos.y + dy
+            });
 
         });
 
-    });
 
-    this.packNetworks(networkInfos);
+        // =====================================
+        // 4. 更新下一个 component 的 X
+        // =====================================
+
+        currentX += bb2.w + GAP;
+
+    });
 
     this.captureStep('Final', 'Final layout complete', null);
 
@@ -2162,811 +2092,6 @@ ForceLayout.prototype.run = function () {
 
     return this;
 };
-
-
-ForceLayout.prototype.packNetworks = function (
-    networks: any[]
-): void {
-
-    if (!networks || networks.length === 0) {
-        return;
-    }
-
-    // ============================================================
-    // Canvas
-    // ============================================================
-
-    const container = this.cy.container();
-
-    const canvasWidth =
-        container?.clientWidth ?? 1200;
-
-    const canvasHeight =
-        container?.clientHeight ?? 800;
-
-    console.log(
-        'Canvas:',
-        canvasWidth,
-        canvasHeight
-    );
-
-
-    // ============================================================
-    // 参数
-    // ============================================================
-
-    const H_GAP = 60;     // 同一行网络之间
-    const V_GAP = 80;     // 行之间
-    const PADDING = 80;   // Canvas 四周
-
-
-    // ============================================================
-    // 1. 重新获取每个 network 的真实 bounding box
-    // ============================================================
-
-    networks.forEach((network: any) => {
-
-        const bb = network.nodes.boundingBox();
-
-        network.x1 = bb.x1;
-        network.y1 = bb.y1;
-        network.x2 = bb.x2;
-        network.y2 = bb.y2;
-
-        network.width = bb.w;
-        network.height = bb.h;
-
-        network.centerX = (bb.x1 + bb.x2) / 2;
-        network.centerY = (bb.y1 + bb.y2) / 2;
-
-    });
-
-
-    // ============================================================
-    // 2. 按节点数从大到小
-    //
-    // 大网络在上
-    // 小网络在下
-    //
-    // nodeCount 相同时，再按照面积排序
-    // ============================================================
-
-    networks.sort((a: any, b: any) => {
-
-        if (a.nodeCount !== b.nodeCount) {
-
-            return b.nodeCount - a.nodeCount;
-
-        }
-
-        return (
-            (b.width * b.height)
-            -
-            (a.width * a.height)
-        );
-
-    });
-
-
-    console.log(
-        'Sorted networks:',
-        networks.map(
-            (n: any) =>
-                `${n.nodeCount} (${Math.round(n.width)}×${Math.round(n.height)})`
-        )
-    );
-
-
-    // ============================================================
-    // 3. 计算所有 network 的总面积
-    //
-    // 用面积估计一个合理的正方形尺寸
-    // ============================================================
-
-    let totalArea = 0;
-
-    networks.forEach((network: any) => {
-
-        totalArea +=
-            network.width *
-            network.height;
-
-    });
-
-
-    // ============================================================
-    // 4. 自动寻找最佳 targetWidth
-    //
-    // 不直接使用：
-    //
-    // columns = sqrt(networkCount)
-    //
-    // 而是根据 network 的真实尺寸决定。
-    //
-    // 目标：
-    //
-    //     totalWidth ≈ totalHeight
-    //
-    // ============================================================
-
-    const availableWidth =
-        Math.max(
-            canvasWidth - 2 * PADDING,
-            1
-        );
-
-    const availableHeight =
-        Math.max(
-            canvasHeight - 2 * PADDING,
-            1
-        );
-
-
-    // 初始估计
-    let targetWidth =
-        Math.sqrt(totalArea);
-
-    // Canvas 不是正方形时进行修正
-    targetWidth *=
-        Math.sqrt(
-            availableWidth /
-            availableHeight
-        );
-
-
-    targetWidth =
-        Math.max(
-            targetWidth,
-            200
-        );
-
-    targetWidth =
-        Math.min(
-            targetWidth,
-            availableWidth
-        );
-
-
-    console.log(
-        'Initial targetWidth:',
-        targetWidth
-    );
-
-
-    // ============================================================
-    // 5. 根据 targetWidth 模拟分行
-    //
-    // 这是整个算法最重要的地方。
-    //
-    // network 按 nodeCount 排序后：
-    //
-    // 大：
-    //   A B
-    //
-    // 中：
-    //   C D E
-    //
-    // 小：
-    //   F G H I
-    //
-    // 不要求每行数量相同。
-    // ============================================================
-
-    const makeRows = (
-        widthLimit: number
-    ): any[][] => {
-
-        const rows: any[][] = [];
-
-        let currentRow: any[] = [];
-        let currentWidth = 0;
-
-
-        networks.forEach((network: any) => {
-
-            const requiredWidth =
-                currentRow.length === 0
-                    ? network.width
-                    : currentWidth
-                    + H_GAP
-                    + network.width;
-
-
-            // ----------------------------------------------------
-            // 当前 network 放不下
-            // ----------------------------------------------------
-
-            if (
-                currentRow.length > 0 &&
-                requiredWidth > widthLimit
-            ) {
-
-                rows.push(currentRow);
-
-                currentRow = [
-                    network
-                ];
-
-                currentWidth =
-                    network.width;
-
-            }
-
-                // ----------------------------------------------------
-                // 可以继续放
-            // ----------------------------------------------------
-
-            else {
-
-                currentRow.push(network);
-
-                currentWidth =
-                    requiredWidth;
-
-            }
-
-        });
-
-
-        if (currentRow.length > 0) {
-
-            rows.push(currentRow);
-
-        }
-
-
-        return rows;
-    };
-
-
-    // ============================================================
-    // 6. 搜索最佳宽度
-    //
-    // 找到：
-    //
-    //     总高度 ≈ 总宽度
-    //
-    // 的布局
-    // ============================================================
-
-    let bestRows: any[][] = [];
-    let bestScore = Number.POSITIVE_INFINITY;
-    let bestWidth = targetWidth;
-
-
-    const minWidth = 200;
-
-    const maxWidth =
-        availableWidth;
-
-
-    // 搜索 40 次
-    for (let i = 0; i < 40; i++) {
-
-        const testWidth =
-            minWidth
-            +
-            (
-                maxWidth -
-                minWidth
-            )
-            *
-            i /
-            39;
-
-
-        const rows =
-            makeRows(testWidth);
-
-
-        // --------------------------------------------
-        // 计算真实总高度
-        // --------------------------------------------
-
-        let totalHeight = 0;
-
-        rows.forEach(
-            (
-                row: any[],
-                rowIndex: number
-            ) => {
-
-                let rowHeight = 0;
-
-                row.forEach(
-                    (network: any) => {
-
-                        rowHeight =
-                            Math.max(
-                                rowHeight,
-                                network.height
-                            );
-
-                    }
-                );
-
-                totalHeight += rowHeight;
-
-                if (
-                    rowIndex <
-                    rows.length - 1
-                ) {
-
-                    totalHeight +=
-                        V_GAP;
-
-                }
-
-            }
-        );
-
-
-        // --------------------------------------------
-        // 实际总宽度
-        // --------------------------------------------
-
-        let maxRowWidth = 0;
-
-
-        rows.forEach(
-            (row: any[]) => {
-
-                let rowWidth = 0;
-
-                row.forEach(
-                    (
-                        network: any,
-                        index: number
-                    ) => {
-
-                        rowWidth +=
-                            network.width;
-
-                        if (
-                            index <
-                            row.length - 1
-                        ) {
-
-                            rowWidth +=
-                                H_GAP;
-
-                        }
-
-                    }
-                );
-
-                maxRowWidth =
-                    Math.max(
-                        maxRowWidth,
-                        rowWidth
-                    );
-
-            }
-        );
-
-
-        // --------------------------------------------
-        // 目标：
-        //
-        // width ≈ height
-        //
-        // 同时不要超过 Canvas
-        // --------------------------------------------
-
-        const aspectError =
-            Math.abs(
-                Math.log(
-                    (
-                        maxRowWidth + 1
-                    )
-                    /
-                    (
-                        totalHeight + 1
-                    )
-                )
-            );
-
-
-        // Canvas 越界惩罚
-        let overflowPenalty = 0;
-
-
-        if (
-            maxRowWidth >
-            availableWidth
-        ) {
-
-            overflowPenalty +=
-                (
-                    maxRowWidth -
-                    availableWidth
-                )
-                *
-                10;
-
-        }
-
-
-        if (
-            totalHeight >
-            availableHeight
-        ) {
-
-            overflowPenalty +=
-                (
-                    totalHeight -
-                    availableHeight
-                )
-                *
-                10;
-
-        }
-
-
-        const score =
-            aspectError
-            +
-            overflowPenalty;
-
-
-        if (
-            score <
-            bestScore
-        ) {
-
-            bestScore =
-                score;
-
-            bestRows =
-                rows;
-
-            bestWidth =
-                testWidth;
-
-        }
-
-    }
-
-
-    // ============================================================
-    // 7. 输出最终分行结果
-    // ============================================================
-
-    console.log(
-        '======================================'
-    );
-
-    console.log(
-        'Best target width:',
-        bestWidth
-    );
-
-    console.log(
-        'Rows:',
-        bestRows.length
-    );
-
-
-    bestRows.forEach(
-        (
-            row: any[],
-            index: number
-        ) => {
-
-            console.log(
-                `Row ${index + 1}:`,
-                row.map(
-                    (n: any) =>
-                        `${n.nodeCount} nodes`
-                )
-            );
-
-        }
-    );
-
-
-    // ============================================================
-    // 8. 计算每一行真实宽度和高度
-    // ============================================================
-
-    const rowInfos: any[] = [];
-
-
-    bestRows.forEach(
-        (row: any[]) => {
-
-            let rowWidth = 0;
-            let rowHeight = 0;
-
-
-            row.forEach(
-                (
-                    network: any,
-                    index: number
-                ) => {
-
-                    rowWidth +=
-                        network.width;
-
-                    if (
-                        index <
-                        row.length - 1
-                    ) {
-
-                        rowWidth +=
-                            H_GAP;
-
-                    }
-
-
-                    rowHeight =
-                        Math.max(
-                            rowHeight,
-                            network.height
-                        );
-
-                }
-            );
-
-
-            rowInfos.push({
-
-                row,
-
-                width:
-                rowWidth,
-
-                height:
-                rowHeight
-
-            });
-
-        }
-    );
-
-
-    // ============================================================
-    // 9. 计算整个布局实际大小
-    // ============================================================
-
-    let totalLayoutWidth = 0;
-    let totalLayoutHeight = 0;
-
-
-    rowInfos.forEach(
-        (
-            info: any,
-            index: number
-        ) => {
-
-            totalLayoutWidth =
-                Math.max(
-                    totalLayoutWidth,
-                    info.width
-                );
-
-
-            totalLayoutHeight +=
-                info.height;
-
-
-            if (
-                index <
-                rowInfos.length - 1
-            ) {
-
-                totalLayoutHeight +=
-                    V_GAP;
-
-            }
-
-        }
-    );
-
-
-    console.log(
-        'Final layout size:',
-        totalLayoutWidth,
-        '×',
-        totalLayoutHeight
-    );
-
-
-    // ============================================================
-    // 10. 整个布局居中
-    // ============================================================
-
-    const layoutStartX =
-        (
-            canvasWidth -
-            totalLayoutWidth
-        ) / 2;
-
-
-    const layoutStartY =
-        (
-            canvasHeight -
-            totalLayoutHeight
-        ) / 2;
-
-
-    // ============================================================
-    // 11. 真正排列
-    // ============================================================
-
-    let currentY =
-        layoutStartY;
-
-
-    rowInfos.forEach(
-        (
-            info: any,
-            rowIndex: number
-        ) => {
-
-            const row =
-                info.row;
-
-            let currentX =
-                layoutStartX;
-
-
-            row.forEach(
-                (network: any) => {
-
-                    const bb =
-                        network.nodes.boundingBox();
-
-
-                    // ----------------------------------------
-                    // 左对齐：
-                    //
-                    // bb.x1 → currentX
-                    // ----------------------------------------
-
-                    const dx =
-                        currentX -
-                        bb.x1;
-
-
-                    // ----------------------------------------
-                    // 垂直方向：
-                    //
-                    // network 在这一行垂直居中
-                    // ----------------------------------------
-
-                    const networkCenterY =
-                        (
-                            bb.y1 +
-                            bb.y2
-                        ) / 2;
-
-
-                    const rowCenterY =
-                        currentY +
-                        info.height / 2;
-
-
-                    const dy =
-                        rowCenterY -
-                        networkCenterY;
-
-
-                    // ----------------------------------------
-                    // 移动 network
-                    // ----------------------------------------
-
-                    network.nodes.forEach(
-                        (
-                            node: cytoscape.NodeSingular
-                        ) => {
-
-                            const pos =
-                                node.position();
-
-
-                            node.position({
-
-                                x:
-                                    pos.x +
-                                    dx,
-
-                                y:
-                                    pos.y +
-                                    dy
-
-                            });
-
-                        }
-                    );
-
-
-                    // ----------------------------------------
-                    // 下一个 network
-                    // ----------------------------------------
-
-                    currentX +=
-                        network.width +
-                        H_GAP;
-
-                }
-            );
-
-
-            // --------------------------------------------
-            // 下一行
-            // --------------------------------------------
-
-            currentY +=
-                info.height +
-                V_GAP;
-
-        }
-    );
-
-
-    // ============================================================
-    // 12. 最终检查
-    // ============================================================
-
-    console.log(
-        '======================================'
-    );
-
-    console.log(
-        'Final packed layout:',
-        `${totalLayoutWidth} × ${totalLayoutHeight}`
-    );
-
-    console.log(
-        'Canvas:',
-        `${canvasWidth} × ${canvasHeight}`
-    );
-
-    console.log(
-        'Aspect ratio:',
-        (
-            totalLayoutWidth /
-            totalLayoutHeight
-        ).toFixed(3)
-    );
-
-
-    // ============================================================
-    // 13. 输出最终每个网络位置
-    // ============================================================
-
-    bestRows.forEach(
-        (
-            row: any[],
-            rowIndex: number
-        ) => {
-
-            row.forEach(
-                (
-                    network: any
-                ) => {
-
-                    const bb =
-                        network.nodes.boundingBox();
-
-
-                    console.log(
-                        `Row ${rowIndex + 1}`,
-                        `nodes=${network.nodeCount}`,
-                        `x=${bb.x1.toFixed(1)}`,
-                        `y=${bb.y1.toFixed(1)}`,
-                        `w=${bb.w.toFixed(1)}`,
-                        `h=${bb.h.toFixed(1)}`
-                    );
-
-                }
-            );
-
-        }
-    );
-};
-
 
 ForceLayout.prototype.stop = function () {
     return this;

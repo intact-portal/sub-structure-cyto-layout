@@ -207,6 +207,85 @@
     #step-list-content > div:last-child {
       border-bottom: none;
     }
+
+    /* ==========================================
+   Layout Loading Spinner
+   ========================================== */
+
+    #layout-loading {
+      position: fixed;
+      left: 380px;
+      top: 0;
+      right: 0;
+      bottom: 0;
+
+      display: none;
+
+      align-items: center;
+      justify-content: center;
+
+      background: rgba(255, 255, 255, 0.55);
+
+      z-index: 10000;
+
+      backdrop-filter: blur(2px);
+      -webkit-backdrop-filter: blur(2px);
+    }
+
+    #layout-loading.active {
+      display: flex;
+    }
+
+    .loading-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+
+      padding: 25px 35px;
+
+      background: rgba(255, 255, 255, 0.95);
+
+      border: 1px solid #ddd;
+      border-radius: 10px;
+
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .spinner {
+      width: 42px;
+      height: 42px;
+
+      border: 4px solid #e0e0e0;
+      border-top: 4px solid #4CAF50;
+
+      border-radius: 50%;
+
+      animation: layout-spin 0.8s linear infinite;
+    }
+
+    .loading-text {
+      margin-top: 15px;
+
+      font-size: 14px;
+      color: #555;
+      font-weight: 500;
+    }
+
+    @keyframes layout-spin {
+      from {
+        transform: rotate(0deg);
+      }
+
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* Sidebar 缩小时，loading 覆盖整个 canvas */
+    .sidebar.minimized ~ #layout-loading {
+      left: 60px;
+    }
   </style>
 </head>
 <body>
@@ -339,6 +418,13 @@
       <button class="btn" onclick="applyLayout()">Apply Layout</button>
       <button class="btn btn-secondary" onclick="resetParameters()">Reset</button>
     </div>
+  </div>
+</div>
+
+<div id="layout-loading">
+  <div class="loading-box">
+    <div class="spinner"></div>
+    <div class="loading-text">Calculating layout...</div>
   </div>
 </div>
 
@@ -659,6 +745,22 @@
     document.getElementById('lastStepBtn').disabled = currentLayout.currentStepIndex === currentLayout.steps.length - 1;
   }
 
+  function showLayoutLoading() {
+    const loading = document.getElementById('layout-loading');
+
+    if (loading) {
+      loading.classList.add('active');
+    }
+  }
+
+  function hideLayoutLoading() {
+    const loading = document.getElementById('layout-loading');
+
+    if (loading) {
+      loading.classList.remove('active');
+    }
+  }
+
   let initialPositions = null;
 
   function saveInitialPositions() {
@@ -688,41 +790,130 @@
   window.applyLayout = async function() {
     if (!cy) return;
 
-    if(1) {
-      // radomize the positions of nodes
-      const spread = 500;
-      cy.nodes().forEach(node => {
-        node.position({x: Math.random() * spread, y: Math.random() * spread});
-      });
-    }
+    // ==========================================
+    // 显示 Loading
+    // ==========================================
 
-    if (!initialPositions) {
-      saveInitialPositions();
-    }
-    restoreInitialPositions();
+    showLayoutLoading();
 
-    cy.resize();
+    // 让浏览器先把 spinner 渲染出来
+    // 然后再开始复杂的 Force Layout 计算
+    await new Promise(resolve => requestAnimationFrame(resolve));
 
-    // Create and run layout
-    currentLayout = cy.layout({
-      name: 'ForceLayout',
-      params: currentParams
-    });
+    try {
 
-    // Listen for layout completion
-    cy.one('layoutstop', () => {
-      if (currentParams.STEP_BY_STEP && currentLayout.steps && currentLayout.steps.length > 0) {
-        // Enable step navigation buttons
-        document.getElementById('firstStepBtn').disabled = false;
-        document.getElementById('fasterNextStepBtn').disabled = false;
-        document.getElementById('nextStepBtn').disabled = false;
-        document.getElementById('lastStepBtn').disabled = false;
-        updateStepDisplay();
-        console.log(`✅ Step-by-step mode: ${currentLayout.steps.length} steps captured`);
+      // ==========================================
+      // Randomize initial positions
+      // ==========================================
+
+      if (1) {
+
+        const spread = 500;
+
+        cy.nodes().forEach(node => {
+
+          node.position({
+            x: Math.random() * spread,
+            y: Math.random() * spread
+          });
+
+        });
+
       }
-    });
 
-    currentLayout.run();
+      // ==========================================
+      // 保存 / 恢复初始位置
+      // ==========================================
+
+      if (!initialPositions) {
+        saveInitialPositions();
+      }
+
+      restoreInitialPositions();
+
+      // ==========================================
+      // Resize
+      // ==========================================
+
+      cy.resize();
+
+      // ==========================================
+      // 创建 Layout
+      // ==========================================
+
+      currentLayout = cy.layout({
+
+        name: 'ForceLayout',
+
+        params: currentParams
+
+      });
+
+      // ==========================================
+      // Layout 完成
+      // ==========================================
+
+      cy.one('layoutstop', () => {
+
+        // Step-by-step
+        if (
+                currentParams.STEP_BY_STEP &&
+                currentLayout.steps &&
+                currentLayout.steps.length > 0
+        ) {
+
+          document.getElementById(
+                  'firstStepBtn'
+          ).disabled = false;
+
+          document.getElementById(
+                  'fasterNextStepBtn'
+          ).disabled = false;
+
+          document.getElementById(
+                  'nextStepBtn'
+          ).disabled = false;
+
+          document.getElementById(
+                  'lastStepBtn'
+          ).disabled = false;
+
+          updateStepDisplay();
+
+          console.log(
+                  `✅ Step-by-step mode: ${currentLayout.steps.length} steps captured`
+          );
+        }
+
+        // ==========================================
+        // 隐藏 Loading
+        // ==========================================
+
+        hideLayoutLoading();
+
+      });
+
+      // ==========================================
+      // 运行 Layout
+      // ==========================================
+
+      currentLayout.run();
+
+    } catch (error) {
+
+      console.error(
+              'Layout error:',
+              error
+      );
+
+      // ==========================================
+      // 出错也必须关闭 Loading
+      // ==========================================
+
+      hideLayoutLoading();
+
+      throw error;
+    }
   };
 
   window.resetParameters = function() {
