@@ -2150,6 +2150,7 @@ ForceLayout.prototype.run = function () {
     this.cy.fit(null, 50);
     this.cy.emit('layoutstop');
 
+    //
     // Expose steps for external access
     if (this.params.STEP_BY_STEP && this.steps.length > 0) {
         console.log(`Step-by-step mode: Captured ${this.steps.length} steps`);
