@@ -1875,57 +1875,480 @@ ForceLayout.prototype.run = function () {
                             });
 
                             const count = gNodes.length;
+
                             if (count >= 2) {
-                                // 1. 计算当前时刻的算术平均中心 (质心)
-                                let cx = 0, cy = 0;
+
+                                // ============================================================
+                                // 1. 计算当前节点的算术平均中心
+                                // ============================================================
+
+                                let cx = 0;
+                                let cy = 0;
+
                                 gNodes.forEach((n: any) => {
+
                                     cx += n.position().x;
                                     cy += n.position().y;
+
                                 });
+
                                 cx /= count;
                                 cy /= count;
 
-                                // 2. 根据节点数量计算标准半径 (保证节点间距接近 k)
-                                const miniMumRadius = params.CHAIN_MIN_RADIUS;
-                                const radius = Math.max((count * params.CYCLE_NODE_SPACING) / (2 * Math.PI), miniMumRadius);
 
-                                // 3. 排序以防止节点在圆周上闪
-                                const sorted = gNodes.slice(1);
+                                // ============================================================
+                                // 2. 特殊处理：只有 3 个节点
+                                //
+                                // 三个节点组成严格等边三角形
+                                //
+                                // 注意：
+                                // 不使用 CHAIN_MIN_RADIUS
+                                // 防止三角形被强行撑大
+                                // ============================================================
 
-                                ///////////////////////////////////////////////////
-                                // 4. 需要旋转，找出最好的旋转角度
-                                let minTotalLength = 10e10;
-                                let bestRotate = 0;    //找出最好的旋转角度
-                                for (let rotate = 0; rotate < 360; rotate = rotate + 10) {
-                                    // 4. 强行覆盖坐标：这是形成“绝对圆”的物理保障
-                                    sorted.forEach((n: any, i: number) => {
-                                        const angle = (i / count) * 2 * Math.PI + rotate;
-                                        n.position({
-                                            x: cx + Math.cos(angle) * radius,
-                                            y: cy + Math.sin(angle) * radius
-                                        });
-                                    });
-                                    const totalLength = totalEdgeLength(edges);
-                                    if (minTotalLength > totalLength) {
-                                        minTotalLength = totalLength;
-                                        bestRotate = rotate;
+                                if (count === 3) {
+
+                                    // --------------------------------------------------------
+                                    // 三角形边长
+                                    //
+                                    // CYCLE_NODE_SPACING 表示希望的节点间距
+                                    // --------------------------------------------------------
+
+                                    const sideLength =
+                                        params.CYCLE_NODE_SPACING;
+
+
+                                    // --------------------------------------------------------
+                                    // 等边三角形外接圆半径
+                                    //
+                                    // side = sqrt(3) * radius
+                                    //
+                                    // 所以：
+                                    //
+                                    // radius = side / sqrt(3)
+                                    // --------------------------------------------------------
+
+                                    const radius =
+                                        sideLength /
+                                        Math.sqrt(3);
+
+
+                                    // ========================================================
+                                    // 3. 搜索最佳旋转角度
+                                    //
+                                    // 与普通 network 使用完全一样的策略
+                                    //
+                                    // 0°
+                                    // 10°
+                                    // 20°
+                                    // ...
+                                    // 350°
+                                    //
+                                    // 每次计算：
+                                    //
+                                    // totalEdgeLength(edges)
+                                    //
+                                    // 找最小值
+                                    // ========================================================
+
+                                    let minTotalLength =
+                                        Number.POSITIVE_INFINITY;
+
+                                    let bestRotate = 0;
+
+
+                                    for (
+                                        let rotate = 0;
+                                        rotate < 360;
+                                        rotate += 10
+                                    ) {
+
+                                        // ----------------------------------------------------
+                                        // 三个节点均匀分布在圆周
+                                        //
+                                        // 每两个节点之间：
+                                        //
+                                        // 120°
+                                        //
+                                        // 因此天然形成等边三角形
+                                        // ----------------------------------------------------
+
+                                        gNodes.forEach(
+                                            (
+                                                n: any,
+                                                i: number
+                                            ) => {
+
+                                                const angle =
+                                                    i *
+                                                    2 *
+                                                    Math.PI /
+                                                    3
+                                                    +
+                                                    rotate *
+                                                    Math.PI /
+                                                    180;
+
+
+                                                n.position({
+
+                                                    x:
+                                                        cx +
+                                                        Math.cos(angle) *
+                                                        radius,
+
+                                                    y:
+                                                        cy +
+                                                        Math.sin(angle) *
+                                                        radius
+
+                                                });
+
+                                            }
+                                        );
+
+
+                                        // ----------------------------------------------------
+                                        // 计算当前旋转角度下的总边长
+                                        // ----------------------------------------------------
+
+                                        const totalLength =
+                                            totalEdgeLength(edges);
+
+
+                                        // ----------------------------------------------------
+                                        // 保存最优旋转
+                                        // ----------------------------------------------------
+
+                                        if (
+                                            totalLength <
+                                            minTotalLength
+                                        ) {
+
+                                            minTotalLength =
+                                                totalLength;
+
+                                            bestRotate =
+                                                rotate;
+
+                                        }
+
                                     }
+
+
+                                    // ========================================================
+                                    // 4. 使用最佳旋转角度重新设置位置
+                                    // ========================================================
+
+                                    gNodes.forEach(
+                                        (
+                                            n: any,
+                                            i: number
+                                        ) => {
+
+                                            const angle =
+                                                i *
+                                                2 *
+                                                Math.PI /
+                                                3
+                                                +
+                                                bestRotate *
+                                                Math.PI /
+                                                180;
+
+
+                                            n.position({
+
+                                                x:
+                                                    cx +
+                                                    Math.cos(angle) *
+                                                    radius,
+
+                                                y:
+                                                    cy +
+                                                    Math.sin(angle) *
+                                                    radius
+
+                                            });
+
+                                        }
+                                    );
+
+
+                                    // ========================================================
+                                    // 5. 输出调试信息
+                                    // ========================================================
+
+                                    console.log(
+                                        '======================================'
+                                    );
+
+                                    console.log(
+                                        'Triangle layout'
+                                    );
+
+                                    console.log(
+                                        'Node count:',
+                                        count
+                                    );
+
+                                    console.log(
+                                        'Center:',
+                                        `(${cx.toFixed(2)}, ${cy.toFixed(2)})`
+                                    );
+
+                                    console.log(
+                                        'Radius:',
+                                        radius.toFixed(2)
+                                    );
+
+                                    console.log(
+                                        'Side length:',
+                                        sideLength.toFixed(2)
+                                    );
+
+                                    console.log(
+                                        'Best rotate:',
+                                        `${bestRotate}°`
+                                    );
+
+                                    console.log(
+                                        'Total edge length:',
+                                        minTotalLength.toFixed(2)
+                                    );
+
+                                    console.log(
+                                        '======================================'
+                                    );
+
+
+                                    return;
                                 }
-                                // 4. 强行覆盖坐标
-                                sorted.forEach((n: any, i: number) => {
-                                    const angle = (i / count) * 2 * Math.PI + bestRotate;
-                                    n.position({
-                                        x: cx + Math.cos(angle) * radius,
-                                        y: cy + Math.sin(angle) * radius
-                                    });
-                                });
-                                ///////////////////////////////////////////////////
+
+
+                                // ============================================================
+                                // 3. count > 3
+                                //
+                                // 保持原来的布局策略：
+                                //
+                                // gNodes[0]
+                                //     ↓
+                                // 中心节点
+                                //
+                                // gNodes[1...]
+                                //     ↓
+                                // 圆周节点
+                                // ============================================================
+
+
+                                // ============================================================
+                                // 4. 根据节点数量计算标准半径
+                                // ============================================================
+
+                                const miniMumRadius =
+                                    params.CHAIN_MIN_RADIUS;
+
+
+                                const radius =
+                                    Math.max(
+                                        (
+                                            count *
+                                            params.CYCLE_NODE_SPACING
+                                        ) /
+                                        (2 * Math.PI),
+
+                                        miniMumRadius
+                                    );
+
+
+                                // ============================================================
+                                // 5. 排序 / 圆周节点
+                                // ============================================================
+
+                                const sorted =
+                                    gNodes.slice(1);
+
+
+                                // ============================================================
+                                // 6. 搜索最佳旋转角度
+                                // ============================================================
+
+                                let minTotalLength =
+                                    Number.POSITIVE_INFINITY;
+
+                                let bestRotate = 0;
+
+
+                                for (
+                                    let rotate = 0;
+                                    rotate < 360;
+                                    rotate += 10
+                                ) {
+
+                                    // --------------------------------------------------------
+                                    // 强行覆盖圆周节点坐标
+                                    // --------------------------------------------------------
+
+                                    sorted.forEach(
+                                        (
+                                            n: any,
+                                            i: number
+                                        ) => {
+
+                                            const angle =
+                                                (
+                                                    i /
+                                                    count
+                                                ) *
+                                                2 *
+                                                Math.PI
+                                                +
+                                                rotate *
+                                                Math.PI /
+                                                180;
+
+
+                                            n.position({
+
+                                                x:
+                                                    cx +
+                                                    Math.cos(angle) *
+                                                    radius,
+
+                                                y:
+                                                    cy +
+                                                    Math.sin(angle) *
+                                                    radius
+
+                                            });
+
+                                        }
+                                    );
+
+
+                                    // --------------------------------------------------------
+                                    // 计算当前旋转下的总边长
+                                    // --------------------------------------------------------
+
+                                    const totalLength =
+                                        totalEdgeLength(edges);
+
+
+                                    // --------------------------------------------------------
+                                    // 保存最佳旋转
+                                    // --------------------------------------------------------
+
+                                    if (
+                                        totalLength <
+                                        minTotalLength
+                                    ) {
+
+                                        minTotalLength =
+                                            totalLength;
+
+                                        bestRotate =
+                                            rotate;
+
+                                    }
+
+                                }
+
+
+                                // ============================================================
+                                // 7. 使用最佳旋转角度
+                                // ============================================================
+
+                                sorted.forEach(
+                                    (
+                                        n: any,
+                                        i: number
+                                    ) => {
+
+                                        const angle =
+                                            (
+                                                i /
+                                                count
+                                            ) *
+                                            2 *
+                                            Math.PI
+                                            +
+                                            bestRotate *
+                                            Math.PI /
+                                            180;
+
+
+                                        n.position({
+
+                                            x:
+                                                cx +
+                                                Math.cos(angle) *
+                                                radius,
+
+                                            y:
+                                                cy +
+                                                Math.sin(angle) *
+                                                radius
+
+                                        });
+                                    }
+                                );
+
+
+                                // ============================================================
+                                // 8. 第一个节点放在中心
+                                // ============================================================
 
                                 gNodes[0].position({
+
                                     x: cx,
                                     y: cy
-                                })
+
+                                });
+
+
+                                // ============================================================
+                                // 9. 输出调试信息
+                                // ============================================================
+
+                                console.log(
+                                    '======================================'
+                                );
+
+                                console.log(
+                                    'Circle layout'
+                                );
+
+                                console.log(
+                                    'Node count:',
+                                    count
+                                );
+
+                                console.log(
+                                    'Center:',
+                                    `(${cx.toFixed(2)}, ${cy.toFixed(2)})`
+                                );
+
+                                console.log(
+                                    'Radius:',
+                                    radius.toFixed(2)
+                                );
+
+                                console.log(
+                                    'Best rotate:',
+                                    `${bestRotate}°`
+                                );
+
+                                console.log(
+                                    'Total edge length:',
+                                    minTotalLength.toFixed(2)
+                                );
+
+                                console.log(
+                                    '======================================'
+                                );
+
                             }
+
                         }
                     }
                 } else if (v.type == 'Parallel') {
@@ -2091,6 +2514,9 @@ ForceLayout.prototype.run = function () {
             nodes[2].position().y = 90;
         }
 
+
+        rotateNetworkToMinimumBoundingBox(nodes)
+
         if (1) {
             let maxDis = 0;
             let maxS = 0;
@@ -2164,7 +2590,698 @@ ForceLayout.prototype.run = function () {
     return this;
 };
 
+/**
+ * 获取面积最小的bounding box 并且按照该bounding box将network旋转到轴平行的矩形框中，x轴大于y轴
+ * @param nodes
+ */
+function rotateNetworkToMinimumBoundingBox(
+    nodes: any
+) {
 
+
+    if (
+        !nodes ||
+        nodes.length === 0
+    ) {
+
+        return null;
+
+    }
+
+
+    // ============================================================
+    // 1. 获取 network 中所有 node 的四个角点
+    //
+    // 注意：
+    //
+    // 这里考虑 node 自身的 width / height
+    // 而不仅仅是 node.position()
+    // ============================================================
+
+    const points: {
+        x: number;
+        y: number;
+    }[] = [];
+
+
+    nodes.forEach(
+        (
+            node:
+            cytoscape.NodeSingular
+        ) => {
+
+            const pos =
+                node.position();
+
+
+            const width =
+                node.outerWidth();
+
+
+            const height =
+                node.outerHeight();
+
+
+            const halfWidth =
+                width / 2;
+
+
+            const halfHeight =
+                height / 2;
+
+
+            points.push({
+
+                x:
+                    pos.x -
+                    halfWidth,
+
+                y:
+                    pos.y -
+                    halfHeight
+
+            });
+
+
+            points.push({
+
+                x:
+                    pos.x +
+                    halfWidth,
+
+                y:
+                    pos.y -
+                    halfHeight
+
+            });
+
+
+            points.push({
+
+                x:
+                    pos.x +
+                    halfWidth,
+
+                y:
+                    pos.y +
+                    halfHeight
+
+            });
+
+
+            points.push({
+
+                x:
+                    pos.x -
+                    halfWidth,
+
+                y:
+                    pos.y +
+                    halfHeight
+
+            });
+
+        }
+    );
+
+
+    // ============================================================
+    // 2. Convex Hull
+    // ============================================================
+
+    const sortedPoints =
+        [...points].sort(
+            (
+                a,
+                b
+            ) => {
+
+                if (
+                    a.x !== b.x
+                ) {
+
+                    return (
+                        a.x -
+                        b.x
+                    );
+
+                }
+
+                return (
+                    a.y -
+                    b.y
+                );
+
+            }
+        );
+
+
+    const cross = (
+        o: any,
+        a: any,
+        b: any
+    ) => {
+
+        return (
+            (a.x - o.x) *
+            (b.y - o.y)
+            -
+            (a.y - o.y) *
+            (b.x - o.x)
+        );
+
+    };
+
+
+    const lower: any[] = [];
+
+
+    for (
+        const p of sortedPoints
+        ) {
+
+        while (
+            lower.length >= 2 &&
+            cross(
+                lower[
+                lower.length - 2
+                    ],
+                lower[
+                lower.length - 1
+                    ],
+                p
+            ) <= 0
+            ) {
+
+            lower.pop();
+
+        }
+
+
+        lower.push(p);
+
+    }
+
+
+    const upper: any[] = [];
+
+
+    for (
+        let i =
+            sortedPoints.length - 1;
+        i >= 0;
+        i--
+    ) {
+
+        const p =
+            sortedPoints[i];
+
+
+        while (
+            upper.length >= 2 &&
+            cross(
+                upper[
+                upper.length - 2
+                    ],
+                upper[
+                upper.length - 1
+                    ],
+                p
+            ) <= 0
+            ) {
+
+            upper.pop();
+
+        }
+
+
+        upper.push(p);
+
+    }
+
+
+    lower.pop();
+
+    upper.pop();
+
+
+    const hull =
+        lower.concat(upper);
+
+
+    if (
+        hull.length < 2
+    ) {
+
+        return null;
+
+    }
+
+
+    // ============================================================
+    // 3. 搜索 Minimum Area Bounding Rectangle
+    // ============================================================
+
+    let bestArea =
+        Number.POSITIVE_INFINITY;
+
+
+    let bestWidth = 0;
+
+    let bestHeight = 0;
+
+    let bestAngle = 0;
+
+    let bestCenterX = 0;
+
+    let bestCenterY = 0;
+
+
+    for (
+        let i = 0;
+        i < hull.length;
+        i++
+    ) {
+
+        const p1 =
+            hull[i];
+
+
+        const p2 =
+            hull[
+            (i + 1) %
+            hull.length
+                ];
+
+
+        // --------------------------------------------------------
+        // 当前凸包边的角度
+        // --------------------------------------------------------
+
+        const edgeAngle =
+            Math.atan2(
+                p2.y - p1.y,
+                p2.x - p1.x
+            );
+
+
+        // --------------------------------------------------------
+        // 将当前边旋转到 X 轴
+        // --------------------------------------------------------
+
+        const cos =
+            Math.cos(
+                -edgeAngle
+            );
+
+
+        const sin =
+            Math.sin(
+                -edgeAngle
+            );
+
+
+        let minX =
+            Number.POSITIVE_INFINITY;
+
+        let maxX =
+            Number.NEGATIVE_INFINITY;
+
+        let minY =
+            Number.POSITIVE_INFINITY;
+
+        let maxY =
+            Number.NEGATIVE_INFINITY;
+
+
+        // --------------------------------------------------------
+        // 旋转所有 hull 点
+        // --------------------------------------------------------
+
+        hull.forEach(
+            (
+                p
+            ) => {
+
+                const x =
+                    p.x * cos -
+                    p.y * sin;
+
+
+                const y =
+                    p.x * sin +
+                    p.y * cos;
+
+
+                minX =
+                    Math.min(
+                        minX,
+                        x
+                    );
+
+
+                maxX =
+                    Math.max(
+                        maxX,
+                        x
+                    );
+
+
+                minY =
+                    Math.min(
+                        minY,
+                        y
+                    );
+
+
+                maxY =
+                    Math.max(
+                        maxY,
+                        y
+                    );
+
+            }
+        );
+
+
+        const width =
+            maxX -
+            minX;
+
+
+        const height =
+            maxY -
+            minY;
+
+
+        const area =
+            width *
+            height;
+
+
+        // --------------------------------------------------------
+        // 找面积最小的矩形
+        // --------------------------------------------------------
+
+        if (
+            area <
+            bestArea
+        ) {
+
+            bestArea =
+                area;
+
+
+            bestWidth =
+                width;
+
+
+            bestHeight =
+                height;
+
+
+            bestAngle =
+                edgeAngle;
+
+
+            // ----------------------------------------------------
+            // 旋转坐标系中的中心
+            // ----------------------------------------------------
+
+            const centerXRot =
+                (
+                    minX +
+                    maxX
+                ) / 2;
+
+
+            const centerYRot =
+                (
+                    minY +
+                    maxY
+                ) / 2;
+
+
+            // ----------------------------------------------------
+            // 转回原坐标
+            // ----------------------------------------------------
+
+            bestCenterX =
+                centerXRot *
+                Math.cos(
+                    edgeAngle
+                )
+                -
+                centerYRot *
+                Math.sin(
+                    edgeAngle
+                );
+
+
+            bestCenterY =
+                centerXRot *
+                Math.sin(
+                    edgeAngle
+                )
+                +
+                centerYRot *
+                Math.cos(
+                    edgeAngle
+                );
+
+        }
+
+    }
+
+
+    // ============================================================
+    // 4. 保证：
+    //
+    // width >= height
+    //
+    // 即：
+    //
+    // 长边沿 X 轴
+    // 短边沿 Y 轴
+    // ============================================================
+
+    if (
+        bestHeight >
+        bestWidth
+    ) {
+
+        const temp =
+            bestWidth;
+
+        bestWidth =
+            bestHeight;
+
+        bestHeight =
+            temp;
+
+
+        // --------------------------------------------------------
+        // 旋转 90°
+        // --------------------------------------------------------
+
+        bestAngle +=
+            Math.PI / 2;
+
+    }
+
+
+    // ============================================================
+    // 5. Normalize angle
+    //
+    // [-PI, PI]
+    // ============================================================
+
+    while (
+        bestAngle >
+        Math.PI
+        ) {
+
+        bestAngle -=
+            2 * Math.PI;
+
+    }
+
+
+    while (
+        bestAngle <
+        -Math.PI
+        ) {
+
+        bestAngle +=
+            2 * Math.PI;
+
+    }
+
+
+    // ============================================================
+    // 6. 真正旋转 network
+    //
+    // 以 bounding box center 为旋转中心
+    // ============================================================
+
+    const cos =
+        Math.cos(
+            -bestAngle
+        );
+
+
+    const sin =
+        Math.sin(
+            -bestAngle
+        );
+
+
+    nodes.forEach(
+        (
+            node:
+            cytoscape.NodeSingular
+        ) => {
+
+            const pos =
+                node.position();
+
+
+            // ----------------------------------------------------
+            // 相对于 network center
+            // ----------------------------------------------------
+
+            const dx =
+                pos.x -
+                bestCenterX;
+
+
+            const dy =
+                pos.y -
+                bestCenterY;
+
+
+            // ----------------------------------------------------
+            // 旋转
+            //
+            // -bestAngle
+            // ----------------------------------------------------
+
+            const newX =
+                bestCenterX +
+                dx * cos -
+                dy * sin;
+
+
+            const newY =
+                bestCenterY +
+                dx * sin +
+                dy * cos;
+
+
+            node.position({
+
+                x:
+                newX,
+
+                y:
+                newY
+
+            });
+
+        }
+    );
+
+
+    // ============================================================
+    // 7. 旋转以后重新计算 Bounding Box
+    //
+    // 此时应该已经是 X/Y 轴平行
+    // ============================================================
+
+    const finalBB =
+        nodes.boundingBox();
+
+
+    // ============================================================
+    // 8. 输出信息
+    // ============================================================
+
+    console.log(
+        '======================================'
+    );
+
+    console.log(
+        'Network minimum bounding box'
+    );
+
+    console.log(
+        'Original minimum area:',
+        bestArea.toFixed(2)
+    );
+
+    console.log(
+        'Rotation:',
+        (
+            bestAngle *
+            180 /
+            Math.PI
+        ).toFixed(2),
+        'degrees'
+    );
+
+    console.log(
+        'Minimum rectangle:',
+        `${bestWidth.toFixed(2)} × ${bestHeight.toFixed(2)}`
+    );
+
+    console.log(
+        'Final Cytoscape BB:',
+        `${finalBB.w.toFixed(2)} × ${finalBB.h.toFixed(2)}`
+    );
+
+    console.log(
+        'Final aspect:',
+        (
+            finalBB.w /
+            finalBB.h
+        ).toFixed(3)
+    );
+
+    console.log(
+        '======================================'
+    );
+
+
+    // ============================================================
+    // 9. 返回结果
+    // ============================================================
+
+    return {
+
+        width:
+        finalBB.w,
+
+        height:
+        finalBB.h,
+
+        area:
+            finalBB.w *
+            finalBB.h,
+
+        angle:
+        bestAngle,
+
+        centerX:
+        bestCenterX,
+
+        centerY:
+        bestCenterY
+
+    };
+
+}
+
+// If there are multiple networks, organize them into multiple rows
 ForceLayout.prototype.packNetworks = function (
     networks: any[]
 ): void {
@@ -2172,6 +3289,7 @@ ForceLayout.prototype.packNetworks = function (
     if (!networks || networks.length === 0) {
         return;
     }
+
 
     // ============================================================
     // Canvas
@@ -2185,6 +3303,7 @@ ForceLayout.prototype.packNetworks = function (
     const canvasHeight =
         container?.clientHeight ?? 800;
 
+
     console.log(
         'Canvas:',
         canvasWidth,
@@ -2196,62 +3315,133 @@ ForceLayout.prototype.packNetworks = function (
     // 参数
     // ============================================================
 
-    const H_GAP = 60;     // 同一行网络之间
-    const V_GAP = 80;     // 行之间
-    const PADDING = 80;   // Canvas 四周
+    const H_GAP = 60;
+
+    const V_GAP = 80;
+
+    const SEARCH_STEPS = 300;
 
 
     // ============================================================
-    // 1. 重新获取每个 network 的真实 bounding box
-    // ============================================================
-
-    networks.forEach((network: any) => {
-
-        const bb = network.nodes.boundingBox();
-
-        network.x1 = bb.x1;
-        network.y1 = bb.y1;
-        network.x2 = bb.x2;
-        network.y2 = bb.y2;
-
-        network.width = bb.w;
-        network.height = bb.h;
-
-        network.centerX = (bb.x1 + bb.x2) / 2;
-        network.centerY = (bb.y1 + bb.y2) / 2;
-
-    });
-
-
-    // ============================================================
-    // 2. 按节点数从大到小
+    // Canvas aspect
     //
-    // 大网络在上
-    // 小网络在下
-    //
-    // nodeCount 相同时，再按照面积排序
+    // 唯一真正需要匹配的目标
     // ============================================================
 
-    networks.sort((a: any, b: any) => {
-
-        if (a.nodeCount !== b.nodeCount) {
-
-            return b.nodeCount - a.nodeCount;
-
-        }
-
-        return (
-            (b.width * b.height)
-            -
-            (a.width * a.height)
-        );
-
-    });
+    const canvasAspect =
+        canvasWidth /
+        canvasHeight;
 
 
     console.log(
-        'Sorted networks:',
-        networks.map(
+        'Canvas aspect:',
+        canvasAspect.toFixed(3)
+    );
+
+
+    // ============================================================
+    // 1. 获取所有 network 的真实 bounding box
+    // ============================================================
+
+    networks.forEach(
+        (network: any) => {
+
+            const bb =
+                network.nodes.boundingBox();
+
+
+            network.x1 =
+                bb.x1;
+
+            network.y1 =
+                bb.y1;
+
+            network.x2 =
+                bb.x2;
+
+            network.y2 =
+                bb.y2;
+
+
+            network.width =
+                bb.w;
+
+            network.height =
+                bb.h;
+
+
+            network.centerX =
+                (
+                    bb.x1 +
+                    bb.x2
+                ) / 2;
+
+
+            network.centerY =
+                (
+                    bb.y1 +
+                    bb.y2
+                ) / 2;
+
+        }
+    );
+
+
+    // ============================================================
+    // 2. 搜索顺序
+    //
+    // 大 network → 小 network
+    //
+    // 用于决定如何分行
+    //
+    // 注意：
+    //
+    // 最终显示的时候，每一行会反转为：
+    //
+    // 小 → 大
+    // ============================================================
+
+    const sortedNetworks =
+        [...networks].sort(
+            (
+                a: any,
+                b: any
+            ) => {
+
+                if (
+                    a.nodeCount !==
+                    b.nodeCount
+                ) {
+
+                    return (
+                        b.nodeCount -
+                        a.nodeCount
+                    );
+
+                }
+
+
+                const areaA =
+                    a.width *
+                    a.height;
+
+                const areaB =
+                    b.width *
+                    b.height;
+
+
+                return (
+                    areaB -
+                    areaA
+                );
+
+            }
+        );
+
+
+    console.log(
+        'Sorted networks (large → small):',
+        sortedNetworks.map(
             (n: any) =>
                 `${n.nodeCount} (${Math.round(n.width)}×${Math.round(n.height)})`
         )
@@ -2259,98 +3449,66 @@ ForceLayout.prototype.packNetworks = function (
 
 
     // ============================================================
-    // 3. 计算所有 network 的总面积
+    // 3. 搜索宽度范围
     //
-    // 用面积估计一个合理的正方形尺寸
+    // 完全不考虑 Canvas 大小
     // ============================================================
 
-    let totalArea = 0;
-
-    networks.forEach((network: any) => {
-
-        totalArea +=
-            network.width *
-            network.height;
-
-    });
-
-
-    // ============================================================
-    // 4. 自动寻找最佳 targetWidth
-    //
-    // 不直接使用：
-    //
-    // columns = sqrt(networkCount)
-    //
-    // 而是根据 network 的真实尺寸决定。
-    //
-    // 目标：
-    //
-    //     totalWidth ≈ totalHeight
-    //
-    // ============================================================
-
-    const availableWidth =
+    const maxNetworkWidth =
         Math.max(
-            canvasWidth - 2 * PADDING,
-            1
+            ...sortedNetworks.map(
+                (n: any) =>
+                    n.width
+            )
         );
 
-    const availableHeight =
+
+    const totalNetworkWidth =
+        sortedNetworks.reduce(
+            (
+                sum: number,
+                n: any
+            ) => {
+
+                return (
+                    sum +
+                    n.width
+                );
+
+            },
+            0
+        );
+
+
+    const minWidth =
+        maxNetworkWidth;
+
+
+    const maxWidth =
+        totalNetworkWidth +
+        H_GAP *
         Math.max(
-            canvasHeight - 2 * PADDING,
-            1
-        );
-
-
-    // 初始估计
-    let targetWidth =
-        Math.sqrt(totalArea);
-
-    // Canvas 不是正方形时进行修正
-    targetWidth *=
-        Math.sqrt(
-            availableWidth /
-            availableHeight
-        );
-
-
-    targetWidth =
-        Math.max(
-            targetWidth,
-            200
-        );
-
-    targetWidth =
-        Math.min(
-            targetWidth,
-            availableWidth
+            sortedNetworks.length - 1,
+            0
         );
 
 
     console.log(
-        'Initial targetWidth:',
-        targetWidth
+        'Search width:',
+        minWidth,
+        '→',
+        maxWidth
     );
 
 
     // ============================================================
-    // 5. 根据 targetWidth 模拟分行
+    // 4. 根据 widthLimit 进行分行
     //
-    // 这是整个算法最重要的地方。
+    // 此时使用：
     //
-    // network 按 nodeCount 排序后：
+    // 大 → 小
     //
-    // 大：
-    //   A B
-    //
-    // 中：
-    //   C D E
-    //
-    // 小：
-    //   F G H I
-    //
-    // 不要求每行数量相同。
+    // 方便稳定地确定布局结构
     // ============================================================
 
     const makeRows = (
@@ -2360,111 +3518,123 @@ ForceLayout.prototype.packNetworks = function (
         const rows: any[][] = [];
 
         let currentRow: any[] = [];
+
         let currentWidth = 0;
 
 
-        networks.forEach((network: any) => {
+        sortedNetworks.forEach(
+            (
+                network: any
+            ) => {
 
-            const requiredWidth =
-                currentRow.length === 0
-                    ? network.width
-                    : currentWidth
-                    + H_GAP
-                    + network.width;
-
-
-            // ----------------------------------------------------
-            // 当前 network 放不下
-            // ----------------------------------------------------
-
-            if (
-                currentRow.length > 0 &&
-                requiredWidth > widthLimit
-            ) {
-
-                rows.push(currentRow);
-
-                currentRow = [
-                    network
-                ];
-
-                currentWidth =
+                const networkWidth =
                     network.width;
 
+
+                // =================================================
+                // 第一 个 network
+                // =================================================
+
+                if (
+                    currentRow.length === 0
+                ) {
+
+                    currentRow.push(
+                        network
+                    );
+
+                    currentWidth =
+                        networkWidth;
+
+                    return;
+                }
+
+
+                // =================================================
+                // 尝试加入当前行
+                // =================================================
+
+                const requiredWidth =
+                    currentWidth +
+                    H_GAP +
+                    networkWidth;
+
+
+                // =================================================
+                // 可以加入
+                // =================================================
+
+                if (
+                    requiredWidth <=
+                    widthLimit
+                ) {
+
+                    currentRow.push(
+                        network
+                    );
+
+                    currentWidth =
+                        requiredWidth;
+
+                }
+
+                    // =================================================
+                    // 放不下
+                // =================================================
+
+                else {
+
+                    rows.push(
+                        currentRow
+                    );
+
+
+                    currentRow = [
+                        network
+                    ];
+
+
+                    currentWidth =
+                        networkWidth;
+
+                }
+
             }
-
-                // ----------------------------------------------------
-                // 可以继续放
-            // ----------------------------------------------------
-
-            else {
-
-                currentRow.push(network);
-
-                currentWidth =
-                    requiredWidth;
-
-            }
-
-        });
+        );
 
 
-        if (currentRow.length > 0) {
+        // =========================================================
+        // 最后一行
+        // =========================================================
 
-            rows.push(currentRow);
+        if (
+            currentRow.length > 0
+        ) {
+
+            rows.push(
+                currentRow
+            );
 
         }
 
 
         return rows;
+
     };
 
 
     // ============================================================
-    // 6. 搜索最佳宽度
-    //
-    // 找到：
-    //
-    //     总高度 ≈ 总宽度
-    //
-    // 的布局
+    // 5. 计算 Layout 尺寸
     // ============================================================
 
-    let bestRows: any[][] = [];
-    let bestScore = Number.POSITIVE_INFINITY;
-    let bestWidth = targetWidth;
+    const calculateLayoutSize = (
+        rows: any[][]
+    ) => {
 
-
-    const minWidth = 200;
-
-    const maxWidth =
-        availableWidth;
-
-
-    // 搜索 40 次
-    for (let i = 0; i < 40; i++) {
-
-        const testWidth =
-            minWidth
-            +
-            (
-                maxWidth -
-                minWidth
-            )
-            *
-            i /
-            39;
-
-
-        const rows =
-            makeRows(testWidth);
-
-
-        // --------------------------------------------
-        // 计算真实总高度
-        // --------------------------------------------
+        let totalWidth = 0;
 
         let totalHeight = 0;
+
 
         rows.forEach(
             (
@@ -2472,10 +3642,31 @@ ForceLayout.prototype.packNetworks = function (
                 rowIndex: number
             ) => {
 
+                let rowWidth = 0;
+
                 let rowHeight = 0;
 
+
                 row.forEach(
-                    (network: any) => {
+                    (
+                        network: any,
+                        index: number
+                    ) => {
+
+                        rowWidth +=
+                            network.width;
+
+
+                        if (
+                            index <
+                            row.length - 1
+                        ) {
+
+                            rowWidth +=
+                                H_GAP;
+
+                        }
+
 
                         rowHeight =
                             Math.max(
@@ -2486,7 +3677,17 @@ ForceLayout.prototype.packNetworks = function (
                     }
                 );
 
-                totalHeight += rowHeight;
+
+                totalWidth =
+                    Math.max(
+                        totalWidth,
+                        rowWidth
+                    );
+
+
+                totalHeight +=
+                    rowHeight;
+
 
                 if (
                     rowIndex <
@@ -2502,113 +3703,159 @@ ForceLayout.prototype.packNetworks = function (
         );
 
 
-        // --------------------------------------------
-        // 实际总宽度
-        // --------------------------------------------
+        return {
 
-        let maxRowWidth = 0;
+            width:
+            totalWidth,
 
+            height:
+            totalHeight
 
-        rows.forEach(
-            (row: any[]) => {
+        };
 
-                let rowWidth = 0;
-
-                row.forEach(
-                    (
-                        network: any,
-                        index: number
-                    ) => {
-
-                        rowWidth +=
-                            network.width;
-
-                        if (
-                            index <
-                            row.length - 1
-                        ) {
-
-                            rowWidth +=
-                                H_GAP;
-
-                        }
-
-                    }
-                );
-
-                maxRowWidth =
-                    Math.max(
-                        maxRowWidth,
-                        rowWidth
-                    );
-
-            }
-        );
+    };
 
 
-        // --------------------------------------------
-        // 目标：
-        //
-        // width ≈ height
-        //
-        // 同时不要超过 Canvas
-        // --------------------------------------------
+    // ============================================================
+    // 6. 搜索最佳布局
+    //
+    // 只优化：
+    //
+    //     Layout aspect
+    //
+    // 接近：
+    //
+    //     Canvas aspect
+    // ============================================================
+
+    let bestRows: any[][] = [];
+
+    let bestScore =
+        Number.POSITIVE_INFINITY;
+
+    let bestWidth = 0;
+
+    let bestHeight = 0;
+
+    let bestAspect = 0;
+
+
+    for (
+        let i = 0;
+        i < SEARCH_STEPS;
+        i++
+    ) {
+
+        const testWidth =
+            minWidth +
+            (
+                maxWidth -
+                minWidth
+            ) *
+            i /
+            (
+                SEARCH_STEPS - 1
+            );
+
+
+        // ========================================================
+        // 根据当前 width 分行
+        // ========================================================
+
+        const rows =
+            makeRows(
+                testWidth
+            );
+
+
+        if (
+            !rows ||
+            rows.length === 0
+        ) {
+
+            continue;
+
+        }
+
+
+        // ========================================================
+        // 计算 Layout 尺寸
+        // ========================================================
+
+        const layoutSize =
+            calculateLayoutSize(
+                rows
+            );
+
+
+        const layoutWidth =
+            layoutSize.width;
+
+        const layoutHeight =
+            layoutSize.height;
+
+
+        if (
+            layoutWidth <= 0 ||
+            layoutHeight <= 0
+        ) {
+
+            continue;
+
+        }
+
+
+        // ========================================================
+        // Layout aspect
+        // ========================================================
+
+        const layoutAspect =
+            layoutWidth /
+            layoutHeight;
+
+
+        // ========================================================
+        // Aspect error
+        // ========================================================
 
         const aspectError =
             Math.abs(
                 Math.log(
-                    (
-                        maxRowWidth + 1
-                    )
-                    /
-                    (
-                        totalHeight + 1
-                    )
+                    layoutAspect /
+                    canvasAspect
                 )
             );
 
 
-        // Canvas 越界惩罚
-        let overflowPenalty = 0;
+        // ========================================================
+        // 行数轻微惩罚
+        //
+        // 只有比例非常接近的时候，
+        // 才倾向于少一些行。
+        // ========================================================
+
+        const rowPenalty =
+            rows.length /
+            Math.max(
+                sortedNetworks.length,
+                1
+            );
 
 
-        if (
-            maxRowWidth >
-            availableWidth
-        ) {
-
-            overflowPenalty +=
-                (
-                    maxRowWidth -
-                    availableWidth
-                )
-                *
-                10;
-
-        }
-
-
-        if (
-            totalHeight >
-            availableHeight
-        ) {
-
-            overflowPenalty +=
-                (
-                    totalHeight -
-                    availableHeight
-                )
-                *
-                10;
-
-        }
-
+        // ========================================================
+        // Score
+        //
+        // 比例远远比行数重要
+        // ========================================================
 
         const score =
-            aspectError
-            +
-            overflowPenalty;
+            aspectError * 100 +
+            rowPenalty * 0.01;
 
+
+        // ========================================================
+        // 保存最佳
+        // ========================================================
 
         if (
             score <
@@ -2622,7 +3869,13 @@ ForceLayout.prototype.packNetworks = function (
                 rows;
 
             bestWidth =
-                testWidth;
+                layoutWidth;
+
+            bestHeight =
+                layoutHeight;
+
+            bestAspect =
+                layoutAspect;
 
         }
 
@@ -2630,7 +3883,73 @@ ForceLayout.prototype.packNetworks = function (
 
 
     // ============================================================
-    // 7. 输出最终分行结果
+    // 7. Fallback
+    // ============================================================
+
+    if (
+        bestRows.length === 0
+    ) {
+
+        bestRows =
+            makeRows(
+                minWidth
+            );
+
+
+        const fallbackSize =
+            calculateLayoutSize(
+                bestRows
+            );
+
+
+        bestWidth =
+            fallbackSize.width;
+
+        bestHeight =
+            fallbackSize.height;
+
+        bestAspect =
+            bestWidth /
+            bestHeight;
+
+    }
+
+
+    // ============================================================
+    // 8. 最终排列顺序
+    //
+    // 这里是关键：
+    //
+    // 搜索时：
+    //
+    //     大 → 小
+    //
+    // 真正排列：
+    //
+    //     小 → 大
+    //
+    // 因此每一行：
+    //
+    //     小 network 在左
+    //     大 network 在右
+    // ============================================================
+
+    const finalRows =
+        bestRows.map(
+            (
+                row: any[]
+            ) => {
+
+                return [
+                    ...row
+                ].reverse();
+
+            }
+        );
+
+
+    // ============================================================
+    // 9. 输出最佳结果
     // ============================================================
 
     console.log(
@@ -2638,27 +3957,56 @@ ForceLayout.prototype.packNetworks = function (
     );
 
     console.log(
-        'Best target width:',
-        bestWidth
+        'Canvas:',
+        `${canvasWidth} × ${canvasHeight}`
+    );
+
+    console.log(
+        'Canvas aspect:',
+        canvasAspect.toFixed(3)
+    );
+
+    console.log(
+        'Best layout:',
+        `${bestWidth} × ${bestHeight}`
+    );
+
+    console.log(
+        'Best layout aspect:',
+        bestAspect.toFixed(3)
+    );
+
+    console.log(
+        'Aspect difference:',
+        Math.abs(
+            bestAspect -
+            canvasAspect
+        ).toFixed(3)
     );
 
     console.log(
         'Rows:',
-        bestRows.length
+        finalRows.length
     );
 
 
-    bestRows.forEach(
+    // ============================================================
+    // 10. 输出最终 rows
+    // ============================================================
+
+    finalRows.forEach(
         (
             row: any[],
-            index: number
+            rowIndex: number
         ) => {
 
             console.log(
-                `Row ${index + 1}:`,
+                `Row ${rowIndex + 1}:`,
                 row.map(
-                    (n: any) =>
-                        `${n.nodeCount} nodes`
+                    (
+                        n: any
+                    ) =>
+                        `${n.nodeCount} nodes (${Math.round(n.width)}×${Math.round(n.height)})`
                 )
             );
 
@@ -2667,16 +4015,19 @@ ForceLayout.prototype.packNetworks = function (
 
 
     // ============================================================
-    // 8. 计算每一行真实宽度和高度
+    // 11. 计算每一行真实尺寸
     // ============================================================
 
     const rowInfos: any[] = [];
 
 
-    bestRows.forEach(
-        (row: any[]) => {
+    finalRows.forEach(
+        (
+            row: any[]
+        ) => {
 
             let rowWidth = 0;
+
             let rowHeight = 0;
 
 
@@ -2688,6 +4039,7 @@ ForceLayout.prototype.packNetworks = function (
 
                     rowWidth +=
                         network.width;
+
 
                     if (
                         index <
@@ -2727,10 +4079,11 @@ ForceLayout.prototype.packNetworks = function (
 
 
     // ============================================================
-    // 9. 计算整个布局实际大小
+    // 12. 计算最终 Layout 尺寸
     // ============================================================
 
     let totalLayoutWidth = 0;
+
     let totalLayoutHeight = 0;
 
 
@@ -2765,6 +4118,19 @@ ForceLayout.prototype.packNetworks = function (
     );
 
 
+    // ============================================================
+    // 13. 最终 aspect
+    // ============================================================
+
+    const finalAspect =
+        totalLayoutWidth /
+        totalLayoutHeight;
+
+
+    console.log(
+        '======================================'
+    );
+
     console.log(
         'Final layout size:',
         totalLayoutWidth,
@@ -2772,9 +4138,36 @@ ForceLayout.prototype.packNetworks = function (
         totalLayoutHeight
     );
 
+    console.log(
+        'Canvas size:',
+        canvasWidth,
+        '×',
+        canvasHeight
+    );
+
+    console.log(
+        'Canvas aspect:',
+        canvasAspect.toFixed(3)
+    );
+
+    console.log(
+        'Layout aspect:',
+        finalAspect.toFixed(3)
+    );
+
+    console.log(
+        'Aspect difference:',
+        Math.abs(
+            finalAspect -
+            canvasAspect
+        ).toFixed(3)
+    );
+
 
     // ============================================================
-    // 10. 整个布局居中
+    // 14. 整体居中
+    //
+    // 不考虑 Layout 是否超过 Canvas
     // ============================================================
 
     const layoutStartX =
@@ -2792,7 +4185,7 @@ ForceLayout.prototype.packNetworks = function (
 
 
     // ============================================================
-    // 11. 真正排列
+    // 15. 真正排列 network
     // ============================================================
 
     let currentY =
@@ -2801,40 +4194,54 @@ ForceLayout.prototype.packNetworks = function (
 
     rowInfos.forEach(
         (
-            info: any,
-            rowIndex: number
+            info: any
         ) => {
 
             const row =
                 info.row;
+
+
+            // ----------------------------------------------------
+            // 当前行从左到右
+            //
+            // 此时 row 已经是：
+            //
+            // 小 → 大
+            // ----------------------------------------------------
 
             let currentX =
                 layoutStartX;
 
 
             row.forEach(
-                (network: any) => {
+                (
+                    network: any
+                ) => {
+
+                    // =================================================
+                    // 获取 network 当前 bounding box
+                    // =================================================
 
                     const bb =
                         network.nodes.boundingBox();
 
 
-                    // ----------------------------------------
-                    // 左对齐：
+                    // =================================================
+                    // X
                     //
-                    // bb.x1 → currentX
-                    // ----------------------------------------
+                    // 左边界 → currentX
+                    // =================================================
 
                     const dx =
                         currentX -
                         bb.x1;
 
 
-                    // ----------------------------------------
-                    // 垂直方向：
+                    // =================================================
+                    // Y
                     //
-                    // network 在这一行垂直居中
-                    // ----------------------------------------
+                    // 当前 network 在 row 中垂直居中
+                    // =================================================
 
                     const networkCenterY =
                         (
@@ -2853,13 +4260,14 @@ ForceLayout.prototype.packNetworks = function (
                         networkCenterY;
 
 
-                    // ----------------------------------------
+                    // =================================================
                     // 移动 network
-                    // ----------------------------------------
+                    // =================================================
 
                     network.nodes.forEach(
                         (
-                            node: cytoscape.NodeSingular
+                            node:
+                            cytoscape.NodeSingular
                         ) => {
 
                             const pos =
@@ -2882,9 +4290,9 @@ ForceLayout.prototype.packNetworks = function (
                     );
 
 
-                    // ----------------------------------------
+                    // =================================================
                     // 下一个 network
-                    // ----------------------------------------
+                    // =================================================
 
                     currentX +=
                         network.width +
@@ -2894,9 +4302,9 @@ ForceLayout.prototype.packNetworks = function (
             );
 
 
-            // --------------------------------------------
+            // ========================================================
             // 下一行
-            // --------------------------------------------
+            // ========================================================
 
             currentY +=
                 info.height +
@@ -2907,7 +4315,7 @@ ForceLayout.prototype.packNetworks = function (
 
 
     // ============================================================
-    // 12. 最终检查
+    // 16. 最终检查
     // ============================================================
 
     console.log(
@@ -2925,19 +4333,42 @@ ForceLayout.prototype.packNetworks = function (
     );
 
     console.log(
-        'Aspect ratio:',
+        'Canvas aspect:',
+        canvasAspect.toFixed(3)
+    );
+
+    console.log(
+        'Layout aspect:',
         (
             totalLayoutWidth /
             totalLayoutHeight
         ).toFixed(3)
     );
 
+    console.log(
+        'Aspect difference:',
+        Math.abs(
+            (
+                totalLayoutWidth /
+                totalLayoutHeight
+            ) -
+            canvasAspect
+        ).toFixed(3)
+    );
+
 
     // ============================================================
-    // 13. 输出最终每个网络位置
+    // 17. 输出最终 network 位置
+    //
+    // 此时应该看到：
+    //
+    // 每一行：
+    //
+    //     小 → 大
+    //
     // ============================================================
 
-    bestRows.forEach(
+    finalRows.forEach(
         (
             row: any[],
             rowIndex: number
@@ -2966,6 +4397,7 @@ ForceLayout.prototype.packNetworks = function (
 
         }
     );
+
 };
 
 
