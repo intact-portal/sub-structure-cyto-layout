@@ -1828,6 +1828,13 @@ ForceLayout.prototype.run = function () {
                             currentRingSize += baseNodesInFirstRing;
                         }
 
+                        // If the last ring contains only one node,
+                        // move it to the previous ring.
+                        if (rings.length > 1 && rings[rings.length - 1].length === 1) {
+                            const lastNode = rings.pop()![0];
+                            rings[rings.length - 1].push(lastNode);
+                        }
+
                         // 2. Position the nodes ring by ring
                         rings.forEach((ringNodes, ringIdx) => {
                             const ringNumber = ringIdx + 1;
@@ -2165,9 +2172,7 @@ ForceLayout.prototype.run = function () {
                                 // 5. 排序 / 圆周节点
                                 // ============================================================
 
-                                const sorted =
-                                    gNodes.slice(1);
-
+                                const sorted = gNodes.slice(1);
 
                                 // ============================================================
                                 // 6. 搜索最佳旋转角度
@@ -2198,7 +2203,7 @@ ForceLayout.prototype.run = function () {
                                             const angle =
                                                 (
                                                     i /
-                                                    count
+                                                    sorted.length
                                                 ) *
                                                 2 *
                                                 Math.PI
@@ -2267,7 +2272,7 @@ ForceLayout.prototype.run = function () {
                                         const angle =
                                             (
                                                 i /
-                                                count
+                                                sorted.length
                                             ) *
                                             2 *
                                             Math.PI
@@ -2304,49 +2309,6 @@ ForceLayout.prototype.run = function () {
                                     y: cy
 
                                 });
-
-
-                                // ============================================================
-                                // 9. 输出调试信息
-                                // ============================================================
-
-                                console.log(
-                                    '======================================'
-                                );
-
-                                console.log(
-                                    'Circle layout'
-                                );
-
-                                console.log(
-                                    'Node count:',
-                                    count
-                                );
-
-                                console.log(
-                                    'Center:',
-                                    `(${cx.toFixed(2)}, ${cy.toFixed(2)})`
-                                );
-
-                                console.log(
-                                    'Radius:',
-                                    radius.toFixed(2)
-                                );
-
-                                console.log(
-                                    'Best rotate:',
-                                    `${bestRotate}°`
-                                );
-
-                                console.log(
-                                    'Total edge length:',
-                                    minTotalLength.toFixed(2)
-                                );
-
-                                console.log(
-                                    '======================================'
-                                );
-
                             }
 
                         }

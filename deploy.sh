@@ -39,7 +39,7 @@ git commit -m "Deploy to GitHub Pages"
 
 # Push to gh-pages branch
 echo "Pushing to gh-pages..."
-git push -f https://github.com/intact-portal/sub-structure-cyto-layout.git HEAD:gh-pages
+git push -f git@github.com:intact-portal/sub-structure-cyto-layout.git HEAD:gh-pages
 
 # Cleanup
 cd ..
