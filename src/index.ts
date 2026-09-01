@@ -240,12 +240,11 @@ function totalEdgeLength(edges: EdgeCollection) {
 
 /**
  * 将 Node 数组排列成矩形矩阵
- * @param nodes Cytoscape 节点数组
- * @param center 矩形中心坐标
- * @param dirVector 长边（行进）方向向量
- * @param rowSpacing 行与行之间的距离
- * @param colSpacing 同一行内点与点的距离
- * @param cols 每行固定的点数（不传则自动计算为接近正方形的比例）
+ *
+ * dirVector：矩形长边方向
+ * colSpacing：长边方向上节点之间的距离
+ * rowSpacing：短边方向上行与行之间的距离
+ * cols：每行节点数量，不传则自动计算
  */
 function layoutRectangular(
     nodes: NodeSingular[],
@@ -256,44 +255,133 @@ function layoutRectangular(
     cols?: number
 ) {
     const n = nodes.length;
-    if (n === 0) return;
 
-    // 1. Determine Grid Dimensions
-    // 'finalCols' will be the number of nodes in the "Vertical Line"
-    let finalCols = cols || Math.ceil(Math.sqrt(n));
-    if (n < 5) finalCols = n;
+    if (n === 0) {
+        return;
+    }
+
+    // ============================================================
+    // 1. 确定矩阵尺寸
+    // ============================================================
+
+    let finalCols: number;
+
+    if (cols !== undefined && cols > 0) {
+        finalCols = Math.min(cols, n);
+    } else {
+        finalCols = Math.ceil(Math.sqrt(n));
+
+        // 少量节点直接放一行
+        if (n < 5) {
+            finalCols = n;
+        }
+    }
 
     const rows = Math.ceil(n / finalCols);
 
-    // 2. Normalize Vectors
-    const mag = Math.max(Math.sqrt(dirVector.x ** 2 + dirVector.y ** 2), 1);
-    const uForward = {x: dirVector.x / mag, y: dirVector.y / mag};
-    const uSide = {x: -uForward.y, y: uForward.x}; // Perpendicular (Vertical) axis
+    // ============================================================
+    // 2. 计算两个单位方向向量
+    //
+    // uLong  = 长边方向 = dirVector
+    // uShort = 短边方向 = 垂直于 dirVector
+    // ============================================================
 
-    // 3. Calculate Total Bounds for Centering
-    const totalForwardDepth = (rows - 1) * rowSpacing;
+    const magnitude = Math.sqrt(
+        dirVector.x * dirVector.x +
+        dirVector.y * dirVector.y
+    );
+
+    const safeMagnitude = Math.max(magnitude, 0.000001);
+
+    const uLong = {
+        x: dirVector.x / safeMagnitude,
+        y: dirVector.y / safeMagnitude
+    };
+
+    const uShort = {
+        x: -uLong.y,
+        y: uLong.x
+    };
+
+    // ============================================================
+    // 3. 遍历所有 Node
+    // ============================================================
 
     nodes.forEach((node, i) => {
-        const r = Math.floor(i / finalCols); // Row index (Depth)
-        const c = i % finalCols;             // Column index (Side-to-Side)
 
-        // Handle centering for the last row if it's incomplete
-        const isLastRow = r === rows - 1;
-        const nodesInThisRow = isLastRow ? (n % finalCols || finalCols) : finalCols;
+        // 当前节点所在的行
+        const row = Math.floor(i / finalCols);
 
-        // 4. Calculate Offsets
-        // Move "Forward" along the dirVector
-        const offsetForward = (r * rowSpacing) - (totalForwardDepth / 2);
+        // 当前节点所在的列
+        const col = i % finalCols;
 
-        // Move "Side-to-Side" along the perpendicular axis
-        const currentRowWidth = (nodesInThisRow - 1) * colSpacing;
-        const offsetSide = (c * colSpacing) - (currentRowWidth / 2);
+        // --------------------------------------------------------
+        // 当前行实际有多少个节点
+        // --------------------------------------------------------
 
-        // 5. Apply Position
-        // Final position = Center + (Forward Offset * Forward Unit) + (Side Offset * Side Unit)
+        const isLastRow = row === rows - 1;
+
+        const nodesInThisRow =
+            isLastRow
+                ? (n % finalCols || finalCols)
+                : finalCols;
+
+        // ========================================================
+        // 4. 长边方向的位置
+        //
+        // 例如：
+        //
+        // ● ● ● ●
+        //
+        // 会围绕 center 对称
+        // ========================================================
+
+        const longWidth =
+            (nodesInThisRow - 1) * colSpacing;
+
+        const offsetLong =
+            col * colSpacing - longWidth / 2;
+
+        // ========================================================
+        // 5. 短边方向的位置
+        //
+        // 例如：
+        //
+        // ● ● ● ●
+        // ● ● ● ●
+        // ● ●
+        //
+        // 每一行整体居中
+        // ========================================================
+
+        const totalShortHeight =
+            (rows - 1) * rowSpacing;
+
+        const offsetShort =
+            row * rowSpacing - totalShortHeight / 2;
+
+        // ========================================================
+        // 6. 计算最终坐标
+        //
+        // position =
+        //      center
+        //    + 长边方向偏移
+        //    + 短边方向偏移
+        // ========================================================
+
+        const x =
+            center.x +
+            offsetLong * uLong.x +
+            offsetShort * uShort.x;
+
+        const y =
+            center.y +
+            offsetLong * uLong.y +
+            offsetShort * uShort.y;
+
         node.position({
-            x: center.x + (offsetForward * uForward.x) + (offsetSide * uSide.x),
-            y: center.y + (offsetForward * uForward.y) + (offsetSide * uSide.y)
+            x,
+            y
         });
     });
 }
