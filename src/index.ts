@@ -271,13 +271,15 @@ function layoutRectangular(
     } else {
         finalCols = Math.ceil(Math.sqrt(n));
 
-        // 少量节点直接放一行
-        if (n < 5) {
-            finalCols = n;
-        }
     }
 
-    const rows = Math.ceil(n / finalCols);
+    let rows = Math.ceil(n / finalCols);
+
+    // 少量节点直接放一行
+    if (n < 5) {
+        finalCols = 1;
+        rows = n;
+    }
 
     // ============================================================
     // 2. 计算两个单位方向向量
@@ -3331,7 +3333,9 @@ function rotateNetworkToMinimumBoundingBox(
 
 }
 
-// If there are multiple networks, organize them into multiple rows
+
+// If there are multiple networks, organize them into multiple rows.
+// Networks with similar sizes are preferentially placed in the same row.
 ForceLayout.prototype.packNetworks = function (
     networks: any[]
 ): void {
@@ -3342,7 +3346,7 @@ ForceLayout.prototype.packNetworks = function (
 
 
     // ============================================================
-    // Canvas
+    // 1. Canvas
     // ============================================================
 
     const container = this.cy.container();
@@ -3354,15 +3358,20 @@ ForceLayout.prototype.packNetworks = function (
         container?.clientHeight ?? 800;
 
 
+    const canvasAspect =
+        canvasWidth /
+        canvasHeight;
+
+
+    console.log('Canvas:', canvasWidth, canvasHeight);
     console.log(
-        'Canvas:',
-        canvasWidth,
-        canvasHeight
+        'Canvas aspect:',
+        canvasAspect.toFixed(3)
     );
 
 
     // ============================================================
-    // 参数
+    // 2. Parameters
     // ============================================================
 
     const H_GAP = 60;
@@ -3372,25 +3381,28 @@ ForceLayout.prototype.packNetworks = function (
     const SEARCH_STEPS = 300;
 
 
-    // ============================================================
-    // Canvas aspect
+    // ------------------------------------------------------------
+    // Weight
     //
-    // 唯一真正需要匹配的目标
+    // aspect:
+    //     整体布局比例
+    //
+    // similarity:
+    //     同一行 network 尺寸相似程度
+    //
+    // balance:
+    //     避免某一行特别拥挤
+    // ------------------------------------------------------------
+
+    const ASPECT_WEIGHT = 0.60;
+
+    const SIZE_SIMILARITY_WEIGHT = 0.30;
+
+    const ROW_BALANCE_WEIGHT = 0.10;
+
+
     // ============================================================
-
-    const canvasAspect =
-        canvasWidth /
-        canvasHeight;
-
-
-    console.log(
-        'Canvas aspect:',
-        canvasAspect.toFixed(3)
-    );
-
-
-    // ============================================================
-    // 1. 获取所有 network 的真实 bounding box
+    // 3. Get real bounding boxes
     // ============================================================
 
     networks.forEach(
@@ -3400,55 +3412,62 @@ ForceLayout.prototype.packNetworks = function (
                 network.nodes.boundingBox();
 
 
-            network.x1 =
-                bb.x1;
+            network.x1 = bb.x1;
+            network.y1 = bb.y1;
+            network.x2 = bb.x2;
+            network.y2 = bb.y2;
 
-            network.y1 =
-                bb.y1;
-
-            network.x2 =
-                bb.x2;
-
-            network.y2 =
-                bb.y2;
-
-
-            network.width =
-                bb.w;
-
-            network.height =
-                bb.h;
-
+            network.width = bb.w;
+            network.height = bb.h;
 
             network.centerX =
-                (
-                    bb.x1 +
-                    bb.x2
-                ) / 2;
-
+                (bb.x1 + bb.x2) / 2;
 
             network.centerY =
-                (
-                    bb.y1 +
-                    bb.y2
-                ) / 2;
+                (bb.y1 + bb.y2) / 2;
+
+
+            // ----------------------------------------------------
+            // 一个综合尺寸指标
+            //
+            // 使用 sqrt(area)，比单纯 width 更合理
+            // ----------------------------------------------------
+
+            network.area =
+                Math.max(
+                    network.width *
+                    network.height,
+                    1
+                );
+
+            network.size =
+                Math.sqrt(
+                    network.area
+                );
+
+
+            // ----------------------------------------------------
+            // aspect
+            // ----------------------------------------------------
+
+            network.aspect =
+                network.width /
+                Math.max(
+                    network.height,
+                    1
+                );
 
         }
     );
 
 
     // ============================================================
-    // 2. 搜索顺序
+    // 4. Sort
     //
-    // 大 network → 小 network
+    // 大 → 小
     //
-    // 用于决定如何分行
-    //
-    // 注意：
-    //
-    // 最终显示的时候，每一行会反转为：
-    //
-    // 小 → 大
+    // size 是主要依据
+    // nodeCount 作为辅助
     // ============================================================
 
     const sortedNetworks =
@@ -3471,18 +3490,9 @@ ForceLayout.prototype.packNetworks = function (
                 }
 
 
-                const areaA =
-                    a.width *
-                    a.height;
-
-                const areaB =
-                    b.width *
-                    b.height;
-
-
                 return (
-                    areaB -
-                    areaA
+                    b.size -
+                    a.size
                 );
 
             }
@@ -3490,7 +3500,7 @@ ForceLayout.prototype.packNetworks = function (
 
 
     console.log(
-        'Sorted networks (large → small):',
+        'Sorted networks:',
         sortedNetworks.map(
             (n: any) =>
                 `${n.nodeCount} (${Math.round(n.width)}×${Math.round(n.height)})`
@@ -3499,9 +3509,66 @@ ForceLayout.prototype.packNetworks = function (
 
 
     // ============================================================
-    // 3. 搜索宽度范围
+    // 5. Size normalization
     //
-    // 完全不考虑 Canvas 大小
+    // 用 log(size) 计算尺寸差异
+    //
+    // 这样：
+    //
+    // 100 → 200
+    //
+    // 和
+    //
+    // 500 → 1000
+    //
+    // 都被认为是相同的 2 倍差异。
+    // ============================================================
+
+    const allSizes =
+        sortedNetworks.map(
+            (n: any) =>
+                Math.log(
+                    Math.max(n.size, 1)
+                )
+        );
+
+
+    const minLogSize =
+        Math.min(...allSizes);
+
+    const maxLogSize =
+        Math.max(...allSizes);
+
+
+    const sizeRange =
+        Math.max(
+            maxLogSize -
+            minLogSize,
+            0.0001
+        );
+
+
+    sortedNetworks.forEach(
+        (network: any) => {
+
+            network.normalizedSize =
+                (
+                    Math.log(
+                        Math.max(
+                            network.size,
+                            1
+                        )
+                    ) -
+                    minLogSize
+                ) /
+                sizeRange;
+
+        }
+    );
+
+
+    // ============================================================
+    // 6. Width range
     // ============================================================
 
     const maxNetworkWidth =
@@ -3552,13 +3619,19 @@ ForceLayout.prototype.packNetworks = function (
 
 
     // ============================================================
-    // 4. 根据 widthLimit 进行分行
+    // 7. Make rows
     //
-    // 此时使用：
+    // 与原来的区别：
     //
-    // 大 → 小
+    // 不只是 widthLimit。
     //
-    // 方便稳定地确定布局结构
+    // 每次准备加入一个 network 时，
+    // 会检查：
+    //
+    //     1. width 是否放得下
+    //     2. size 是否与当前 row 接近
+    //
+    // 但是这里仍然保持大 → 小的稳定顺序。
     // ============================================================
 
     const makeRows = (
@@ -3582,7 +3655,7 @@ ForceLayout.prototype.packNetworks = function (
 
 
                 // =================================================
-                // 第一 个 network
+                // First network
                 // =================================================
 
                 if (
@@ -3597,11 +3670,12 @@ ForceLayout.prototype.packNetworks = function (
                         networkWidth;
 
                     return;
+
                 }
 
 
                 // =================================================
-                // 尝试加入当前行
+                // Width check
                 // =================================================
 
                 const requiredWidth =
@@ -3610,29 +3684,10 @@ ForceLayout.prototype.packNetworks = function (
                     networkWidth;
 
 
-                // =================================================
-                // 可以加入
-                // =================================================
-
                 if (
-                    requiredWidth <=
+                    requiredWidth >
                     widthLimit
                 ) {
-
-                    currentRow.push(
-                        network
-                    );
-
-                    currentWidth =
-                        requiredWidth;
-
-                }
-
-                    // =================================================
-                    // 放不下
-                // =================================================
-
-                else {
 
                     rows.push(
                         currentRow
@@ -3647,14 +3702,87 @@ ForceLayout.prototype.packNetworks = function (
                     currentWidth =
                         networkWidth;
 
+
+                    return;
+
                 }
+
+
+                // =================================================
+                // Size similarity check
+                // =================================================
+
+                const currentMeanSize =
+                    currentRow.reduce(
+                        (
+                            sum: number,
+                            n: any
+                        ) =>
+                            sum +
+                            n.normalizedSize,
+                        0
+                    ) /
+                    currentRow.length;
+
+
+                const sizeDifference =
+                    Math.abs(
+                        network.normalizedSize -
+                        currentMeanSize
+                    );
+
+
+                // -------------------------------------------------
+                // 不要让尺寸差距太大的 network 自动进入同一行
+                //
+                // 但是不能太严格，否则会产生大量行。
+                // -------------------------------------------------
+
+                const SIZE_THRESHOLD = 0.35;
+
+
+                if (
+                    sizeDifference >
+                    SIZE_THRESHOLD &&
+                    currentRow.length >= 2
+                ) {
+
+                    rows.push(
+                        currentRow
+                    );
+
+
+                    currentRow = [
+                        network
+                    ];
+
+
+                    currentWidth =
+                        networkWidth;
+
+
+                    return;
+
+                }
+
+
+                // =================================================
+                // Add
+                // =================================================
+
+                currentRow.push(
+                    network
+                );
+
+                currentWidth =
+                    requiredWidth;
 
             }
         );
 
 
         // =========================================================
-        // 最后一行
+        // Last row
         // =========================================================
 
         if (
@@ -3674,7 +3802,7 @@ ForceLayout.prototype.packNetworks = function (
 
 
     // ============================================================
-    // 5. 计算 Layout 尺寸
+    // 8. Calculate layout size
     // ============================================================
 
     const calculateLayoutSize = (
@@ -3754,28 +3882,216 @@ ForceLayout.prototype.packNetworks = function (
 
 
         return {
-
-            width:
-            totalWidth,
-
-            height:
-            totalHeight
-
+            width: totalWidth,
+            height: totalHeight
         };
 
     };
 
 
     // ============================================================
-    // 6. 搜索最佳布局
+    // 9. Calculate row size similarity score
     //
-    // 只优化：
+    // 0 = 非常好
+    // 1 = 非常差
     //
-    //     Layout aspect
+    // 使用 row 内最大/最小尺寸比例。
     //
-    // 接近：
+    // 例如：
     //
-    //     Canvas aspect
+    // 100, 110, 120
+    //
+    // → 很好
+    //
+    // 100, 500, 1000
+    //
+    // → 很差
+    // ============================================================
+
+    const calculateSizeSimilarity =
+        (
+            rows: any[][]
+        ): number => {
+
+            if (
+                rows.length === 0
+            ) {
+
+                return 1;
+
+            }
+
+
+            let totalPenalty = 0;
+
+            let totalWeight = 0;
+
+
+            rows.forEach(
+                (
+                    row: any[]
+                ) => {
+
+                    if (
+                        row.length <= 1
+                    ) {
+
+                        return;
+
+                    }
+
+
+                    const sizes =
+                        row.map(
+                            (n: any) =>
+                                Math.log(
+                                    Math.max(
+                                        n.size,
+                                        1
+                                    )
+                                )
+                        );
+
+
+                    const min =
+                        Math.min(
+                            ...sizes
+                        );
+
+                    const max =
+                        Math.max(
+                            ...sizes
+                        );
+
+
+                    const difference =
+                        max - min;
+
+
+                    // ------------------------------------------------
+                    // row 越大，惩罚越大
+                    // ------------------------------------------------
+
+                    const weight =
+                        row.length;
+
+
+                    totalPenalty +=
+                        difference *
+                        weight;
+
+                    totalWeight +=
+                        weight;
+
+                }
+            );
+
+
+            if (
+                totalWeight === 0
+            ) {
+
+                return 0;
+
+            }
+
+
+            return (
+                totalPenalty /
+                totalWeight /
+                Math.max(
+                    sizeRange,
+                    0.0001
+                )
+            );
+
+        };
+
+
+    // ============================================================
+    // 10. Row balance score
+    //
+    // 避免：
+    //
+    // Row 1: 6 networks
+    // Row 2: 1 network
+    //
+    // 这种极端情况。
+    // ============================================================
+
+    const calculateRowBalance =
+        (
+            rows: any[][]
+        ): number => {
+
+            if (
+                rows.length <= 1
+            ) {
+
+                return 0;
+
+            }
+
+
+            const counts =
+                rows.map(
+                    (row: any[]) =>
+                        row.length
+                );
+
+
+            const mean =
+                counts.reduce(
+                    (
+                        a: number,
+                        b: number
+                    ) =>
+                        a + b,
+                    0
+                ) /
+                counts.length;
+
+
+            if (
+                mean <= 0
+            ) {
+
+                return 0;
+
+            }
+
+
+            const variance =
+                counts.reduce(
+                    (
+                        sum: number,
+                        count: number
+                    ) => {
+
+                        return (
+                            sum +
+                            Math.pow(
+                                count - mean,
+                                2
+                            )
+                        );
+
+                    },
+                    0
+                ) /
+                counts.length;
+
+
+            return (
+                Math.sqrt(variance) /
+                mean
+            );
+
+        };
+
+
+    // ============================================================
+    // 11. Search best layout
     // ============================================================
 
     let bestRows: any[][] = [];
@@ -3788,6 +4104,8 @@ ForceLayout.prototype.packNetworks = function (
     let bestHeight = 0;
 
     let bestAspect = 0;
+
+    let bestSimilarity = 0;
 
 
     for (
@@ -3803,13 +4121,14 @@ ForceLayout.prototype.packNetworks = function (
                 minWidth
             ) *
             i /
-            (
-                SEARCH_STEPS - 1
+            Math.max(
+                SEARCH_STEPS - 1,
+                1
             );
 
 
         // ========================================================
-        // 根据当前 width 分行
+        // Make rows
         // ========================================================
 
         const rows =
@@ -3829,7 +4148,7 @@ ForceLayout.prototype.packNetworks = function (
 
 
         // ========================================================
-        // 计算 Layout 尺寸
+        // Layout size
         // ========================================================
 
         const layoutSize =
@@ -3878,10 +4197,29 @@ ForceLayout.prototype.packNetworks = function (
 
 
         // ========================================================
-        // 行数轻微惩罚
+        // Size similarity
+        // ========================================================
+
+        const similarityError =
+            calculateSizeSimilarity(
+                rows
+            );
+
+
+        // ========================================================
+        // Row balance
+        // ========================================================
+
+        const rowBalanceError =
+            calculateRowBalance(
+                rows
+            );
+
+
+        // ========================================================
+        // Row count
         //
-        // 只有比例非常接近的时候，
-        // 才倾向于少一些行。
+        // 非常轻微的惩罚
         // ========================================================
 
         const rowPenalty =
@@ -3893,18 +4231,40 @@ ForceLayout.prototype.packNetworks = function (
 
 
         // ========================================================
-        // Score
+        // Final score
         //
-        // 比例远远比行数重要
+        // 重点：
+        //
+        // aspect 仍然是第一目标
+        //
+        // 但 size similarity 明显参与优化。
         // ========================================================
 
         const score =
-            aspectError * 100 +
-            rowPenalty * 0.01;
+            aspectError *
+            ASPECT_WEIGHT *
+
+            100
+
+            +
+
+            similarityError *
+            SIZE_SIMILARITY_WEIGHT *
+            10
+
+            +
+
+            rowBalanceError *
+            ROW_BALANCE_WEIGHT
+
+            +
+
+            rowPenalty *
+            0.01;
 
 
         // ========================================================
-        // 保存最佳
+        // Save best
         // ========================================================
 
         if (
@@ -3927,13 +4287,16 @@ ForceLayout.prototype.packNetworks = function (
             bestAspect =
                 layoutAspect;
 
+            bestSimilarity =
+                similarityError;
+
         }
 
     }
 
 
     // ============================================================
-    // 7. Fallback
+    // 12. Fallback
     // ============================================================
 
     if (
@@ -3960,28 +4323,29 @@ ForceLayout.prototype.packNetworks = function (
 
         bestAspect =
             bestWidth /
-            bestHeight;
+            Math.max(
+                bestHeight,
+                1
+            );
+
+        bestSimilarity =
+            calculateSizeSimilarity(
+                bestRows
+            );
 
     }
 
 
     // ============================================================
-    // 8. 最终排列顺序
+    // 13. Final order
     //
-    // 这里是关键：
-    //
-    // 搜索时：
+    // 搜索：
     //
     //     大 → 小
     //
-    // 真正排列：
+    // 显示：
     //
     //     小 → 大
-    //
-    // 因此每一行：
-    //
-    //     小 network 在左
-    //     大 network 在右
     // ============================================================
 
     const finalRows =
@@ -3999,7 +4363,7 @@ ForceLayout.prototype.packNetworks = function (
 
 
     // ============================================================
-    // 9. 输出最佳结果
+    // 14. Output result
     // ============================================================
 
     console.log(
@@ -4035,13 +4399,18 @@ ForceLayout.prototype.packNetworks = function (
     );
 
     console.log(
+        'Size similarity error:',
+        bestSimilarity.toFixed(3)
+    );
+
+    console.log(
         'Rows:',
         finalRows.length
     );
 
 
     // ============================================================
-    // 10. 输出最终 rows
+    // 15. Output rows
     // ============================================================
 
     finalRows.forEach(
@@ -4065,7 +4434,7 @@ ForceLayout.prototype.packNetworks = function (
 
 
     // ============================================================
-    // 11. 计算每一行真实尺寸
+    // 16. Calculate row infos
     // ============================================================
 
     const rowInfos: any[] = [];
@@ -4113,15 +4482,9 @@ ForceLayout.prototype.packNetworks = function (
 
 
             rowInfos.push({
-
                 row,
-
-                width:
-                rowWidth,
-
-                height:
-                rowHeight
-
+                width: rowWidth,
+                height: rowHeight
             });
 
         }
@@ -4129,7 +4492,7 @@ ForceLayout.prototype.packNetworks = function (
 
 
     // ============================================================
-    // 12. 计算最终 Layout 尺寸
+    // 17. Final layout size
     // ============================================================
 
     let totalLayoutWidth = 0;
@@ -4168,14 +4531,17 @@ ForceLayout.prototype.packNetworks = function (
     );
 
 
-    // ============================================================
-    // 13. 最终 aspect
-    // ============================================================
-
     const finalAspect =
         totalLayoutWidth /
-        totalLayoutHeight;
+        Math.max(
+            totalLayoutHeight,
+            1
+        );
 
+
+    // ============================================================
+    // 18. Final log
+    // ============================================================
 
     console.log(
         '======================================'
@@ -4215,9 +4581,7 @@ ForceLayout.prototype.packNetworks = function (
 
 
     // ============================================================
-    // 14. 整体居中
-    //
-    // 不考虑 Layout 是否超过 Canvas
+    // 19. Center layout
     // ============================================================
 
     const layoutStartX =
@@ -4235,7 +4599,7 @@ ForceLayout.prototype.packNetworks = function (
 
 
     // ============================================================
-    // 15. 真正排列 network
+    // 20. Pack networks
     // ============================================================
 
     let currentY =
@@ -4251,14 +4615,6 @@ ForceLayout.prototype.packNetworks = function (
                 info.row;
 
 
-            // ----------------------------------------------------
-            // 当前行从左到右
-            //
-            // 此时 row 已经是：
-            //
-            // 小 → 大
-            // ----------------------------------------------------
-
             let currentX =
                 layoutStartX;
 
@@ -4269,7 +4625,7 @@ ForceLayout.prototype.packNetworks = function (
                 ) => {
 
                     // =================================================
-                    // 获取 network 当前 bounding box
+                    // Current bounding box
                     // =================================================
 
                     const bb =
@@ -4277,9 +4633,7 @@ ForceLayout.prototype.packNetworks = function (
 
 
                     // =================================================
-                    // X
-                    //
-                    // 左边界 → currentX
+                    // Move X
                     // =================================================
 
                     const dx =
@@ -4288,9 +4642,7 @@ ForceLayout.prototype.packNetworks = function (
 
 
                     // =================================================
-                    // Y
-                    //
-                    // 当前 network 在 row 中垂直居中
+                    // Move Y
                     // =================================================
 
                     const networkCenterY =
@@ -4311,7 +4663,7 @@ ForceLayout.prototype.packNetworks = function (
 
 
                     // =================================================
-                    // 移动 network
+                    // Move nodes
                     // =================================================
 
                     network.nodes.forEach(
@@ -4325,7 +4677,6 @@ ForceLayout.prototype.packNetworks = function (
 
 
                             node.position({
-
                                 x:
                                     pos.x +
                                     dx,
@@ -4333,7 +4684,6 @@ ForceLayout.prototype.packNetworks = function (
                                 y:
                                     pos.y +
                                     dy
-
                             });
 
                         }
@@ -4341,7 +4691,7 @@ ForceLayout.prototype.packNetworks = function (
 
 
                     // =================================================
-                    // 下一个 network
+                    // Next network
                     // =================================================
 
                     currentX +=
@@ -4353,7 +4703,7 @@ ForceLayout.prototype.packNetworks = function (
 
 
             // ========================================================
-            // 下一行
+            // Next row
             // ========================================================
 
             currentY +=
@@ -4365,7 +4715,7 @@ ForceLayout.prototype.packNetworks = function (
 
 
     // ============================================================
-    // 16. 最终检查
+    // 21. Final verification
     // ============================================================
 
     console.log(
@@ -4389,33 +4739,20 @@ ForceLayout.prototype.packNetworks = function (
 
     console.log(
         'Layout aspect:',
-        (
-            totalLayoutWidth /
-            totalLayoutHeight
-        ).toFixed(3)
+        finalAspect.toFixed(3)
     );
 
     console.log(
         'Aspect difference:',
         Math.abs(
-            (
-                totalLayoutWidth /
-                totalLayoutHeight
-            ) -
+            finalAspect -
             canvasAspect
         ).toFixed(3)
     );
 
 
     // ============================================================
-    // 17. 输出最终 network 位置
-    //
-    // 此时应该看到：
-    //
-    // 每一行：
-    //
-    //     小 → 大
-    //
+    // 22. Final network positions
     // ============================================================
 
     finalRows.forEach(
@@ -4449,6 +4786,8 @@ ForceLayout.prototype.packNetworks = function (
     );
 
 };
+
+
 
 
 ForceLayout.prototype.stop = function () {
