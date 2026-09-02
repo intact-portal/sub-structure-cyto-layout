@@ -1632,6 +1632,7 @@ ForceLayout.prototype.run = function () {
             this.captureStep('Virtual Node Layout', 'Force-directed layout applied to virtual nodes', {iterations: ITERATIONS});
         }
 
+
         //******************** stress force layout ************************
         //Stress Majorization（应力主元化）算法
         //All-Pairs 最短路径计算 和 Guttman Transform（拉普拉斯矩阵加权更新），
