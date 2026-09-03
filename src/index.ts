@@ -1,4 +1,4 @@
-import cytoscape, {Core, Collection, NodeCollection, EdgeCollection, NodeSingular, EdgeSingular} from 'cytoscape';
+import cytoscape, {EdgeCollection, EdgeSingular, NodeCollection, NodeSingular} from 'cytoscape';
 
 // Centralized Layout Parameters
 export interface LayoutParameters {
@@ -402,7 +402,6 @@ ForceLayout.prototype.identifyStructures = function (nodes: NodeCollection) {
     nodes.data('structs', {});
 
     ///////////////////////////// 2. detecting Cycle - by DFS algorithm /////////////////
-    const visited = new Set<string>();
     const allCycles: string[][] = [];  // each sub-array represents an independent cycle
     if (1) {
         const normalNodes = nodes.toArray().filter((n: any) => n.data('structType') === 'Normal' && n.degree() >= 2); //degree >= 2 means possible in a cycle
@@ -637,6 +636,7 @@ ForceLayout.prototype.identifyStructures = function (nodes: NodeCollection) {
                     }
                 });
 
+
                 leafNeighbors.forEach((leaf: any) => {
                     leaf.data('structType', 'Star-Member');
                     leaf.data('structColor', '#F48FB1');
@@ -652,6 +652,10 @@ ForceLayout.prototype.identifyStructures = function (nodes: NodeCollection) {
                     });
                 });
 
+                if(1){
+
+                }
+
                 starIndex++;
             }
         }
@@ -664,7 +668,6 @@ ForceLayout.prototype.identifyStructures = function (nodes: NodeCollection) {
         //任意两个点是否有共同的neighbor
         for (let i = 0; i < nodes.length; i++) {
             let nodeVecParallel = [];
-            let terminalVec = [];
             const u = nodes[i];
             const u1 = u.neighborhood().nodes();
 
@@ -737,18 +740,12 @@ ForceLayout.prototype.run = function () {
 
     const layout_algorithm = this.options.params.LAYOUT_ALGORITHM;
 
-
     const components = this.cy.elements().components();
-
-    const GAP = 100;       // 网络之间的水平间距
-    const START_X = 100;   // 起始 X
-    const START_Y = 100;   // 起始 Y
-    let currentX = START_X;
 
     const networkInfos: NetworkInfo[] = [];
 
     components.forEach((component: any, index: any) => {
-        const nodes = component.nodes();
+        let nodes = component.nodes();
         const edges = component.edges();
 
         this.vnodes = [];
@@ -797,9 +794,8 @@ ForceLayout.prototype.run = function () {
         });
 
         // 1. 识别结构 (标记 structType 并通过 components 划分独立环)
-        const start = performance.now();
         this.identifyStructures(nodes);
-        const end = performance.now();
+
 
         this.captureStep('Structure Detection', 'Structures identified (Stars, Cycles, Chains, Parallel)', {
             stars: nodes.filter((n: any) => n.data('structType')?.startsWith('Star')).length,
@@ -947,7 +943,6 @@ ForceLayout.prototype.run = function () {
                 }
             }
 
-
             // --------------------------------------------------------
             // 2. 遍历真实 Edge
             //
@@ -968,7 +963,6 @@ ForceLayout.prototype.run = function () {
                     count: number;
                 }>();
 
-
             for (const edge of edges) {
 
                 const sourceNode = edge.source();
@@ -983,12 +977,10 @@ ForceLayout.prototype.run = function () {
                 const targetVNode =
                     nodeToVNode.get(targetId);
 
-
                 // 如果找不到对应 VNode，跳过
                 if (!sourceVNode || !targetVNode) {
                     continue;
                 }
-
 
                 // ----------------------------------------------------
                 // Edge 在同一个 VNode 内部
@@ -1004,7 +996,6 @@ ForceLayout.prototype.run = function () {
                 if (sourceVNode === targetVNode) {
                     continue;
                 }
-
 
                 // ----------------------------------------------------
                 // 为了保证：
@@ -1025,10 +1016,8 @@ ForceLayout.prototype.run = function () {
                         ? `${id1}---${id2}`
                         : `${id2}---${id1}`;
 
-
                 const existing =
                     connectionMap.get(key);
-
 
                 if (existing) {
 
@@ -1052,7 +1041,6 @@ ForceLayout.prototype.run = function () {
                 }
             }
 
-
             // --------------------------------------------------------
             // 3. 根据 connectionMap 创建 VEdge
             // --------------------------------------------------------
@@ -1075,12 +1063,10 @@ ForceLayout.prototype.run = function () {
                 }
             );
 
-
             console.log(
                 `Virtual edges created: ${this.vedges.length}`
             );
         }
-
 
         console.log("@@@@@@");
         this.captureStep('Virtual Edges Created', 'Virtual edges created between virtual nodes', {vedgeCount: this.vedges.length});
@@ -1180,13 +1166,12 @@ ForceLayout.prototype.run = function () {
             const ITERATIONS = params.ITERATIONS;
             // const ITERATIONS =2000;
             // const ANGULAR_STRENGTH = params.ANGULAR_STRENGTH;
-            const USE_ANGULAR_FORCE = params.USE_ANGULAR_FORCE;
+            //const USE_ANGULAR_FORCE = params.USE_ANGULAR_FORCE;
 
             var colisionFlag = true;
             let iter = 0;
             var maxAttractMove = 10e10;
             var maxRepulsetMove = 10e10;
-            var maxDist = 10e10;
             var numOfCollision = 0;
 
             // 调整退出阈值：当全图任何节点的最大移动量都小于 0.5 像素时，才认为真正静止
@@ -1225,7 +1210,6 @@ ForceLayout.prototype.run = function () {
                     }
                 }
             });
-
 
             while (iter < ITERATIONS) {
                 iter++;
@@ -1539,7 +1523,6 @@ ForceLayout.prototype.run = function () {
                     break;
                 }
             }
-
 
             this.vnodes.forEach((v: any) => {
                 v.nodes.forEach((n: any) => {
@@ -1884,18 +1867,6 @@ ForceLayout.prototype.run = function () {
             const IDEAL_LENGTH = params.LEAF_NODE_DISTANCE;
             this.vnodes.forEach((v: any) => {
                 if (v.type == 'Star') {
-                    const targetNode = v.nodes.find((node: any) => {
-                        const structs = node.data('structs') || {};
-                        const keys = Object.keys(structs);
-
-                        // 1. 确保 key 的数量有且仅有 1 个，且这个 key 必须是 'Star'
-                        const hasOnlyStar = keys.length === 1 && keys[0] === 'Star';
-
-                        // 2. 确保 Star 的 role 属性是 'Center'
-                        const isCenter = structs.Star?.role === 'Center';
-
-                        return hasOnlyStar && isCenter;
-                    });
 
                     // if(targetNode){    // star是独立的star, 不是依附在某个Cycle里
                     if (1) {
@@ -1991,7 +1962,6 @@ ForceLayout.prototype.run = function () {
                                 cx /= count;
                                 cy /= count;
 
-
                                 // ============================================================
                                 // 2. 特殊处理：只有 3 个节点
                                 //
@@ -2013,7 +1983,6 @@ ForceLayout.prototype.run = function () {
                                     const sideLength =
                                         params.CYCLE_NODE_SPACING;
 
-
                                     // --------------------------------------------------------
                                     // 等边三角形外接圆半径
                                     //
@@ -2027,7 +1996,6 @@ ForceLayout.prototype.run = function () {
                                     const radius =
                                         sideLength /
                                         Math.sqrt(3);
-
 
                                     // ========================================================
                                     // 3. 搜索最佳旋转角度
@@ -2051,7 +2019,6 @@ ForceLayout.prototype.run = function () {
                                         Number.POSITIVE_INFINITY;
 
                                     let bestRotate = 0;
-
 
                                     for (
                                         let rotate = 0;
@@ -2085,7 +2052,6 @@ ForceLayout.prototype.run = function () {
                                                     Math.PI /
                                                     180;
 
-
                                                 n.position({
 
                                                     x:
@@ -2103,14 +2069,12 @@ ForceLayout.prototype.run = function () {
                                             }
                                         );
 
-
                                         // ----------------------------------------------------
                                         // 计算当前旋转角度下的总边长
                                         // ----------------------------------------------------
 
                                         const totalLength =
                                             totalEdgeLength(edges);
-
 
                                         // ----------------------------------------------------
                                         // 保存最优旋转
@@ -2130,7 +2094,6 @@ ForceLayout.prototype.run = function () {
                                         }
 
                                     }
-
 
                                     // ========================================================
                                     // 4. 使用最佳旋转角度重新设置位置
@@ -2152,7 +2115,6 @@ ForceLayout.prototype.run = function () {
                                                 Math.PI /
                                                 180;
 
-
                                             n.position({
 
                                                 x:
@@ -2169,7 +2131,6 @@ ForceLayout.prototype.run = function () {
 
                                         }
                                     );
-
 
                                     // ========================================================
                                     // 5. 输出调试信息
@@ -2217,10 +2178,8 @@ ForceLayout.prototype.run = function () {
                                         '======================================'
                                     );
 
-
                                     return;
                                 }
-
 
                                 // ============================================================
                                 // 3. count > 3
@@ -2236,14 +2195,12 @@ ForceLayout.prototype.run = function () {
                                 // 圆周节点
                                 // ============================================================
 
-
                                 // ============================================================
                                 // 4. 根据节点数量计算标准半径
                                 // ============================================================
 
                                 const miniMumRadius =
                                     params.CHAIN_MIN_RADIUS;
-
 
                                 const radius =
                                     Math.max(
@@ -2255,7 +2212,6 @@ ForceLayout.prototype.run = function () {
 
                                         miniMumRadius
                                     );
-
 
                                 // ============================================================
                                 // 5. 排序 / 圆周节点
@@ -2271,7 +2227,6 @@ ForceLayout.prototype.run = function () {
                                     Number.POSITIVE_INFINITY;
 
                                 let bestRotate = 0;
-
 
                                 for (
                                     let rotate = 0;
@@ -2301,7 +2256,6 @@ ForceLayout.prototype.run = function () {
                                                 Math.PI /
                                                 180;
 
-
                                             n.position({
 
                                                 x:
@@ -2319,14 +2273,12 @@ ForceLayout.prototype.run = function () {
                                         }
                                     );
 
-
                                     // --------------------------------------------------------
                                     // 计算当前旋转下的总边长
                                     // --------------------------------------------------------
 
                                     const totalLength =
                                         totalEdgeLength(edges);
-
 
                                     // --------------------------------------------------------
                                     // 保存最佳旋转
@@ -2346,7 +2298,6 @@ ForceLayout.prototype.run = function () {
                                     }
 
                                 }
-
 
                                 // ============================================================
                                 // 7. 使用最佳旋转角度
@@ -2370,7 +2321,6 @@ ForceLayout.prototype.run = function () {
                                             Math.PI /
                                             180;
 
-
                                         n.position({
 
                                             x:
@@ -2386,7 +2336,6 @@ ForceLayout.prototype.run = function () {
                                         });
                                     }
                                 );
-
 
                                 // ============================================================
                                 // 8. 第一个节点放在中心
@@ -2412,7 +2361,7 @@ ForceLayout.prototype.run = function () {
                     })
                     // console.log('endVec.length:'+endVec.length+' v.id:'+v.id);
                     if (endVec.length >= 2) { //应该>=2，否则就错误
-                        const gap = params.PARALLEL_GAP; //垂直分布的步长
+
                         //有node数组，将里面的所有node在两个点n1,n2中点垂线上均匀分布
                         const p1 = endVec[0].position();
                         const p2 = endVec[1].position();
@@ -2505,7 +2454,6 @@ ForceLayout.prototype.run = function () {
                 if (n.data('structType') == 'LeafButNotChain') {
 
                     let fatherPos = n.neighborhood().nodes().first().position();
-                    const pos = n.position();
 
                     let maxTotalLength = 10e10;
                     let bestRotate = 0;    //找出最好的旋转角度
@@ -2565,8 +2513,42 @@ ForceLayout.prototype.run = function () {
             nodes[2].position().y = 90;
         }
 
-
         rotateNetworkToMinimumBoundingBox(nodes)
+
+        // 获取这个 component 中所有不同的 parent ID
+        //add parent node in cytoscape based on substructure
+        // const parentIds = new Set<string>();
+        // if(1){
+        //
+        //     nodes.forEach((node: any) => {
+        //
+        //         const parentId = index+"_"+node.data('groupId');
+        //
+        //         if (parentId) {
+        //             parentIds.add(parentId);
+        //             node.data('parent', parentId);
+        //         }
+        //
+        //     });
+        //
+        //     // 创建所有 parent node
+        //     parentIds.forEach((parentId: string) => {
+        //         // 防止 parent 已经存在
+        //         if (this.cy.getElementById(parentId).empty()) {
+        //
+        //             this.cy.add({
+        //                 group: 'nodes',
+        //                 data: {
+        //                     id: parentId,
+        //                     label: parentId
+        //                 }
+        //             });
+        //
+        //         }
+        //     });
+        //
+        //
+        // }
 
         if (1) {
             let maxDis = 0;
@@ -2622,21 +2604,176 @@ ForceLayout.prototype.run = function () {
 
     this.packNetworks(networkInfos);
 
+    if (1) {
+
+        networkInfos.forEach((networkInfo,index) => {
+
+            const nodes = networkInfo.nodes;
+
+            // 当前 network 中所有 parent ID
+            const parentIds = new Set<string>();
+
+            nodes.forEach((node: any) => {
+
+                const groupId = node.data('groupId');
+
+                if (groupId) {
+                    parentIds.add(index+"_"+groupId);
+                }
+
+            });
+
+
+            // ========================================
+            // 创建 parent
+            // ========================================
+
+            parentIds.forEach((parentId: string) => {
+
+                // parent 已经存在
+                if (!this.cy.getElementById(parentId).empty()) {
+                    return;
+                }
+
+
+                // 找到 children
+                const children = nodes.filter((node: any) => {
+                    return (index+"_"+node.data('groupId')) === parentId;
+                });
+
+                if (children.length === 0) {
+                    return;
+                }
+
+
+                // ========================================
+                // ① 保存 children 原始位置
+                // ========================================
+
+                const originalPositions = new Map<string, {
+                    x: number,
+                    y: number
+                }>();
+
+                children.forEach((node: any) => {
+
+                    const pos = node.position();
+
+                    originalPositions.set(node.id(), {
+                        x: pos.x,
+                        y: pos.y
+                    });
+
+                });
+
+
+                // ========================================
+                // ② 根据原始位置计算 bounding box
+                // ========================================
+
+                const bb = children.boundingBox();
+
+                const centerX = (bb.x1 + bb.x2) / 2;
+                const centerY = (bb.y1 + bb.y2) / 2;
+
+
+                // ========================================
+                // ③ 创建 parent
+                // ========================================
+
+                const parent = this.cy.add({
+
+                    group: 'nodes',
+
+                    data: {
+                        id: parentId,
+                        label: parentId
+                    },
+
+                    position: {
+                        x: centerX,
+                        y: centerY
+                    },
+
+                    classes: 'network-parent'
+
+                }).first();
+
+
+                // ========================================
+                // ④ 建立 compound relationship
+                // ========================================
+
+                children.forEach((node: any) => {
+
+                    node.move({
+                        parent: parentId
+                    });
+
+                });
+
+
+                // ========================================
+                // ⑤ 恢复 children 原来的绝对位置
+                // ========================================
+
+                children.forEach((node: any) => {
+
+                    const original = originalPositions.get(node.id());
+
+                    if (!original) {
+                        return;
+                    }
+
+                    node.position({
+                        x: original.x,
+                        y: original.y
+                    });
+
+                });
+
+
+                // ========================================
+                // ⑥ 恢复 parent 中心位置
+                // ========================================
+
+                parent.position({
+                    x: centerX,
+                    y: centerY
+                });
+
+
+                // ========================================
+                // ⑦ 检查
+                // ========================================
+
+                console.log(
+                    'Parent:',
+                    parent.id(),
+                    'isParent:',
+                    parent.isParent(),
+                    'children:',
+                    parent.children().length,
+                    parent.children().map((node: any) => node.id())
+                );
+
+            });
+
+        });
+
+    }
+
     this.captureStep('Final', 'Final layout complete', null);
 
     this.cy.fit(null, 50);
     this.cy.emit('layoutstop');
 
-    //
+
     // Expose steps for external access
     if (this.params.STEP_BY_STEP && this.steps.length > 0) {
         console.log(`Step-by-step mode: Captured ${this.steps.length} steps`);
         console.log('Access steps via layout.steps or use layout.goToStep(n)');
     }
-
-    this.layoutStatistics = {
-        edgeCrossings: 0
-    };
 
     return this;
 };
@@ -2649,7 +2786,6 @@ function rotateNetworkToMinimumBoundingBox(
     nodes: any
 ) {
 
-
     if (
         !nodes ||
         nodes.length === 0
@@ -2658,7 +2794,6 @@ function rotateNetworkToMinimumBoundingBox(
         return null;
 
     }
-
 
     // ============================================================
     // 1. 获取 network 中所有 node 的四个角点
@@ -2674,7 +2809,6 @@ function rotateNetworkToMinimumBoundingBox(
         y: number;
     }[] = [];
 
-
     nodes.forEach(
         (
             node:
@@ -2684,22 +2818,17 @@ function rotateNetworkToMinimumBoundingBox(
             const pos =
                 node.position();
 
-
             const width =
                 node.outerWidth();
-
 
             const height =
                 node.outerHeight();
 
-
             const halfWidth =
                 width / 2;
 
-
             const halfHeight =
                 height / 2;
-
 
             points.push({
 
@@ -2713,7 +2842,6 @@ function rotateNetworkToMinimumBoundingBox(
 
             });
 
-
             points.push({
 
                 x:
@@ -2726,7 +2854,6 @@ function rotateNetworkToMinimumBoundingBox(
 
             });
 
-
             points.push({
 
                 x:
@@ -2738,7 +2865,6 @@ function rotateNetworkToMinimumBoundingBox(
                     halfHeight
 
             });
-
 
             points.push({
 
@@ -2754,7 +2880,6 @@ function rotateNetworkToMinimumBoundingBox(
 
         }
     );
-
 
     // ============================================================
     // 2. Convex Hull
@@ -2786,7 +2911,6 @@ function rotateNetworkToMinimumBoundingBox(
             }
         );
 
-
     const cross = (
         o: any,
         a: any,
@@ -2803,9 +2927,7 @@ function rotateNetworkToMinimumBoundingBox(
 
     };
 
-
     const lower: any[] = [];
-
 
     for (
         const p of sortedPoints
@@ -2828,14 +2950,11 @@ function rotateNetworkToMinimumBoundingBox(
 
         }
 
-
         lower.push(p);
 
     }
 
-
     const upper: any[] = [];
-
 
     for (
         let i =
@@ -2846,7 +2965,6 @@ function rotateNetworkToMinimumBoundingBox(
 
         const p =
             sortedPoints[i];
-
 
         while (
             upper.length >= 2 &&
@@ -2865,20 +2983,16 @@ function rotateNetworkToMinimumBoundingBox(
 
         }
 
-
         upper.push(p);
 
     }
-
 
     lower.pop();
 
     upper.pop();
 
-
     const hull =
         lower.concat(upper);
-
 
     if (
         hull.length < 2
@@ -2888,14 +3002,12 @@ function rotateNetworkToMinimumBoundingBox(
 
     }
 
-
     // ============================================================
     // 3. 搜索 Minimum Area Bounding Rectangle
     // ============================================================
 
     let bestArea =
         Number.POSITIVE_INFINITY;
-
 
     let bestWidth = 0;
 
@@ -2907,7 +3019,6 @@ function rotateNetworkToMinimumBoundingBox(
 
     let bestCenterY = 0;
 
-
     for (
         let i = 0;
         i < hull.length;
@@ -2917,13 +3028,11 @@ function rotateNetworkToMinimumBoundingBox(
         const p1 =
             hull[i];
 
-
         const p2 =
             hull[
             (i + 1) %
             hull.length
                 ];
-
 
         // --------------------------------------------------------
         // 当前凸包边的角度
@@ -2935,7 +3044,6 @@ function rotateNetworkToMinimumBoundingBox(
                 p2.x - p1.x
             );
 
-
         // --------------------------------------------------------
         // 将当前边旋转到 X 轴
         // --------------------------------------------------------
@@ -2945,12 +3053,10 @@ function rotateNetworkToMinimumBoundingBox(
                 -edgeAngle
             );
 
-
         const sin =
             Math.sin(
                 -edgeAngle
             );
-
 
         let minX =
             Number.POSITIVE_INFINITY;
@@ -2963,7 +3069,6 @@ function rotateNetworkToMinimumBoundingBox(
 
         let maxY =
             Number.NEGATIVE_INFINITY;
-
 
         // --------------------------------------------------------
         // 旋转所有 hull 点
@@ -2978,11 +3083,9 @@ function rotateNetworkToMinimumBoundingBox(
                     p.x * cos -
                     p.y * sin;
 
-
                 const y =
                     p.x * sin +
                     p.y * cos;
-
 
                 minX =
                     Math.min(
@@ -2990,20 +3093,17 @@ function rotateNetworkToMinimumBoundingBox(
                         x
                     );
 
-
                 maxX =
                     Math.max(
                         maxX,
                         x
                     );
 
-
                 minY =
                     Math.min(
                         minY,
                         y
                     );
-
 
                 maxY =
                     Math.max(
@@ -3014,21 +3114,17 @@ function rotateNetworkToMinimumBoundingBox(
             }
         );
 
-
         const width =
             maxX -
             minX;
-
 
         const height =
             maxY -
             minY;
 
-
         const area =
             width *
             height;
-
 
         // --------------------------------------------------------
         // 找面积最小的矩形
@@ -3042,18 +3138,14 @@ function rotateNetworkToMinimumBoundingBox(
             bestArea =
                 area;
 
-
             bestWidth =
                 width;
-
 
             bestHeight =
                 height;
 
-
             bestAngle =
                 edgeAngle;
-
 
             // ----------------------------------------------------
             // 旋转坐标系中的中心
@@ -3065,13 +3157,11 @@ function rotateNetworkToMinimumBoundingBox(
                     maxX
                 ) / 2;
 
-
             const centerYRot =
                 (
                     minY +
                     maxY
                 ) / 2;
-
 
             // ----------------------------------------------------
             // 转回原坐标
@@ -3088,7 +3178,6 @@ function rotateNetworkToMinimumBoundingBox(
                     edgeAngle
                 );
 
-
             bestCenterY =
                 centerXRot *
                 Math.sin(
@@ -3103,7 +3192,6 @@ function rotateNetworkToMinimumBoundingBox(
         }
 
     }
-
 
     // ============================================================
     // 4. 保证：
@@ -3130,7 +3218,6 @@ function rotateNetworkToMinimumBoundingBox(
         bestHeight =
             temp;
 
-
         // --------------------------------------------------------
         // 旋转 90°
         // --------------------------------------------------------
@@ -3139,7 +3226,6 @@ function rotateNetworkToMinimumBoundingBox(
             Math.PI / 2;
 
     }
-
 
     // ============================================================
     // 5. Normalize angle
@@ -3157,7 +3243,6 @@ function rotateNetworkToMinimumBoundingBox(
 
     }
 
-
     while (
         bestAngle <
         -Math.PI
@@ -3167,7 +3252,6 @@ function rotateNetworkToMinimumBoundingBox(
             2 * Math.PI;
 
     }
-
 
     // ============================================================
     // 6. 真正旋转 network
@@ -3180,12 +3264,10 @@ function rotateNetworkToMinimumBoundingBox(
             -bestAngle
         );
 
-
     const sin =
         Math.sin(
             -bestAngle
         );
-
 
     nodes.forEach(
         (
@@ -3196,7 +3278,6 @@ function rotateNetworkToMinimumBoundingBox(
             const pos =
                 node.position();
 
-
             // ----------------------------------------------------
             // 相对于 network center
             // ----------------------------------------------------
@@ -3205,11 +3286,9 @@ function rotateNetworkToMinimumBoundingBox(
                 pos.x -
                 bestCenterX;
 
-
             const dy =
                 pos.y -
                 bestCenterY;
-
 
             // ----------------------------------------------------
             // 旋转
@@ -3222,12 +3301,10 @@ function rotateNetworkToMinimumBoundingBox(
                 dx * cos -
                 dy * sin;
 
-
             const newY =
                 bestCenterY +
                 dx * sin +
                 dy * cos;
-
 
             node.position({
 
@@ -3242,7 +3319,6 @@ function rotateNetworkToMinimumBoundingBox(
         }
     );
 
-
     // ============================================================
     // 7. 旋转以后重新计算 Bounding Box
     //
@@ -3251,7 +3327,6 @@ function rotateNetworkToMinimumBoundingBox(
 
     const finalBB =
         nodes.boundingBox();
-
 
     // ============================================================
     // 8. 输出信息
@@ -3302,7 +3377,6 @@ function rotateNetworkToMinimumBoundingBox(
         '======================================'
     );
 
-
     // ============================================================
     // 9. 返回结果
     // ============================================================
@@ -3332,7 +3406,6 @@ function rotateNetworkToMinimumBoundingBox(
 
 }
 
-
 // If there are multiple networks, organize them into multiple rows.
 // Networks with similar sizes are preferentially placed in the same row.
 ForceLayout.prototype.packNetworks = function (
@@ -3342,7 +3415,6 @@ ForceLayout.prototype.packNetworks = function (
     if (!networks || networks.length === 0) {
         return;
     }
-
 
     // ============================================================
     // 1. Canvas
@@ -3356,18 +3428,15 @@ ForceLayout.prototype.packNetworks = function (
     const canvasHeight =
         container?.clientHeight ?? 800;
 
-
     const canvasAspect =
         canvasWidth /
         canvasHeight;
-
 
     console.log('Canvas:', canvasWidth, canvasHeight);
     console.log(
         'Canvas aspect:',
         canvasAspect.toFixed(3)
     );
-
 
     // ============================================================
     // 2. Parameters
@@ -3378,7 +3447,6 @@ ForceLayout.prototype.packNetworks = function (
     const V_GAP = 80;
 
     const SEARCH_STEPS = 300;
-
 
     // ------------------------------------------------------------
     // Weight
@@ -3399,7 +3467,6 @@ ForceLayout.prototype.packNetworks = function (
 
     const ROW_BALANCE_WEIGHT = 0.10;
 
-
     // ============================================================
     // 3. Get real bounding boxes
     // ============================================================
@@ -3409,7 +3476,6 @@ ForceLayout.prototype.packNetworks = function (
 
             const bb =
                 network.nodes.boundingBox();
-
 
             network.x1 = bb.x1;
             network.y1 = bb.y1;
@@ -3424,7 +3490,6 @@ ForceLayout.prototype.packNetworks = function (
 
             network.centerY =
                 (bb.y1 + bb.y2) / 2;
-
 
             // ----------------------------------------------------
             // 一个综合尺寸指标
@@ -3444,7 +3509,6 @@ ForceLayout.prototype.packNetworks = function (
                     network.area
                 );
 
-
             // ----------------------------------------------------
             // aspect
             // ----------------------------------------------------
@@ -3458,7 +3522,6 @@ ForceLayout.prototype.packNetworks = function (
 
         }
     );
-
 
     // ============================================================
     // 4. Sort
@@ -3488,7 +3551,6 @@ ForceLayout.prototype.packNetworks = function (
 
                 }
 
-
                 return (
                     b.size -
                     a.size
@@ -3497,7 +3559,6 @@ ForceLayout.prototype.packNetworks = function (
             }
         );
 
-
     console.log(
         'Sorted networks:',
         sortedNetworks.map(
@@ -3505,7 +3566,6 @@ ForceLayout.prototype.packNetworks = function (
                 `${n.nodeCount} (${Math.round(n.width)}×${Math.round(n.height)})`
         )
     );
-
 
     // ============================================================
     // 5. Size normalization
@@ -3531,13 +3591,11 @@ ForceLayout.prototype.packNetworks = function (
                 )
         );
 
-
     const minLogSize =
         Math.min(...allSizes);
 
     const maxLogSize =
         Math.max(...allSizes);
-
 
     const sizeRange =
         Math.max(
@@ -3545,7 +3603,6 @@ ForceLayout.prototype.packNetworks = function (
             minLogSize,
             0.0001
         );
-
 
     sortedNetworks.forEach(
         (network: any) => {
@@ -3565,7 +3622,6 @@ ForceLayout.prototype.packNetworks = function (
         }
     );
 
-
     // ============================================================
     // 6. Width range
     // ============================================================
@@ -3577,7 +3633,6 @@ ForceLayout.prototype.packNetworks = function (
                     n.width
             )
         );
-
 
     const totalNetworkWidth =
         sortedNetworks.reduce(
@@ -3595,10 +3650,8 @@ ForceLayout.prototype.packNetworks = function (
             0
         );
 
-
     const minWidth =
         maxNetworkWidth;
-
 
     const maxWidth =
         totalNetworkWidth +
@@ -3608,14 +3661,12 @@ ForceLayout.prototype.packNetworks = function (
             0
         );
 
-
     console.log(
         'Search width:',
         minWidth,
         '→',
         maxWidth
     );
-
 
     // ============================================================
     // 7. Make rows
@@ -3643,7 +3694,6 @@ ForceLayout.prototype.packNetworks = function (
 
         let currentWidth = 0;
 
-
         sortedNetworks.forEach(
             (
                 network: any
@@ -3651,7 +3701,6 @@ ForceLayout.prototype.packNetworks = function (
 
                 const networkWidth =
                     network.width;
-
 
                 // =================================================
                 // First network
@@ -3672,7 +3721,6 @@ ForceLayout.prototype.packNetworks = function (
 
                 }
 
-
                 // =================================================
                 // Width check
                 // =================================================
@@ -3681,7 +3729,6 @@ ForceLayout.prototype.packNetworks = function (
                     currentWidth +
                     H_GAP +
                     networkWidth;
-
 
                 if (
                     requiredWidth >
@@ -3692,20 +3739,16 @@ ForceLayout.prototype.packNetworks = function (
                         currentRow
                     );
 
-
                     currentRow = [
                         network
                     ];
 
-
                     currentWidth =
                         networkWidth;
-
 
                     return;
 
                 }
-
 
                 // =================================================
                 // Size similarity check
@@ -3723,13 +3766,11 @@ ForceLayout.prototype.packNetworks = function (
                     ) /
                     currentRow.length;
 
-
                 const sizeDifference =
                     Math.abs(
                         network.normalizedSize -
                         currentMeanSize
                     );
-
 
                 // -------------------------------------------------
                 // 不要让尺寸差距太大的 network 自动进入同一行
@@ -3738,7 +3779,6 @@ ForceLayout.prototype.packNetworks = function (
                 // -------------------------------------------------
 
                 const SIZE_THRESHOLD = 0.35;
-
 
                 if (
                     sizeDifference >
@@ -3750,20 +3790,16 @@ ForceLayout.prototype.packNetworks = function (
                         currentRow
                     );
 
-
                     currentRow = [
                         network
                     ];
 
-
                     currentWidth =
                         networkWidth;
-
 
                     return;
 
                 }
-
 
                 // =================================================
                 // Add
@@ -3779,7 +3815,6 @@ ForceLayout.prototype.packNetworks = function (
             }
         );
 
-
         // =========================================================
         // Last row
         // =========================================================
@@ -3794,11 +3829,9 @@ ForceLayout.prototype.packNetworks = function (
 
         }
 
-
         return rows;
 
     };
-
 
     // ============================================================
     // 8. Calculate layout size
@@ -3812,7 +3845,6 @@ ForceLayout.prototype.packNetworks = function (
 
         let totalHeight = 0;
 
-
         rows.forEach(
             (
                 row: any[],
@@ -3823,7 +3855,6 @@ ForceLayout.prototype.packNetworks = function (
 
                 let rowHeight = 0;
 
-
                 row.forEach(
                     (
                         network: any,
@@ -3832,7 +3863,6 @@ ForceLayout.prototype.packNetworks = function (
 
                         rowWidth +=
                             network.width;
-
 
                         if (
                             index <
@@ -3844,7 +3874,6 @@ ForceLayout.prototype.packNetworks = function (
 
                         }
 
-
                         rowHeight =
                             Math.max(
                                 rowHeight,
@@ -3854,17 +3883,14 @@ ForceLayout.prototype.packNetworks = function (
                     }
                 );
 
-
                 totalWidth =
                     Math.max(
                         totalWidth,
                         rowWidth
                     );
 
-
                 totalHeight +=
                     rowHeight;
-
 
                 if (
                     rowIndex <
@@ -3879,14 +3905,12 @@ ForceLayout.prototype.packNetworks = function (
             }
         );
 
-
         return {
             width: totalWidth,
             height: totalHeight
         };
 
     };
-
 
     // ============================================================
     // 9. Calculate row size similarity score
@@ -3920,11 +3944,9 @@ ForceLayout.prototype.packNetworks = function (
 
             }
 
-
             let totalPenalty = 0;
 
             let totalWeight = 0;
-
 
             rows.forEach(
                 (
@@ -3939,7 +3961,6 @@ ForceLayout.prototype.packNetworks = function (
 
                     }
 
-
                     const sizes =
                         row.map(
                             (n: any) =>
@@ -3951,7 +3972,6 @@ ForceLayout.prototype.packNetworks = function (
                                 )
                         );
 
-
                     const min =
                         Math.min(
                             ...sizes
@@ -3962,10 +3982,8 @@ ForceLayout.prototype.packNetworks = function (
                             ...sizes
                         );
 
-
                     const difference =
                         max - min;
-
 
                     // ------------------------------------------------
                     // row 越大，惩罚越大
@@ -3973,7 +3991,6 @@ ForceLayout.prototype.packNetworks = function (
 
                     const weight =
                         row.length;
-
 
                     totalPenalty +=
                         difference *
@@ -3985,7 +4002,6 @@ ForceLayout.prototype.packNetworks = function (
                 }
             );
 
-
             if (
                 totalWeight === 0
             ) {
@@ -3993,7 +4009,6 @@ ForceLayout.prototype.packNetworks = function (
                 return 0;
 
             }
-
 
             return (
                 totalPenalty /
@@ -4005,7 +4020,6 @@ ForceLayout.prototype.packNetworks = function (
             );
 
         };
-
 
     // ============================================================
     // 10. Row balance score
@@ -4031,13 +4045,11 @@ ForceLayout.prototype.packNetworks = function (
 
             }
 
-
             const counts =
                 rows.map(
                     (row: any[]) =>
                         row.length
                 );
-
 
             const mean =
                 counts.reduce(
@@ -4050,7 +4062,6 @@ ForceLayout.prototype.packNetworks = function (
                 ) /
                 counts.length;
 
-
             if (
                 mean <= 0
             ) {
@@ -4058,7 +4069,6 @@ ForceLayout.prototype.packNetworks = function (
                 return 0;
 
             }
-
 
             const variance =
                 counts.reduce(
@@ -4080,14 +4090,12 @@ ForceLayout.prototype.packNetworks = function (
                 ) /
                 counts.length;
 
-
             return (
                 Math.sqrt(variance) /
                 mean
             );
 
         };
-
 
     // ============================================================
     // 11. Search best layout
@@ -4105,7 +4113,6 @@ ForceLayout.prototype.packNetworks = function (
     let bestAspect = 0;
 
     let bestSimilarity = 0;
-
 
     for (
         let i = 0;
@@ -4125,7 +4132,6 @@ ForceLayout.prototype.packNetworks = function (
                 1
             );
 
-
         // ========================================================
         // Make rows
         // ========================================================
@@ -4134,7 +4140,6 @@ ForceLayout.prototype.packNetworks = function (
             makeRows(
                 testWidth
             );
-
 
         if (
             !rows ||
@@ -4145,7 +4150,6 @@ ForceLayout.prototype.packNetworks = function (
 
         }
 
-
         // ========================================================
         // Layout size
         // ========================================================
@@ -4155,13 +4159,11 @@ ForceLayout.prototype.packNetworks = function (
                 rows
             );
 
-
         const layoutWidth =
             layoutSize.width;
 
         const layoutHeight =
             layoutSize.height;
-
 
         if (
             layoutWidth <= 0 ||
@@ -4172,7 +4174,6 @@ ForceLayout.prototype.packNetworks = function (
 
         }
 
-
         // ========================================================
         // Layout aspect
         // ========================================================
@@ -4180,7 +4181,6 @@ ForceLayout.prototype.packNetworks = function (
         const layoutAspect =
             layoutWidth /
             layoutHeight;
-
 
         // ========================================================
         // Aspect error
@@ -4194,7 +4194,6 @@ ForceLayout.prototype.packNetworks = function (
                 )
             );
 
-
         // ========================================================
         // Size similarity
         // ========================================================
@@ -4204,7 +4203,6 @@ ForceLayout.prototype.packNetworks = function (
                 rows
             );
 
-
         // ========================================================
         // Row balance
         // ========================================================
@@ -4213,7 +4211,6 @@ ForceLayout.prototype.packNetworks = function (
             calculateRowBalance(
                 rows
             );
-
 
         // ========================================================
         // Row count
@@ -4227,7 +4224,6 @@ ForceLayout.prototype.packNetworks = function (
                 sortedNetworks.length,
                 1
             );
-
 
         // ========================================================
         // Final score
@@ -4261,7 +4257,6 @@ ForceLayout.prototype.packNetworks = function (
             rowPenalty *
             0.01;
 
-
         // ========================================================
         // Save best
         // ========================================================
@@ -4293,7 +4288,6 @@ ForceLayout.prototype.packNetworks = function (
 
     }
 
-
     // ============================================================
     // 12. Fallback
     // ============================================================
@@ -4307,12 +4301,10 @@ ForceLayout.prototype.packNetworks = function (
                 minWidth
             );
 
-
         const fallbackSize =
             calculateLayoutSize(
                 bestRows
             );
-
 
         bestWidth =
             fallbackSize.width;
@@ -4333,7 +4325,6 @@ ForceLayout.prototype.packNetworks = function (
             );
 
     }
-
 
     // ============================================================
     // 13. Final order
@@ -4359,7 +4350,6 @@ ForceLayout.prototype.packNetworks = function (
 
             }
         );
-
 
     // ============================================================
     // 14. Output result
@@ -4407,7 +4397,6 @@ ForceLayout.prototype.packNetworks = function (
         finalRows.length
     );
 
-
     // ============================================================
     // 15. Output rows
     // ============================================================
@@ -4431,13 +4420,11 @@ ForceLayout.prototype.packNetworks = function (
         }
     );
 
-
     // ============================================================
     // 16. Calculate row infos
     // ============================================================
 
     const rowInfos: any[] = [];
-
 
     finalRows.forEach(
         (
@@ -4448,7 +4435,6 @@ ForceLayout.prototype.packNetworks = function (
 
             let rowHeight = 0;
 
-
             row.forEach(
                 (
                     network: any,
@@ -4457,7 +4443,6 @@ ForceLayout.prototype.packNetworks = function (
 
                     rowWidth +=
                         network.width;
-
 
                     if (
                         index <
@@ -4469,7 +4454,6 @@ ForceLayout.prototype.packNetworks = function (
 
                     }
 
-
                     rowHeight =
                         Math.max(
                             rowHeight,
@@ -4478,7 +4462,6 @@ ForceLayout.prototype.packNetworks = function (
 
                 }
             );
-
 
             rowInfos.push({
                 row,
@@ -4489,7 +4472,6 @@ ForceLayout.prototype.packNetworks = function (
         }
     );
 
-
     // ============================================================
     // 17. Final layout size
     // ============================================================
@@ -4497,7 +4479,6 @@ ForceLayout.prototype.packNetworks = function (
     let totalLayoutWidth = 0;
 
     let totalLayoutHeight = 0;
-
 
     rowInfos.forEach(
         (
@@ -4511,10 +4492,8 @@ ForceLayout.prototype.packNetworks = function (
                     info.width
                 );
 
-
             totalLayoutHeight +=
                 info.height;
-
 
             if (
                 index <
@@ -4529,14 +4508,12 @@ ForceLayout.prototype.packNetworks = function (
         }
     );
 
-
     const finalAspect =
         totalLayoutWidth /
         Math.max(
             totalLayoutHeight,
             1
         );
-
 
     // ============================================================
     // 18. Final log
@@ -4578,7 +4555,6 @@ ForceLayout.prototype.packNetworks = function (
         ).toFixed(3)
     );
 
-
     // ============================================================
     // 19. Center layout
     // ============================================================
@@ -4589,13 +4565,11 @@ ForceLayout.prototype.packNetworks = function (
             totalLayoutWidth
         ) / 2;
 
-
     const layoutStartY =
         (
             canvasHeight -
             totalLayoutHeight
         ) / 2;
-
 
     // ============================================================
     // 20. Pack networks
@@ -4603,7 +4577,6 @@ ForceLayout.prototype.packNetworks = function (
 
     let currentY =
         layoutStartY;
-
 
     rowInfos.forEach(
         (
@@ -4613,10 +4586,8 @@ ForceLayout.prototype.packNetworks = function (
             const row =
                 info.row;
 
-
             let currentX =
                 layoutStartX;
-
 
             row.forEach(
                 (
@@ -4630,7 +4601,6 @@ ForceLayout.prototype.packNetworks = function (
                     const bb =
                         network.nodes.boundingBox();
 
-
                     // =================================================
                     // Move X
                     // =================================================
@@ -4638,7 +4608,6 @@ ForceLayout.prototype.packNetworks = function (
                     const dx =
                         currentX -
                         bb.x1;
-
 
                     // =================================================
                     // Move Y
@@ -4650,16 +4619,13 @@ ForceLayout.prototype.packNetworks = function (
                             bb.y2
                         ) / 2;
 
-
                     const rowCenterY =
                         currentY +
                         info.height / 2;
 
-
                     const dy =
                         rowCenterY -
                         networkCenterY;
-
 
                     // =================================================
                     // Move nodes
@@ -4674,7 +4640,6 @@ ForceLayout.prototype.packNetworks = function (
                             const pos =
                                 node.position();
 
-
                             node.position({
                                 x:
                                     pos.x +
@@ -4688,7 +4653,6 @@ ForceLayout.prototype.packNetworks = function (
                         }
                     );
 
-
                     // =================================================
                     // Next network
                     // =================================================
@@ -4700,7 +4664,6 @@ ForceLayout.prototype.packNetworks = function (
                 }
             );
 
-
             // ========================================================
             // Next row
             // ========================================================
@@ -4711,7 +4674,6 @@ ForceLayout.prototype.packNetworks = function (
 
         }
     );
-
 
     // ============================================================
     // 21. Final verification
@@ -4749,7 +4711,6 @@ ForceLayout.prototype.packNetworks = function (
         ).toFixed(3)
     );
 
-
     // ============================================================
     // 22. Final network positions
     // ============================================================
@@ -4768,7 +4729,6 @@ ForceLayout.prototype.packNetworks = function (
                     const bb =
                         network.nodes.boundingBox();
 
-
                     console.log(
                         `Row ${rowIndex + 1}`,
                         `nodes=${network.nodeCount}`,
@@ -4786,13 +4746,9 @@ ForceLayout.prototype.packNetworks = function (
 
 };
 
-
-
-
 ForceLayout.prototype.stop = function () {
     return this;
 };
-
 
 /**
  * 改进版布局：让 'star' 类型的节点倾向于分布在外围

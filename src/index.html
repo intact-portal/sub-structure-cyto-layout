@@ -1207,7 +1207,6 @@ font-size:11px;
 
     }
 
-
     async function loadDataFileList() {
 
         const dataFiles = [
@@ -1441,53 +1440,6 @@ font-size:11px;
 
                     {
                         selector:
-                            '.virtual-node',
-
-                        style: {
-
-                            'label':
-                                'data(label)',
-
-                            'text-valign':
-                                'center',
-
-                            'text-halign':
-                                'center',
-
-                            'font-size':
-                                '10px',
-
-                            'font-weight':
-                                'bold',
-
-                            'shape':
-                                'ellipse',
-
-                            'z-index':
-                                0
-
-                        }
-
-                    },
-
-                    {
-                        selector:
-                            '.virtual-edge',
-
-                        style: {
-
-                            'curve-style':
-                                'bezier',
-
-                            'z-index':
-                                0
-
-                        }
-
-                    },
-
-                    {
-                        selector:
                             'edge',
 
                         style: {
@@ -1496,9 +1448,6 @@ font-size:11px;
                                 8,
 
                             'line-color': '#aaa',
-                            //'line-color': '#E0E0E0', // 从 #aaa 改为更浅的灰色
-
-                            //'opacity': 0.15,
 
                             'curve-style':
                                 'haystack',
@@ -1508,8 +1457,31 @@ font-size:11px;
 
                         }
 
-                    }
+                    },
 
+                    {
+                        selector: 'node.network-parent',
+
+                        style: {
+                            'shape': 'ellipse',
+
+                            'background-color': '#e8e8e8',
+                            'background-opacity': 0.35,
+
+                            'border-width': 0,
+
+                            'label': '',
+                            'color': '#333',
+                            'font-size': '18px',
+                            'font-weight': 'bold',
+
+                            'text-valign': 'top',
+                            'text-halign': 'center',
+
+                            'z-index': 0,
+                            'z-compound-depth': 'bottom'
+                        }
+                    }
                 ]
 
             });
