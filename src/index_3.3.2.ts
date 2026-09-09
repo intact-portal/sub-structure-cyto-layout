@@ -50,12 +50,19 @@ export interface LayoutParameters {
     STEP_BY_STEP: boolean;
 }
 
+// Step snapshot for debugging and visualization
+export interface LayoutStep {
+    stepNumber: number;
+    stepName: string;
+    description: string;
+    nodePositions: { [nodeId: string]: { x: number; y: number } };
+    virtualNodes?: VNode[];
+    virtualEdges?: VEdge[];
+    metadata?: any;
+}
+
 // @ts-ignore
 export const DEFAULT_PARAMS: LayoutParameters = {
-    //layout algorithm
-    FORCE_LAYOUT: false,
-    STRESS_LAYOUT: true,
-
     // Force-directed parameters
     IDEAL_LENGTH: 100,
     REPULSION: 10000,
@@ -97,40 +104,15 @@ export const DEFAULT_PARAMS: LayoutParameters = {
     STEP_BY_STEP: false,
 };
 
-// Step snapshot for debugging and visualization
-export interface LayoutStep {
-    stepNumber: number;
-    stepName: string;
-    description: string;
-    nodePositions: { [nodeId: string]: { x: number; y: number } };
-    virtualNodes?: VNode[];
-    virtualEdges?: VEdge[];
-    metadata?: any;
-}
-
-export type SubstructureType =
-    | 'Normal'
-    | 'Cycle'
-    | 'Chain'
-    | 'Star-Center'
-    | 'Star-Member'
-    | 'Parallel'
-    | 'LeafButNotChain';
-
-type Node = cytoscape.NodeSingular;
-type Edge = cytoscape.EdgeSingular;
-type Nodes = cytoscape.NodeCollection;
-type Edges = cytoscape.EdgeCollection;
-
 class VNode {
-    public id: string;
-    public type: any;
-    public center_x: number;
-    public center_y: number;
-    public radius: number;
-    public rotate_angle: number = 0;
-    public nodes: Node[] = []; // stores node objects
-    public neighbors: VNode[] = [];
+    id: any;
+    type: any;
+    center_x: any;
+    center_y: any;
+    radius: any;
+    rotate_angle: any;
+    nodes: any[] | undefined; // 存储节点对象
+    neighbors: any[] | undefined;
     public _permanentOrder?: string[];
 
     constructor(id: string, x: number, y: number, radius: number) {
@@ -139,188 +121,42 @@ class VNode {
         this.center_y = y;
         this.radius = radius;
 
-        // 2. Initialization: leave unassigned, so the value is undefined
+        // 2. 【初始化：默认不赋值，即为 undefined】
         this._permanentOrder = undefined;
-    }
-
-    public get position() {
-        return {x: this.center_x, y: this.center_y};
-    }
-
-    public setPosition(x: number, y: number): void {
-        this.center_x = x;
-        this.center_y = y;
-    }
-
-    public addNode(node: Node): void {
-        this.nodes.push(node);
-    }
-
-    public setPermanentOrder(order: string[]): void {
-        this._permanentOrder = [...order];
-    }
-
-    public getPermanentOrder(): string[] | undefined {
-        return this._permanentOrder;
-    }
-
-    public toSnapshot() {
-        return {
-            id: this.id,
-            type: this.type,
-            center_x: this.center_x,
-            center_y: this.center_y,
-            radius: this.radius,
-            rotate_angle: this.rotate_angle,
-            nodeIds: this.nodes
-        };
     }
 }
 
 class VEdge {
-    public source: VNode;
-    public target: VNode;
-    public weight: number;
-    // weight is number of edges between source node and target node,
-    // normally is 1, but can be 2 or more for like parallel edges
+    source: any;
+    target: any;
+    weight: any;  // weight is number of edges between source node and target node,
+                  // normally is 1, but can be 2 or more for like parallel edges
 
-    constructor(source: VNode, target: VNode, weight: number = 1) {
+    // 构造函数
+    constructor(source: any, target: any, weight: any = 1) {
         this.source = source;
         this.target = target;
         this.weight = weight;
     }
-
-    public toSnapshot() {
-        return {
-            source: this.source.id, target: this.target.id, weight: this.weight
-        };
-    }
 }
 
-// export default function register(cytoscape: any) {
-//     if (!cytoscape) return;
-//     cytoscape('layout', 'ForceLayout', ForceLayout);
-// }
-
-/**
- * Register this layout as a Cytoscape.js layout extension.
- *
- * Usage:
- *   import cytoscape from 'cytoscape';
- *   import substructureLayout from './cytoscape-substructure-layout';
- *
- *   substructureLayout(cytoscape);
- *
- *   cy.layout({
- *       name: 'substructure',
- *       layoutAlgorithm: 'force',
- *       idealLength: 100,
- *       repulsion: 10000,
- *       springK: 0.15,
- *       iterations: 400
- *   }).run();
- */
-
-export default function register(cytoscapeInstance: any) {
-    if (!cytoscapeInstance) {
-        throw new Error('cytoscape-substructure-layout: Cytoscape.js instance is required');
-    }
-
-    // Avoid duplicate registration when the plugin is initialized more than once.
-    try {
-        cytoscapeInstance('layout', 'ForceLayout', ForceLayout);
-    } catch (error) {
-        // Cytoscape normally throws if an extension with the same name is already
-        // registered. Keeping registration idempotent makes the plugin easier to use
-        // in hot-reload/demo environments.
-        const message = error instanceof Error ? error.message : String(error);
-        if (!/already|exists|registered/i.test(message)) {
-            throw error;
-        }
-    }
+export default function register(cytoscape: any) {
+    if (!cytoscape) return;
+    cytoscape('layout', 'ForceLayout', ForceLayout);
 }
-
-// Optional named export for consumers that prefer: import { register } ...
-export {ForceLayout};
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
- * Enhanced force-directed layout with structure awareness
+ * 结构增强版力导向布局
  */
 function ForceLayout(this: any, options: any) {
-    this.options = options || {};
-    this.cy = this.options.cy;
-    this.eles = this.options.eles || this.cy.elements();
-    this.boundingBox = this.options.boundingBox;
-    this.stopped = false;
+    this.options = options;
+    this.cy = options.cy;
+    this.eles = options.eles;
 
-    if (!this.cy) {
-        throw new Error('cytoscape-substructure-layout: options.cy is required');
-    }
-
-    // Public Cytoscape.js options use camelCase. The original algorithm uses
-    // uppercase internal parameters, so normalize the public API here.
-    // `params` is still accepted for backward compatibility with the old demo.
-    const p = this.options.params || {};
-    const publicParams = {
-        FORCE_LAYOUT: this.options.layoutAlgorithm === 'force' || this.options.layoutAlgorithm === 'MY_ForceLayout',
-        STRESS_LAYOUT: this.options.layoutAlgorithm === 'stress' || this.options.layoutAlgorithm === 'MY_StressLayout',
-
-        IDEAL_LENGTH: this.options.idealLength,
-        REPULSION: this.options.repulsion,
-        SPRING_K: this.options.springK,
-        ITERATIONS: this.options.iterations,
-        ANGULAR_STRENGTH: this.options.angularStrength,
-        CENTER_GRAVITY: this.options.centerGravity,
-        USE_ANGULAR_FORCE: this.options.useAngularForce,
-        RANDOMIZE_INITIAL_POSITIONS: this.options.randomizeInitialPositions,
-
-        MIN_STAR_LEAVES: this.options.minStarLeaves,
-        MIN_CYCLE_LENGTH: this.options.minCycleLength,
-        MAX_CYCLE_LENGTH: this.options.maxCycleLength,
-        MIN_CHAIN_LENGTH: this.options.minChainLength,
-        MIN_PARALLEL_NEIGHBORS: this.options.minParallelNeighbors,
-
-        CYCLE_NODE_SPACING: this.options.cycleNodeSpacing,
-        STAR_RING_SPACING: this.options.starRingSpacing,
-        STAR_BASE_NODES_PER_RING: this.options.starBaseNodesPerRing,
-        CHAIN_MIN_RADIUS: this.options.chainMinRadius,
-        PARALLEL_GAP: this.options.parallelGap,
-        LEAF_NODE_DISTANCE: this.options.leafNodeDistance,
-
-        VNODE_RADIUS_MULTIPLIER: this.options.vnodeRadiusMultiplier,
-        VNODE_REPULSION: this.options.vnodeRepulsion,
-        VNODE_SPRING_K: this.options.vnodeSpringK,
-        VNODE_ITERATIONS: this.options.vnodeIterations,
-        VNODE_ANGULAR_STRENGTH: this.options.vnodeAngularStrength,
-
-        SPREAD_V_NODES: this.options.spreadVNodes,
-        SUBSTRUCTURE_LAYOUT: this.options.substructureLayout,
-        ENABLE_INITIAL_FORCE_LAYOUT: this.options.enableInitialForceLayout,
-        STEP_BY_STEP: this.options.stepByStep
-    };
-
-    // Merge defaults -> legacy params -> public camelCase options. Undefined
-    // public values are ignored so defaults are preserved.
-    const camelToInternal: Record<string, any> = {};
-    Object.keys(publicParams).forEach((key) => {
-        const value = publicParams[key as keyof typeof publicParams];
-
-        if (value !== undefined) {
-            camelToInternal[key] = value;
-        }
-    });
-
-    this.params = {
-        ...DEFAULT_PARAMS, ...p, ...camelToInternal
-    };
-
-    // If no algorithm was explicitly supplied, use force.
-    if (this.options.layoutAlgorithm === undefined && p.LAYOUT_ALGORITHM === undefined) {
-        this.params.FORCE_LAYOUT = true;
-        this.params.STRESS_LAYOUT = false;
-    }
+    // Merge user-provided parameters with defaults
+    this.params = {...DEFAULT_PARAMS, ...(options.params || {})};
 
     // Instance-specific arrays instead of global
     this.vnodes = [];
@@ -371,15 +207,15 @@ ForceLayout.prototype.captureStep = function (stepName: string, description: str
     console.log(`[Step ${step.stepNumber}] ${stepName}: ${description}`);
 };
 
-/////////////// Check whether two node arrays are identical, ignoring order
+///////////////判断两个node数组是否相同，不用考虑顺序
 function areNodesEqual(arr1: cytoscape.NodeCollection, arr2: cytoscape.NodeCollection): boolean {
-    // 1. Different lengths mean they are definitely different
+    // 1. 长度不等，肯定不相同
     if (arr1.length !== arr2.length) return false;
 
-    // 2. Extract all IDs and put them into a Set
+    // 2. 提取所有 ID 并放入 Set
     const ids1 = new Set(arr1.map((node: Node) => node.id()));
 
-    // 3. Check whether every ID in arr2 exists in the Set
+    // 3. 检查 arr2 中的每个 ID 是否都在 Set 中
     return arr2.every(node => ids1.has((node as NodeSingular).id()));
 }
 
@@ -400,15 +236,16 @@ function totalEdgeLength(edges: Edges) {
 }
 
 /**
- * Arrange the Node array into a rectangular matrix
+ * 将 Node 数组排列成矩形矩阵
  *
- * dirVector: direction of the long side of the rectangle
- * colSpacing: distance between nodes along the long-side direction
- * rowSpacing: distance between rows along the short-side direction
- * cols: number of nodes per row; calculated automatically if omitted
+ * dirVector：矩形长边方向
+ * colSpacing：长边方向上节点之间的距离
+ * rowSpacing：短边方向上行与行之间的距离
+ * cols：每行节点数量，不传则自动计算
  */
 function layoutRectangular(nodes: NodeSingular[], center: { x: number, y: number }, dirVector: {
-    x: number, y: number
+    x: number,
+    y: number
 }, rowSpacing: number = 60, colSpacing: number = 60, cols?: number) {
     const n = nodes.length;
 
@@ -417,7 +254,7 @@ function layoutRectangular(nodes: NodeSingular[], center: { x: number, y: number
     }
 
     // ============================================================
-    // 1. Determine matrix dimensions
+    // 1. 确定矩阵尺寸
     // ============================================================
 
     let finalCols: number;
@@ -431,17 +268,17 @@ function layoutRectangular(nodes: NodeSingular[], center: { x: number, y: number
 
     let rows = Math.ceil(n / finalCols);
 
-    // A small number of nodes are placed in a single row
+    // 少量节点直接放一行
     if (n < 5) {
         finalCols = 1;
         rows = n;
     }
 
     // ============================================================
-    // 2. Calculate the two unit direction vectors
+    // 2. 计算两个单位方向向量
     //
-    // uLong  = long-side direction = dirVector
-    // uShort = short-side direction = perpendicular to dirVector
+    // uLong  = 长边方向 = dirVector
+    // uShort = 短边方向 = 垂直于 dirVector
     // ============================================================
 
     const magnitude = Math.sqrt(dirVector.x * dirVector.x + dirVector.y * dirVector.y);
@@ -457,19 +294,19 @@ function layoutRectangular(nodes: NodeSingular[], center: { x: number, y: number
     };
 
     // ============================================================
-    // 3. Iterate over all Nodes
+    // 3. 遍历所有 Node
     // ============================================================
 
     nodes.forEach((node, i) => {
 
-        // Row containing the current node
+        // 当前节点所在的行
         const row = Math.floor(i / finalCols);
 
-        // Column containing the current node
+        // 当前节点所在的列
         const col = i % finalCols;
 
         // --------------------------------------------------------
-        // Actual number of nodes in the current row
+        // 当前行实际有多少个节点
         // --------------------------------------------------------
 
         const isLastRow = row === rows - 1;
@@ -477,8 +314,13 @@ function layoutRectangular(nodes: NodeSingular[], center: { x: number, y: number
         const nodesInThisRow = isLastRow ? (n % finalCols || finalCols) : finalCols;
 
         // ========================================================
-        // 4. Position along the long-side direction
-        // Arrange symmetrically around center
+        // 4. 长边方向的位置
+        //
+        // 例如：
+        //
+        // ● ● ● ●
+        //
+        // 会围绕 center 对称
         // ========================================================
 
         const longWidth = (nodesInThisRow - 1) * colSpacing;
@@ -486,9 +328,15 @@ function layoutRectangular(nodes: NodeSingular[], center: { x: number, y: number
         const offsetLong = col * colSpacing - longWidth / 2;
 
         // ========================================================
-        // 5. Position along the short-side direction
+        // 5. 短边方向的位置
         //
-        // Center each row as a whole
+        // 例如：
+        //
+        // ● ● ● ●
+        // ● ● ● ●
+        // ● ●
+        //
+        // 每一行整体居中
         // ========================================================
 
         const totalShortHeight = (rows - 1) * rowSpacing;
@@ -496,12 +344,12 @@ function layoutRectangular(nodes: NodeSingular[], center: { x: number, y: number
         const offsetShort = row * rowSpacing - totalShortHeight / 2;
 
         // ========================================================
-        // 6. Calculate the final coordinates
+        // 6. 计算最终坐标
         //
         // position =
         //      center
-        //    + offset along the long-side direction
-        //    + offset along the short-side direction
+        //    + 长边方向偏移
+        //    + 短边方向偏移
         // ========================================================
 
         const x = center.x + offsetLong * uLong.x + offsetShort * uShort.x;
@@ -514,13 +362,18 @@ function layoutRectangular(nodes: NodeSingular[], center: { x: number, y: number
     });
 }
 
+type Node = cytoscape.NodeSingular;
+type Edge = cytoscape.EdgeSingular;
+type Nodes = cytoscape.NodeCollection;
+type Edges = cytoscape.EdgeCollection;
+
 ForceLayout.prototype.identifyStructures = function (nodes: NodeCollection) {
     const params = this.params;
 
-    // 0. Reset all markers
+    // 0. 重置所有标记
     nodes.data('structType', 'Normal');
     nodes.data('structColor', '#999999');
-    nodes.data('groupId', null); // Added: reset group ID for cycles
+    nodes.data('groupId', null); // 新增：重置分组 ID for cycle
     nodes.data('innerId', null);  // index inner a circle
     nodes.data('parallelGroupIdVec', []);
 
@@ -543,7 +396,7 @@ ForceLayout.prototype.identifyStructures = function (nodes: NodeCollection) {
             const findCycles = (u: Node, parent: Node | null, path: string[]) => {
                 const neighbors = u.neighborhood().nodes().toArray().filter((n: any) => n.data('structType') === 'Normal');
 
-                if (neighbors.length < 8) { // If a node has too many neighbors, it is unlikely to be part of a cycle; this mainly improves efficiency and prevents the search from getting stuck here
+                if (neighbors.length < 8) { //如果一个节点的邻居太多，那很有可能不在某个环上，这里主要为了效率，否则会一直卡在这里
                     for (const v of neighbors) {
                         const vId = v.id();
                         // 1. Found a cycle back to our specific START node
@@ -574,21 +427,21 @@ ForceLayout.prototype.identifyStructures = function (nodes: NodeCollection) {
         });
     }
 
-    // --- 2. Secondary filtering: remove cycles with an overlap of >= 2 nodes ---
+    // --- 2. 二次过滤：去掉重合度 >= 2 的环 ---
     const filteredCycles: string[][] = [];
     allCycles.sort((a, b) => b.length - a.length);
-    // It is recommended to sort cycles by size first; smaller cycles are usually more meaningful because fundamental cycles tend to be shorter
+    // 建议先按环的大小排序，通常保留“小环”更有意义（基础环往往更短）
     allCycles.forEach((currentCycle) => {
         const currentSet = new Set(currentCycle);
 
-        // Check whether the current cycle overlaps any saved cycle by two or more nodes
+        // 检查当前环是否与已保存的任何一个环有 2 个以上节点重合
         const isRedundant = filteredCycles.some(existingCycle => {
             let overlapCount = 0;
             for (const nodeId of existingCycle) {
                 if (currentSet.has(nodeId)) {
                     overlapCount++;
                 }
-                // Performance optimization: stop counting as soon as the overlap reaches 2
+                // 性能优化：一旦发现重合点达到 2 个，立即停止计数
                 if (overlapCount >= 2) return true;
             }
             return false;
@@ -634,16 +487,16 @@ ForceLayout.prototype.identifyStructures = function (nodes: NodeCollection) {
 
     console.log("num of cycles: ", filteredCycles.length);
 
-    ////////////////////////////////////////// Define the storage structure for chains  ////////////////////////////
+    ////////////////////////////////////////// 定义链的存储结构  ////////////////////////////
     interface Chain {
         chainId: string;
-        nodes: any[]; // stores node objects
+        nodes: any[]; // 存储节点对象
     }
 
     const chains: Chain[] = [];
-    const processedNodeIds = new Set<string>(); // avoid processing nodes more than once
+    const processedNodeIds = new Set<string>(); // 避免重复处理
 
-    // 2. Find all leaf nodes (Normal type with degree 1)
+    // 2. 找出所有的叶子节点 (Normal 类型且度数为 1)
     const leafNodes = nodes.filter((n: any) => n.data('structType') === 'Normal' && n.degree() === 1);
 
     let chainId = 0;
@@ -654,35 +507,35 @@ ForceLayout.prototype.identifyStructures = function (nodes: NodeCollection) {
         const currentChainNodes: any[] = [];
         let currentNode = leaf;
         let nodeId = 0;
-        // 3. Trace inward along the chain
+        // 3. 沿着链向内溯源
         while (currentNode) {
 
             currentChainNodes.push(currentNode);
             processedNodeIds.add(currentNode.id());
 
-            // Find the next neighbor
+            // 寻找下一个邻居
             const neighbors = currentNode.neighborhood().nodes().filter((n: any) => n.data('structType') === 'Normal' && !processedNodeIds.has(n.id()));
 
-            // Chain continuation conditions:
-            // 1. There is exactly one unvisited Normal neighbor
-            // 2. The neighbor must not have a high degree (if degree > 2, a branching point has been reached and the chain ends)
+            // 链的延续条件：
+            // 1. 只有一个未访问的 Normal 邻居
+            // 2. 且该邻居的度数不能太高（如果度数 > 2，说明到了分叉点，链结束）
             if (neighbors.length === 1) {
                 const nextNode = neighbors[0];
 
-                // If the next node is a branching point (degree > 2), treat it as the endpoint of the chain and stop extending
+                // 如果下一个节点是分叉点 (degree > 2)，我们把它作为链的终点，但停止继续延伸
                 if (nextNode.degree() > 2) {
-                    // Optional: should the branching point also be included in the chain? Usually not, to keep the chain independent
+                    // 可选：是否将分叉点也计入链中？通常不计入，以保持链的独立性
                     break;
                 }
 
                 currentNode = nextNode;
             } else {
-                // No neighbors or multiple neighbors (branching), so the chain ends
+                // 没有邻居或有多个邻居（分叉），链结束
                 currentNode = null;
             }
         }
 
-        // 4. Save the chain that was found
+        // 4. 保存找到的链
         if (currentChainNodes.length >= params.MIN_CHAIN_LENGTH) {
             nodeId = 0;
             currentChainNodes.forEach((node: any) => {
@@ -701,7 +554,7 @@ ForceLayout.prototype.identifyStructures = function (nodes: NodeCollection) {
             })
             chainId++;
             chains.push({
-                chainId: `chain_${leaf.id()}`, // name it using the leaf node ID
+                chainId: `chain_${leaf.id()}`, // 以叶子节点 ID 命名
                 nodes: currentChainNodes
             });
         } else {
@@ -723,16 +576,16 @@ ForceLayout.prototype.identifyStructures = function (nodes: NodeCollection) {
         }
     });
 
-    ///////////////////////////////// Star structure ///////////
+    ///////////////////////////////// 星型结构 ///////////
     let starIndex: number = 0;
     nodes.forEach((node: any) => {
 
         const neighbors = node.neighborhood().nodes();
 
-        // Number of distinct neighbors
+        // 不同邻居节点数量
         const neighborCount = neighbors.length;
 
-        // Check whether the neighbors consist only of distinct neighbor nodes
+        // 判断邻居是不是只有一个不同的邻居节点
         const leafNeighbors = neighbors.filter((n: Node) => n.neighborhood().nodes().length === 1);
 
         if (leafNeighbors.length >= params.MIN_STAR_LEAVES && neighborCount >= params.MIN_STAR_LEAVES) {
@@ -771,57 +624,58 @@ ForceLayout.prototype.identifyStructures = function (nodes: NodeCollection) {
         }
     });
 
-    /////////////////////////////// Find parallel/diamond structures ///////////////////////////////////
+    /////////////////////////////// 找出平行/钻石结构 Parallel ///////////////////////////////////
+    if (1) {
+        // let diamonds = [];
+        let parallelId = 0;
+        //任意两个点是否有共同的neighbor
+        for (let i = 0; i < nodes.length; i++) {
+            let nodeVecParallel = [];
+            const u = nodes[i];
+            const u1 = u.neighborhood().nodes();
 
-    // let diamonds = [];
-    let parallelId = 0;
-    // Whether any two nodes have common neighbors
-    for (let i = 0; i < nodes.length; i++) {
-        let nodeVecParallel = [];
-        const u = nodes[i];
-        const u1 = u.neighborhood().nodes();
-
-        if (u.data('structType') === 'Normal') {
-            for (let j = 0; j < nodes.length; j++) {
-                if (i === j) continue;
-                const v = nodes[j];
-                if (v.data('structType') === 'Normal') {
-                    const v1 = v.neighborhood().nodes();
-                    if (areNodesEqual(v1, u1) && v1.length >= params.MIN_PARALLEL_NEIGHBORS && u1.length >= params.MIN_PARALLEL_NEIGHBORS) {
-                        if (nodeVecParallel.length === 0) {
-                            nodeVecParallel.push(u.id());
+            if (u.data('structType') === 'Normal') {
+                for (let j = 0; j < nodes.length; j++) {
+                    if (i === j) continue;
+                    const v = nodes[j];
+                    if (v.data('structType') === 'Normal') {
+                        const v1 = v.neighborhood().nodes();
+                        if (areNodesEqual(v1, u1) && v1.length >= params.MIN_PARALLEL_NEIGHBORS && u1.length >= params.MIN_PARALLEL_NEIGHBORS) {
+                            if (nodeVecParallel.length === 0) {
+                                nodeVecParallel.push(u.id());
+                            }
+                            nodeVecParallel.push(v.id());
                         }
-                        nodeVecParallel.push(v.id());
                     }
                 }
             }
-        }
-        if (nodeVecParallel.length >= 2) {
-            nodeVecParallel.forEach(v => {
-                nodes.forEach((node: Node) => {
-                    if (node.id() == v) {
-                        node.addClass('substructure-parallel')
-                        node.data('structType', 'Parallel');
-                        node.data('structColor', '#50C878');
-                        node.data('groupId', 'Parallel' + parallelId);
+            if (nodeVecParallel.length >= 2) {
+                nodeVecParallel.forEach(v => {
+                    nodes.forEach((node: Node) => {
+                        if (node.id() == v) {
+                            node.addClass('substructure-parallel')
+                            node.data('structType', 'Parallel');
+                            node.data('structColor', '#50C878');
+                            node.data('groupId', 'Parallel' + parallelId);
 
-                        node.data('structs', {
-                            ...node.data('structs'), Parallel: {
-                                color: '#50C878', groupId: `Parallel_${parallelId}`
-                            }
-                        });
-                    }
+                            node.data('structs', {
+                                ...node.data('structs'), Parallel: {
+                                    color: '#50C878', groupId: `Parallel_${parallelId}`
+                                }
+                            });
+                        }
+                    })
                 })
-            })
 
-            u1.forEach((v1: Node) => {
-                nodes.forEach((node: Node) => {
-                    if (node.id() == v1.id()) {
-                        node.data('parallelGroupIdVec', [...node.data('parallelGroupIdVec'), 'Parallel' + parallelId]);
-                    }
+                u1.forEach((v1: Node) => {
+                    nodes.forEach((node: Node) => {
+                        if (node.id() == v1.id()) {
+                            node.data('parallelGroupIdVec', [...node.data('parallelGroupIdVec'), 'Parallel' + parallelId]);
+                        }
+                    })
                 })
-            })
-            parallelId++;
+                parallelId++;
+            }
         }
     }
 
@@ -903,7 +757,7 @@ ForceLayout.prototype.run = function () {
             nodeCount: nodes.length, edgeCount: edgeSet.length
         });
 
-        // 1. Identify structures (mark structType and use components to separate independent cycles)
+        // 1. 识别结构 (标记 structType 并通过 components 划分独立环)
         this.identifyStructures(nodes);
 
         this.captureStep('Structure Detection', 'Structures identified (Stars, Cycles, Chains, Parallel)', {
@@ -913,7 +767,7 @@ ForceLayout.prototype.run = function () {
             parallel: nodes.filter((n: any) => n.data('structType') === 'Parallel').length
         });
 
-        //************ Classify and save each type into the virtual-node array *///////////
+        //************ 将每种类型分类保存到二维数组中 *///////////
         if (1) {
             nodes.forEach((n: any) => {
                 if (n.data('structType') === 'Normal' || n.data('structType') === 'LeafButNotChain') {
@@ -938,7 +792,7 @@ ForceLayout.prototype.run = function () {
                             flag = false;
                         }
                     });
-                    if (flag) { // not saved yet
+                    if (flag) { //还没保存过
                         let nodesarray: any[] = [];
                         nodesarray.push(n);
                         this.vnodes.push({
@@ -960,7 +814,7 @@ ForceLayout.prototype.run = function () {
                             flag = false;
                         }
                     });
-                    if (flag) { // not saved yet
+                    if (flag) { //还没保存过
                         let nodesarray: any[] = [];
                         nodesarray.push(n);
 
@@ -982,7 +836,7 @@ ForceLayout.prototype.run = function () {
                             flag = false;
                         }
                     });
-                    if (flag) { // not saved yet
+                    if (flag) { //还没保存过
                         let nodesarray: any[] = [];
                         nodesarray.push(n);
                         this.vnodes.push({
@@ -1004,7 +858,7 @@ ForceLayout.prototype.run = function () {
                             flag = false;
                         }
                     });
-                    if (flag) { // not saved yet
+                    if (flag) { //还没保存过
                         let nodesarray: any[] = [];
                         nodesarray.push(n);
                         this.vnodes.push({
@@ -1026,7 +880,7 @@ ForceLayout.prototype.run = function () {
         if (1) {
 
             // --------------------------------------------------------
-            // 1. Build mapping: real Node ID -> VNode
+            // 1. 建立：真实 Node ID -> VNode
             // --------------------------------------------------------
 
             const nodeToVNode = new Map<string, VNode>();
@@ -1037,13 +891,13 @@ ForceLayout.prototype.run = function () {
 
                 for (const node of vnode.nodes) {
 
-                    // Should Star-Member participate in VNode edge construction?
-                    // Keep this consistent with the original logic:
+                    // Star-Member 是否需要参与 VNode edge 建立，
+                    // 保持和你原来的逻辑一致：
                     //
-                    // In the original code, when actually creating edges:
+                    // 原代码在真正建立 edge 时：
                     // if (n1.data("structType") != 'Star-Member')
                     //
-                    // Therefore, Star-Member can be ignored here.
+                    // 因此这里可以直接忽略 Star-Member。
                     if (node.data("structType") === "Star-Member") {
                         continue;
                     }
@@ -1053,14 +907,14 @@ ForceLayout.prototype.run = function () {
             }
 
             // --------------------------------------------------------
-            // 2. Traverse the real Edges
+            // 2. 遍历真实 Edge
             //
-            // Determine directly:
+            // 直接确定：
             //
             // realNode1 -> VNode1
             // realNode2 -> VNode2
             //
-            // Then:
+            // 然后：
             //
             // VNode1 <-> VNode2 : connectionCount++
             // --------------------------------------------------------
@@ -1081,20 +935,20 @@ ForceLayout.prototype.run = function () {
 
                 const targetVNode = nodeToVNode.get(targetId);
 
-                // If the corresponding VNode cannot be found, skip it
+                // 如果找不到对应 VNode，跳过
                 if (!sourceVNode || !targetVNode) {
                     continue;
                 }
 
                 // ----------------------------------------------------
-                // Edge is inside the same VNode
+                // Edge 在同一个 VNode 内部
                 //
-                // Original logic:
+                // 原来的逻辑：
                 //
                 // count == 2
                 //
-                // This means both ends of the edge are in the same VNode,
-                // so no virtual edge is created.
+                // 表示 edge 两端都在同一个 vnode，
+                // 因此不建立 virtual edge。
                 // ----------------------------------------------------
 
                 if (sourceVNode === targetVNode) {
@@ -1102,14 +956,14 @@ ForceLayout.prototype.run = function () {
                 }
 
                 // ----------------------------------------------------
-                // To ensure that:
+                // 为了保证：
                 //
                 // A -> B
                 // B -> A
                 //
-                // A -> B and B -> A are treated as the same VEdge
+                // 被认为是同一条 VEdge
                 //
-                // Use the VNode index / ID to build a unique key
+                // 使用 vnode index / id 建立唯一 key
                 // ----------------------------------------------------
 
                 const id1 = sourceVNode.id;
@@ -1136,7 +990,7 @@ ForceLayout.prototype.run = function () {
             }
 
             // --------------------------------------------------------
-            // 3. Create VEdges based on connectionMap
+            // 3. 根据 connectionMap 创建 VEdge
             // --------------------------------------------------------
 
             connectionMap.forEach(({
@@ -1160,7 +1014,7 @@ ForceLayout.prototype.run = function () {
             vedge.target.neighbors.push(vedge.source);
         })
 
-        ///////////////////////////////// Update the centers of virtual nodes //////////////////////////
+        ///////////////////////////////// 更新虚拟节点的中心 //////////////////////////
         this.vnodes.forEach((v1: any) => {
             if (v1.nodes && v1.nodes.length > 0) {
                 const sumX = v1.nodes.reduce((acc: number, curr: any) => acc + (curr.position().x || 0), 0);
@@ -1174,7 +1028,7 @@ ForceLayout.prototype.run = function () {
             }
         });
 
-        //////////////////////////////// Update the radius of virtual nodes /////////////////////////////
+        //////////////////////////////// 更新半径 update radius for virtual nodes /////////////////////////////
         if (1) {
             this.vnodes.forEach((v1: any) => {
                 if (v1.type == 'Star') {
@@ -1206,20 +1060,20 @@ ForceLayout.prototype.run = function () {
                     if (n === 0) {
                         v1.radius = 0;
                     } else {
-                        // 1. Mirror the core row/column logic of the original layout function
+                        // 1. 镜像原布局函数的行列核心逻辑
                         let finalCols = Math.ceil(Math.sqrt(n));
                         if (n < 3) finalCols = n;
                         const rows = Math.ceil(n / finalCols);
 
-                        // 2. Use the spacing values passed to the layout (assuming both are 60)
+                        // 2. 定义好你在布局里传入的间距（假设都用 60）
                         const colSpacing = 60;
                         const rowSpacing = 60;
 
-                        // 3. Calculate the grid width and height (center-to-edge distances)
+                        // 3. 计算网格的长和宽（边缘中心距）
                         const totalWidth = (finalCols - 1) * colSpacing;
                         const totalHeight = (rows - 1) * rowSpacing;
 
-                        // 4. Use the Pythagorean theorem to calculate the distance from the center to a corner, plus a safety margin for one node itself (e.g. 20)
+                        // 4. 使用勾股定理计算中心到顶角的距离，并加上单个节点自身的安全留白（比如 20）
                         const nodeSelfRadius = 20;
                         v1.radius = Math.sqrt((totalWidth / 2) ** 2 + (totalHeight / 2) ** 2) + nodeSelfRadius;
                     }
@@ -1253,10 +1107,10 @@ ForceLayout.prototype.run = function () {
             var maxRepulsetMove = 10e10;
             var numOfCollision = 0;
 
-            // Adjust the exit threshold: only consider the whole graph truly stationary when the maximum movement of every node is below 0.5 pixels
+            // 调整退出阈值：当全图任何节点的最大移动量都小于 0.5 像素时，才认为真正静止
             const ENERGY_THRESHOLD = 0.5;
 
-            // Build the adjacency list in advance so it can be reused seamlessly for both "initial ordering" and the "later angular force"
+            // 提前提取构建邻接表，供“初始秩序建立”和“后期角度力”共同无缝复用
             const adj = new Map<string, VNode[]>();
             this.vedges.forEach((e: VEdge) => {
                 if (!e.source || !e.target) return;
@@ -1269,18 +1123,18 @@ ForceLayout.prototype.run = function () {
             this.vnodes.forEach((node: VNode) => {
                 if (!node._permanentOrder) {
                     const allNeighbors = adj.get(node.id) || [];
-                    // Filter out leaf nodes (terminal attached nodes with degree <= 2)
+                    // 过滤出叶子节点（度数小于等于2的末端挂载节点）
                     const leafNeighbors = allNeighbors.filter((nb: VNode) => {
                         const nbEdges = adj.get(nb.id) || [];
                         return nbEdges.length <= 2;
                     });
 
                     if (leafNeighbors.length >= 2) {
-                        // Sort to establish a clean initial topological ordering
+                        // 排序建立绝对干净的初始拓扑阵列
                         leafNeighbors.sort((a: VNode, b: VNode) => a.id.localeCompare(b.id));
                         node._permanentOrder = leafNeighbors.map((a: VNode) => a.id);
 
-                        // Also give them an initial star-shaped radial geometric distribution that is guaranteed not to cross
+                        // 顺便给它们一个初始的、绝对不交叉的星型辐射状几何分布基础
                         leafNeighbors.forEach((nb: VNode, index: number) => {
                             const initAngle = (Math.PI * 2 / leafNeighbors.length) * index;
                             nb.center_x = node.center_x + Math.cos(initAngle) * IDEAL_LENGTH;
@@ -1293,26 +1147,26 @@ ForceLayout.prototype.run = function () {
             while (iter < ITERATIONS) {
                 iter++;
 
-                // Reset total movement-energy statistics before each iteration
+                // 每一轮开始前，重置总移动能量统计
                 maxAttractMove = 0;
                 maxRepulsetMove = 0;
                 let maxAngularMove = 0;
                 numOfCollision = 0;
 
-                ////////////////////// Place each node at the position of its corresponding virtual node
-
+                ////////////////////// 将node放在对应的virtual node的位置上
+                if (1) {
                     this.vnodes.forEach((v: any) => {
                         v.nodes.forEach((n: any) => {
                             n.position().x = v.center_x + Math.random() * 5;
                             n.position().y = v.center_y + Math.random() * 5;
                         })
                     });
+                }
 
-
-                // [Core correction] Perform all physical calculations in virtual space; no longer repeatedly shuffle real nodes randomly within each frame
+                // 【核心修正】物理运算完全在虚拟空间迭代，不再在每帧内部频繁对真实节点做乱序随机洗牌
                 this.captureStep('Virtual Nodes Positioned step ' + iter, 'Virtual node centers and radii calculated', null);
 
-                // Count the current number of collisions
+                // 统计当前碰撞数
                 for (let i = 0; i < this.vnodes.length; i++) {
                     for (let j = i + 1; j < this.vnodes.length; j++) {
                         const n1 = this.vnodes[i];
@@ -1326,7 +1180,7 @@ ForceLayout.prototype.run = function () {
                     }
                 }
 
-                // Calculate the current global cooling factor (the core simulated-annealing control)
+                // 计算当前的全局降温系数（模拟退火核心控制）
                 const cooling = Math.pow(1 - iter / ITERATIONS, 2);
 
                 /* ---------- A. Attraction (Spring) ---------- */
@@ -1343,7 +1197,7 @@ ForceLayout.prototype.run = function () {
                         const surfaceDist = centerDist - (s.radius + t.radius);
                         const delta = Math.max(0, surfaceDist - IDEAL_LENGTH);
 
-                        // Apply the cooling factor to the attractive force
+                        // 引力引入降温系数
                         let force = SPRING_K * delta * cooling;
 
                         const fx = (force * dx) / centerDist;
@@ -1386,7 +1240,7 @@ ForceLayout.prototype.run = function () {
                                 force = REPULSION / (gap * gap + 20);
                             }
 
-                            // Apply the cooling factor to the repulsive force
+                            // 排斥力同样引入降温系数
                             force *= cooling;
 
                             const maxForceLimit = REPULSION * 2 * cooling;
@@ -1459,7 +1313,7 @@ ForceLayout.prototype.run = function () {
                                 gap += Math.PI * 2;
                             }
 
-                            // The gap is already large enough
+                            // 已经够开
                             if (gap >= idealGap) {
                                 continue;
                             }
@@ -1470,17 +1324,17 @@ ForceLayout.prototype.run = function () {
 
                             force = Math.min(force, MAX_FORCE);
 
-                            // Tangential direction of the left item
+                            // left切线方向
                             const ltx = -left.dy / left.dist;
 
                             const lty = left.dx / left.dist;
 
-                            // Tangential direction of the right item
+                            // right切线方向
                             const rtx = -right.dy / right.dist;
 
                             const rty = right.dx / right.dist;
 
-                            // Push them apart in opposite directions
+                            // 向相反方向推开
                             left.nb.center_x -= ltx * force;
 
                             left.nb.center_y -= lty * force;
@@ -1496,7 +1350,7 @@ ForceLayout.prototype.run = function () {
                     });
                 }
 
-                // [Exit criterion] Only allow an early safe exit when all movement energy in the graph has completely settled and become extremely small
+                // 【退出判定机制】只有当全图所有移动能量彻底平息、都极其微小时，才允许提前安全退出
                 const totalMaxMovement = Math.max(maxAttractMove, maxRepulsetMove, maxAngularMove);
                 if (totalMaxMovement < ENERGY_THRESHOLD && iter > 10) {
                     break;
@@ -1543,14 +1397,14 @@ ForceLayout.prototype.run = function () {
                                 colisionFlag = true;
                                 numOfCollision++;
 
-                                // 1.2 Calculate the physical overlap distance
+                                // 1.2 计算重叠的物理长度
                                 const overlap = minDistance + padding - centerDist;
 
-                                // 1.3 Calculate the normalized direction vector
+                                // 1.3 计算归一化的方向向量
                                 let nx = dx / centerDist;
                                 let ny = dy / centerDist;
 
-                                // 1.4 Move each node half the distance in opposite directions (50%)
+                                // 1.4 两个节点各自向相反方向退让一半（50%）
                                 const moveDistance = overlap / 2;
                                 const offsetX = nx * moveDistance;
                                 const offsetY = ny * moveDistance;
@@ -1564,7 +1418,7 @@ ForceLayout.prototype.run = function () {
                         }
                     }
 
-                    // [Optimization 3] Safety valve: exit directly if the iteration count becomes too large (typically when nodes are extremely dense)
+                    // 【优化 3】安全阀：如果迭代次数过多（通常在节点极度密集时发生），直接退出
                     if (numOfCollision > 10000) {
                         console.warn("avoid dead loop");
                         break;
@@ -1595,9 +1449,9 @@ ForceLayout.prototype.run = function () {
         }
 
         //******************** stress force layout ************************
-        // Stress Majorization algorithm
-        // All-Pairs shortest-path calculation and Guttman Transform (weighted Laplacian updates),
-        // while retaining the polar-coordinate initialization for leaf nodes and the Anti-Collision post-processing in the original code
+        //Stress Majorization（应力主元化）算法
+        //All-Pairs 最短路径计算 和 Guttman Transform（拉普拉斯矩阵加权更新），
+        //同时保留了代码中的叶子节点极坐标初始化和防重叠（Anti-Collision）后处理
         if (layout_algorithm === 'MY_StressLayout') {
             const IDEAL_LENGTH = params.IDEAL_LENGTH;
             const ITERATIONS = params.ITERATIONS;
@@ -1606,11 +1460,11 @@ ForceLayout.prototype.run = function () {
             const numNodes = this.vnodes.length;
             if (numNodes === 0) return;
 
-            // Index mapping: ID -> array index, for matrix operations
+            // 索引映射表：ID -> 数组下标，方便矩阵运算
             const nodeIndexMap = new Map<string, number>();
             this.vnodes.forEach((v: VNode, i: number) => nodeIndexMap.set(v.id, i));
 
-            // Extract the adjacency list for reuse during initialization
+            // 邻接表提取供初始化复用
             const adj = new Map<string, VNode[]>();
             this.vedges.forEach((e: VEdge) => {
                 if (!e.source || !e.target) return;
@@ -1621,14 +1475,14 @@ ForceLayout.prototype.run = function () {
             });
 
             // -------------------------------------------------------------
-            // [Preprocessing 1] Calculate the shortest-path distance matrix between every pair of nodes in the graph (APSP - Floyd Warshall)
+            // [预处理 1] 计算全图任意节点对之间的最短路径距离矩阵 (APSP - Floyd Warshall)
             // -------------------------------------------------------------
             const distMatrix: number[][] = Array.from({length: numNodes}, () => new Array(numNodes).fill(Infinity));
             const weightMatrix: number[][] = Array.from({length: numNodes}, () => new Array(numNodes).fill(0));
 
             for (let i = 0; i < numNodes; i++) distMatrix[i][i] = 0;
 
-            // Assign the ideal distance baseline based on real edges
+            // 根据真实边赋予理想距离基准
             this.vedges.forEach((e: VEdge) => {
                 if (!e.source || !e.target) return;
                 const u = nodeIndexMap.get(e.source.id);
@@ -1640,7 +1494,7 @@ ForceLayout.prototype.run = function () {
                 }
             });
 
-            // Use Floyd-Warshall to compute shortest paths between all node pairs
+            // Floyd-Warshall 求解任意节点对最短路径
             for (let k = 0; k < numNodes; k++) {
                 for (let i = 0; i < numNodes; i++) {
                     for (let j = 0; j < numNodes; j++) {
@@ -1651,11 +1505,11 @@ ForceLayout.prototype.run = function () {
                 }
             }
 
-            // Calculate the weight matrix W_ij = 1 / (d_ij ^ 2)
+            // 计算权重矩阵 W_ij = 1 / (d_ij ^ 2)
             for (let i = 0; i < numNodes; i++) {
                 for (let j = 0; j < numNodes; j++) {
                     if (i !== j && distMatrix[i][j] !== Infinity) {
-                        // Account for the actual node radius to prevent excessive crowding
+                        // 考虑节点真实半径，防止过于拥挤
                         const minR = this.vnodes[i].radius + this.vnodes[j].radius;
                         const d = Math.max(distMatrix[i][j], minR);
                         weightMatrix[i][j] = 1 / (d * d);
@@ -1664,7 +1518,7 @@ ForceLayout.prototype.run = function () {
             }
 
             // -------------------------------------------------------------
-            // [Preprocessing 2] Establish topological ordering and initial coordinates
+            // [预处理 2] 拓扑秩序建立与初始坐标设置
             // -------------------------------------------------------------
             this.vnodes.forEach((node: VNode) => {
                 if (!node._permanentOrder) {
@@ -1688,14 +1542,14 @@ ForceLayout.prototype.run = function () {
             });
 
             // -------------------------------------------------------------
-            // [Main loop] Stress Majorization iteration (Guttman Transform)
+            // [主循环] Stress Majorization 迭代 (Guttman Transform)
             // -------------------------------------------------------------
             let iter = 0;
             while (iter < ITERATIONS) {
                 iter++;
                 let maxStressMove = 0;
 
-                // Temporary array for the new coordinates calculated in this iteration
+                // 临时数组存储本轮计算的新坐标
                 const nextX = new Float64Array(numNodes);
                 const nextY = new Float64Array(numNodes);
 
@@ -1724,7 +1578,7 @@ ForceLayout.prototype.run = function () {
 
                         const currentDist = Math.sqrt(dx * dx + dy * dy) || 1;
 
-                        // Guttman Transform formula: calculate the weighted average obtained by projecting/pulling all other nodes j toward/from i according to the ideal distance dij
+                        // Guttman Transform 计算公式：所有其他节点 j 根据理想距离 dij 对 i 投影推拉后的加权平均
                         const invDist = dij / currentDist;
                         sumX += wij * (vj.center_x + dx * invDist);
                         sumY += wij * (vj.center_y + dy * invDist);
@@ -1740,7 +1594,7 @@ ForceLayout.prototype.run = function () {
                     }
                 }
 
-                // Apply coordinate updates and track the maximum displacement
+                // 应用坐标更新，并统计最大位移
                 for (let i = 0; i < numNodes; i++) {
                     const vi = this.vnodes[i];
                     const moveX = Math.abs(nextX[i] - vi.center_x);
@@ -1751,13 +1605,13 @@ ForceLayout.prototype.run = function () {
                     vi.center_y = nextY[i];
                 }
 
-                // Check the convergence condition and exit early
+                // 判定收敛条件提前退出
                 if (maxStressMove < ENERGY_THRESHOLD && iter > 10) {
                     break;
                 }
             }
 
-            // Map the calculated virtual coordinates back to the real nodes
+            // 将计算出的虚拟坐标映射到真实节点
             this.vnodes.forEach((v: any) => {
                 v.nodes.forEach((n: any) => {
                     n.position().x = v.center_x;
@@ -1766,7 +1620,7 @@ ForceLayout.prototype.run = function () {
             });
 
             // -------------------------------------------------------------
-            // [Post-processing] Collision / overlap removal (Node Overlap Removal)
+            // [后处理] 防碰撞 / 重叠消除 (Node Overlap Removal)
             // -------------------------------------------------------------
             if (1) {
                 let colisionFlag = true;
@@ -1835,13 +1689,13 @@ ForceLayout.prototype.run = function () {
             }
         }
 
-        /////////////////////  Delete the old layout so that only virtual-node VNode layout remains  ////////////////
+        /////////////////////  删除之后变成只有虚拟节点 vnode 的layout ////////////////
         if (!params.SUBSTRUCTURE_LAYOUT) {
             const IDEAL_LENGTH = params.LEAF_NODE_DISTANCE;
             this.vnodes.forEach((v: any) => {
                 if (v.type == 'Star') {
 
-                    // if(targetNode){    // star is an independent star, not attached to a Cycle
+                    // if(targetNode){    // star是独立的star, 不是依附在某个Cycle里
                     if (1) {
                         const allMemberNode = v.nodes.filter((node: {
                             data: (arg0: string) => string;
@@ -1876,7 +1730,7 @@ ForceLayout.prototype.run = function () {
 
                             ringNodes.forEach((node, nodeIdx) => {
                                 // Evenly distribute based on actual count in THIS ring
-                                let angle = ringIdx * Math.PI / 12.0 + (nodeIdx / totalInThisRing) * 2 * Math.PI;
+                                let angle = (nodeIdx / totalInThisRing) * 2 * Math.PI;
 
                                 // Stagger every ring
                                 angle += (Math.PI / totalInThisRing);
@@ -1888,7 +1742,7 @@ ForceLayout.prototype.run = function () {
                         });
                     }
                 } else if (v.type == 'Chain') {
-                    // 1. Still use a temporary object to group nodes by groupId
+                    // 1. 依然使用临时对象按 groupId 归类节点
                     const chainGroups: { [key: string]: any[] } = {};
 
                     v.nodes.forEach((node: any) => {
@@ -1897,8 +1751,8 @@ ForceLayout.prototype.run = function () {
                             if (!chainGroups[groupId]) {
                                 chainGroups[groupId] = [];
                             }
-                            if (node.degree() === 1) { // Put the leaf node of the chain first, to identify which node is the chain leaf
-                                chainGroups[groupId].unshift(node);//Insert the element at the beginning of the array and shift the existing elements back.
+                            if (node.degree() === 1) { //把链子的叶节点放在第一位，用于标记哪个是链的叶节点
+                                chainGroups[groupId].unshift(node);//将元素插入到数组的开头，并将原本的元素依次后移。
                             } else {
                                 chainGroups[groupId].push(node);
                             }
@@ -1918,7 +1772,7 @@ ForceLayout.prototype.run = function () {
                             if (count >= 2) {
 
                                 // ============================================================
-                                // 1. Calculate the arithmetic mean center of the current node group
+                                // 1. 计算当前节点的算术平均中心
                                 // ============================================================
 
                                 let cx = 0;
@@ -1935,31 +1789,31 @@ ForceLayout.prototype.run = function () {
                                 cy /= count;
 
                                 // ============================================================
-                                // 2. Special handling: exactly 3 nodes
+                                // 2. 特殊处理：只有 3 个节点
                                 //
-                                // Three nodes form a strict equilateral triangle
+                                // 三个节点组成严格等边三角形
                                 //
-                                // Note:
-                                // Do not use CHAIN_MIN_RADIUS
-                                // Prevent the triangle from being artificially enlarged
+                                // 注意：
+                                // 不使用 CHAIN_MIN_RADIUS
+                                // 防止三角形被强行撑大
                                 // ============================================================
 
                                 if (count === 3) {
 
                                     // --------------------------------------------------------
-                                    // Triangle side length
+                                    // 三角形边长
                                     //
-                                    // CYCLE_NODE_SPACING represents the desired node spacing
+                                    // CYCLE_NODE_SPACING 表示希望的节点间距
                                     // --------------------------------------------------------
 
                                     const sideLength = params.CYCLE_NODE_SPACING;
 
                                     // --------------------------------------------------------
-                                    // Circumradius of the equilateral triangle
+                                    // 等边三角形外接圆半径
                                     //
                                     // side = sqrt(3) * radius
                                     //
-                                    // Therefore:
+                                    // 所以：
                                     //
                                     // radius = side / sqrt(3)
                                     // --------------------------------------------------------
@@ -1967,9 +1821,9 @@ ForceLayout.prototype.run = function () {
                                     const radius = sideLength / Math.sqrt(3);
 
                                     // ========================================================
-                                    // 3. Search for the best rotation angle
+                                    // 3. 搜索最佳旋转角度
                                     //
-                                    // Use exactly the same strategy as for a normal network
+                                    // 与普通 network 使用完全一样的策略
                                     //
                                     // 0°
                                     // 10°
@@ -1977,11 +1831,11 @@ ForceLayout.prototype.run = function () {
                                     // ...
                                     // 350°
                                     //
-                                    // For each calculation:
+                                    // 每次计算：
                                     //
                                     // totalEdgeLength(edges)
                                     //
-                                    // Find the minimum value
+                                    // 找最小值
                                     // ========================================================
 
                                     let minTotalLength = Number.POSITIVE_INFINITY;
@@ -1991,13 +1845,13 @@ ForceLayout.prototype.run = function () {
                                     for (let rotate = 0; rotate < 360; rotate += 10) {
 
                                         // ----------------------------------------------------
-                                        // Three nodes are evenly distributed around the circumference
+                                        // 三个节点均匀分布在圆周
                                         //
-                                        // Between every pair of nodes:
+                                        // 每两个节点之间：
                                         //
                                         // 120°
                                         //
-                                        // Therefore, an equilateral triangle is naturally formed
+                                        // 因此天然形成等边三角形
                                         // ----------------------------------------------------
 
                                         gNodes.forEach((n: any, i: number) => {
@@ -2015,13 +1869,13 @@ ForceLayout.prototype.run = function () {
                                         });
 
                                         // ----------------------------------------------------
-                                        // Calculate the total edge length at the current rotation angle
+                                        // 计算当前旋转角度下的总边长
                                         // ----------------------------------------------------
 
                                         const totalLength = totalEdgeLength(edgeSet);
 
                                         // ----------------------------------------------------
-                                        // Save the best rotation
+                                        // 保存最优旋转
                                         // ----------------------------------------------------
 
                                         if (totalLength < minTotalLength) {
@@ -2035,7 +1889,7 @@ ForceLayout.prototype.run = function () {
                                     }
 
                                     // ========================================================
-                                    // 4. Reapply positions using the best rotation angle
+                                    // 4. 使用最佳旋转角度重新设置位置
                                     // ========================================================
 
                                     gNodes.forEach((n: any, i: number) => {
@@ -2058,19 +1912,19 @@ ForceLayout.prototype.run = function () {
                                 // ============================================================
                                 // 3. count > 3
                                 //
-                                // Keep the original layout strategy:
+                                // 保持原来的布局策略：
                                 //
                                 // gNodes[0]
                                 //     ↓
-                                // Center node
+                                // 中心节点
                                 //
                                 // gNodes[1...]
                                 //     ↓
-                                // Circumference nodes
+                                // 圆周节点
                                 // ============================================================
 
                                 // ============================================================
-                                // 4. Calculate the standard radius based on the number of nodes
+                                // 4. 根据节点数量计算标准半径
                                 // ============================================================
 
                                 const miniMumRadius = params.CHAIN_MIN_RADIUS;
@@ -2080,13 +1934,13 @@ ForceLayout.prototype.run = function () {
                                     miniMumRadius);
 
                                 // ============================================================
-                                // 5. Sort / circumference nodes
+                                // 5. 排序 / 圆周节点
                                 // ============================================================
 
                                 const sorted = gNodes.slice(1);
 
                                 // ============================================================
-                                // 6. Search for the best rotation angle
+                                // 6. 搜索最佳旋转角度
                                 // ============================================================
 
                                 let minTotalLength = Number.POSITIVE_INFINITY;
@@ -2096,7 +1950,7 @@ ForceLayout.prototype.run = function () {
                                 for (let rotate = 0; rotate < 360; rotate += 10) {
 
                                     // --------------------------------------------------------
-                                    // Forcefully overwrite the coordinates of circumference nodes
+                                    // 强行覆盖圆周节点坐标
                                     // --------------------------------------------------------
 
                                     sorted.forEach((n: any, i: number) => {
@@ -2114,13 +1968,13 @@ ForceLayout.prototype.run = function () {
                                     });
 
                                     // --------------------------------------------------------
-                                    // Calculate the total edge length at the current rotation
+                                    // 计算当前旋转下的总边长
                                     // --------------------------------------------------------
 
                                     const totalLength = totalEdgeLength(edgeSet);
 
                                     // --------------------------------------------------------
-                                    // Save the best rotation
+                                    // 保存最佳旋转
                                     // --------------------------------------------------------
 
                                     if (totalLength < minTotalLength) {
@@ -2134,7 +1988,7 @@ ForceLayout.prototype.run = function () {
                                 }
 
                                 // ============================================================
-                                // 7. Apply the best rotation angle
+                                // 7. 使用最佳旋转角度
                                 // ============================================================
 
                                 sorted.forEach((n: any, i: number) => {
@@ -2151,7 +2005,7 @@ ForceLayout.prototype.run = function () {
                                 });
 
                                 // ============================================================
-                                // 8. Place the first node at the center
+                                // 8. 第一个节点放在中心
                                 // ============================================================
 
                                 gNodes[0].position({
@@ -2167,14 +2021,14 @@ ForceLayout.prototype.run = function () {
                     let endVec: any = [];
                     nodes.forEach((n: any, i: number) => {
                         if (n.data('parallelGroupIdVec').includes(v.id) && n.data('structType') != 'Parallel') {
-                            // Extract the endpoint nodes of the same group
+                            //提取同一个group的端节点
                             endVec.push(n);
                         }
                     })
 
-                    if (endVec.length >= 2) { // should be >= 2; otherwise an error may occur
+                    if (endVec.length >= 2) { //应该>=2，否则就错误
 
-                        // There is a node array; distribute all nodes in it evenly along the perpendicular bisector of the two points n1 and n2
+                        //有node数组，将里面的所有node在两个点n1,n2中点垂线上均匀分布
                         const p1 = endVec[0].position();
                         const p2 = endVec[1].position();
                         const diff = {x: p2.x - p1.x, y: p2.y - p1.y};
@@ -2183,31 +2037,31 @@ ForceLayout.prototype.run = function () {
                     }
                 }
                 if (v.type == 'Cycle') {
-                    // 1. Check that nodes exists and is not empty
+                    // 1. 检查 nodes 是否存在且不为空
                     if (v.nodes && v.nodes.length > 0) {
                         v.nodes.sort((a: any, b: any) => {
-                            // Assume innerId is a number. If it is a string, localeCompare can be used
+                            // 假设 innerId 是数字。如果是字符串，可以使用 localeCompare
                             const idA = a.data('innerId') ?? 0;
                             const idB = b.data('innerId') ?? 0;
-                            return idA - idB; // sort in ascending order
+                            return idA - idB; // 升序排序
                         });
                     }
-                    // 2. Calculate the standard radius based on the number of nodes (to keep node spacing close to k)
+                    // 2. 根据节点数量计算标准半径 (保证节点间距接近 k)
                     const count = v.nodes.length;
                     const k = params.CYCLE_NODE_SPACING;
                     const radius = (count * k) / (2 * Math.PI);
 
-                    // 3. Sort to prevent nodes from flickering around the circumference
+                    // 3. 排序以防止节点在圆周上闪烁
                     const sorted = v.nodes;
                     const sortedReverse = sorted.slice().reverse();
                     let reverseFlag = false;
 
                     let minTotalLength = 10e10;
-                    let bestRotate = 0;    //Find the best rotation angle
+                    let bestRotate = 0;    //找出最好的旋转角度
 
                     //clock-wise
                     for (let rotate = 0; rotate < 360; rotate = rotate + 10) {
-                        // 4. Forcefully overwrite coordinates: this guarantees a "perfect circle"
+                        // 4. 强行覆盖坐标：这是形成“绝对圆”的物理保障
                         sorted.forEach((n: any, i: number) => {
                             const angle = (i / count) * 2 * Math.PI + rotate;
                             n.position({
@@ -2223,7 +2077,7 @@ ForceLayout.prototype.run = function () {
 
                     //anti-clock-wise
                     for (let rotate = 0; rotate < 360; rotate = rotate + 10) {
-                        // 4. Forcefully overwrite coordinates: this guarantees a "perfect circle"
+                        // 4. 强行覆盖坐标：这是形成“绝对圆”的物理保障
                         sortedReverse.forEach((n: any, i: number) => {
                             const angle = (i / count) * 2 * Math.PI + rotate;
                             n.position({
@@ -2238,7 +2092,7 @@ ForceLayout.prototype.run = function () {
                         }
                     }
 
-                    // 4. Forcefully overwrite coordinates: this guarantees a "perfect circle"
+                    // 4. 强行覆盖坐标：这是形成“绝对圆”的物理保障
                     if (!reverseFlag) {
                         sorted.forEach((n: any, i: number) => {
                             const angle = (i / count) * 2 * Math.PI + bestRotate;
@@ -2263,7 +2117,7 @@ ForceLayout.prototype.run = function () {
                     let fatherPos = n.neighborhood().nodes().first().position();
 
                     let maxTotalLength = 10e10;
-                    let bestRotate = 0;    //Find the best rotation angle
+                    let bestRotate = 0;    //找出最好的旋转角度
                     let aroundNodesVec: any[] = [];
 
                     nodes.forEach((nd: any, i: number) => {
@@ -2378,7 +2232,7 @@ ForceLayout.prototype.run = function () {
 
             const nodes = networkInfo.nodes;
 
-            // All parent IDs in the current network
+            // 当前 network 中所有 parent ID
             const parentIds = new Set<string>();
 
             nodes.forEach((node: any) => {
@@ -2392,17 +2246,17 @@ ForceLayout.prototype.run = function () {
             });
 
             // ========================================
-            // Create parent
+            // 创建 parent
             // ========================================
 
             parentIds.forEach((parentId: string) => {
 
-                // Parent already exists
+                // parent 已经存在
                 if (!this.cy.getElementById(parentId).empty()) {
                     return;
                 }
 
-                // Find children
+                // 找到 children
                 const children = nodes.filter((node: any) => {
                     return (index + "_" + node.data('groupId')) === parentId;
                 });
@@ -2412,7 +2266,7 @@ ForceLayout.prototype.run = function () {
                 }
 
                 // ========================================
-                // ① Save the original positions of the children
+                // ① 保存 children 原始位置
                 // ========================================
 
                 const originalPositions = new Map<string, {
@@ -2430,7 +2284,7 @@ ForceLayout.prototype.run = function () {
                 });
 
                 // ========================================
-                // ② Calculate the bounding box from the original positions
+                // ② 根据原始位置计算 bounding box
                 // ========================================
 
                 const bb = children.boundingBox();
@@ -2439,7 +2293,7 @@ ForceLayout.prototype.run = function () {
                 const centerY = (bb.y1 + bb.y2) / 2;
 
                 // ========================================
-                // ③ Create the parent
+                // ③ 创建 parent
                 // ========================================
 
                 const parent = this.cy.add({
@@ -2459,7 +2313,7 @@ ForceLayout.prototype.run = function () {
                 }).first();
 
                 // ========================================
-                // ④ Establish the compound relationship
+                // ④ 建立 compound relationship
                 // ========================================
 
                 children.forEach((node: any) => {
@@ -2471,7 +2325,7 @@ ForceLayout.prototype.run = function () {
                 });
 
                 // ========================================
-                // ⑤ Restore the original absolute positions of the children
+                // ⑤ 恢复 children 原来的绝对位置
                 // ========================================
 
                 children.forEach((node: any) => {
@@ -2489,7 +2343,7 @@ ForceLayout.prototype.run = function () {
                 });
 
                 // ========================================
-                // ⑥ Restore the center position of the parent
+                // ⑥ 恢复 parent 中心位置
                 // ========================================
 
                 parent.position({
@@ -2504,6 +2358,7 @@ ForceLayout.prototype.run = function () {
     this.captureStep('Final', 'Final layout complete', null);
 
     this.cy.fit(null, 50);
+    // this.cy.emit('layoutstop');
 
     this.trigger({
         type: 'layoutstop'
@@ -2513,17 +2368,24 @@ ForceLayout.prototype.run = function () {
 };
 
 /**
- * get minimum bounding box , then rotate bounding box and make network rotate to rectangle
+ * 获取面积最小的bounding box 并且按照该bounding box将network旋转到轴平行的矩形框中，x轴大于y轴
  * @param nodes
  */
 function rotateNetworkToMinimumBoundingBox(nodes: any) {
 
     if (!nodes || nodes.length === 0) {
+
         return null;
+
     }
 
     // ============================================================
-    // 1. get four corner position for each node in network
+    // 1. 获取 network 中所有 node 的四个角点
+    //
+    // 注意：
+    //
+    // 这里考虑 node 自身的 width / height
+    // 而不仅仅是 node.position()
     // ============================================================
 
     const points: {
@@ -2641,7 +2503,7 @@ function rotateNetworkToMinimumBoundingBox(nodes: any) {
     }
 
     // ============================================================
-    // 3. search Minimum Area Bounding Rectangle
+    // 3. 搜索 Minimum Area Bounding Rectangle
     // ============================================================
 
     let bestArea = Number.POSITIVE_INFINITY;
@@ -2663,13 +2525,13 @@ function rotateNetworkToMinimumBoundingBox(nodes: any) {
         const p2 = hull[(i + 1) % hull.length];
 
         // --------------------------------------------------------
-        // convex hull
+        // 当前凸包边的角度
         // --------------------------------------------------------
 
         const edgeAngle = Math.atan2(p2.y - p1.y, p2.x - p1.x);
 
         // --------------------------------------------------------
-        // rotate to X axis
+        // 将当前边旋转到 X 轴
         // --------------------------------------------------------
 
         const cos = Math.cos(-edgeAngle);
@@ -2685,7 +2547,7 @@ function rotateNetworkToMinimumBoundingBox(nodes: any) {
         let maxY = Number.NEGATIVE_INFINITY;
 
         // --------------------------------------------------------
-        // rotate all hull
+        // 旋转所有 hull 点
         // --------------------------------------------------------
 
         hull.forEach((p) => {
@@ -2711,7 +2573,7 @@ function rotateNetworkToMinimumBoundingBox(nodes: any) {
         const area = width * height;
 
         // --------------------------------------------------------
-        // search for minimum rectangle
+        // 找面积最小的矩形
         // --------------------------------------------------------
 
         if (area < bestArea) {
@@ -2724,12 +2586,16 @@ function rotateNetworkToMinimumBoundingBox(nodes: any) {
 
             bestAngle = edgeAngle;
 
+            // ----------------------------------------------------
+            // 旋转坐标系中的中心
+            // ----------------------------------------------------
+
             const centerXRot = (minX + maxX) / 2;
 
             const centerYRot = (minY + maxY) / 2;
 
             // ----------------------------------------------------
-            // rotate
+            // 转回原坐标
             // ----------------------------------------------------
 
             bestCenterX = centerXRot * Math.cos(edgeAngle) - centerYRot * Math.sin(edgeAngle);
@@ -2741,10 +2607,14 @@ function rotateNetworkToMinimumBoundingBox(nodes: any) {
     }
 
     // ============================================================
-    // 4. make sure：
+    // 4. 保证：
     //
     // width >= height
     //
+    // 即：
+    //
+    // 长边沿 X 轴
+    // 短边沿 Y 轴
     // ============================================================
 
     if (bestHeight > bestWidth) {
@@ -2756,7 +2626,7 @@ function rotateNetworkToMinimumBoundingBox(nodes: any) {
         bestHeight = temp;
 
         // --------------------------------------------------------
-        // rotate 90°
+        // 旋转 90°
         // --------------------------------------------------------
 
         bestAngle += Math.PI / 2;
@@ -2782,7 +2652,9 @@ function rotateNetworkToMinimumBoundingBox(nodes: any) {
     }
 
     // ============================================================
-    // 6. rotate network according to bounding box center
+    // 6. 真正旋转 network
+    //
+    // 以 bounding box center 为旋转中心
     // ============================================================
 
     const cos = Math.cos(-bestAngle);
@@ -2793,12 +2665,17 @@ function rotateNetworkToMinimumBoundingBox(nodes: any) {
 
         const pos = node.position();
 
+        // ----------------------------------------------------
+        // 相对于 network center
+        // ----------------------------------------------------
+
         const dx = pos.x - bestCenterX;
 
         const dy = pos.y - bestCenterY;
 
         // ----------------------------------------------------
-        // rotate
+        // 旋转
+        //
         // -bestAngle
         // ----------------------------------------------------
 
@@ -2817,10 +2694,16 @@ function rotateNetworkToMinimumBoundingBox(nodes: any) {
     });
 
     // ============================================================
-    // 7. re-calculate Bounding Box after rotation
+    // 7. 旋转以后重新计算 Bounding Box
+    //
+    // 此时应该已经是 X/Y 轴平行
     // ============================================================
 
     const finalBB = nodes.boundingBox();
+
+    // ============================================================
+    // 9. 返回结果
+    // ============================================================
 
     return {
 
@@ -2860,6 +2743,7 @@ ForceLayout.prototype.packNetworks = function (networks: any[]): void {
 
     const canvasAspect = canvasWidth / canvasHeight;
 
+
     // ============================================================
     // 2. Parameters
     // ============================================================
@@ -2873,11 +2757,14 @@ ForceLayout.prototype.packNetworks = function (networks: any[]): void {
     // ------------------------------------------------------------
     // Weight
     //
-    // aspect: overall ratio
+    // aspect:
+    //     整体布局比例
     //
-    // similarity: network similarity on the same row
+    // similarity:
+    //     同一行 network 尺寸相似程度
     //
-    // balance: make sure not too crowd on one row
+    // balance:
+    //     避免某一行特别拥挤
     // ------------------------------------------------------------
 
     const ASPECT_WEIGHT = 0.60;
@@ -2906,9 +2793,19 @@ ForceLayout.prototype.packNetworks = function (networks: any[]): void {
 
         network.centerY = (bb.y1 + bb.y2) / 2;
 
+        // ----------------------------------------------------
+        // 一个综合尺寸指标
+        //
+        // 使用 sqrt(area)，比单纯 width 更合理
+        // ----------------------------------------------------
+
         network.area = Math.max(network.width * network.height, 1);
 
         network.size = Math.sqrt(network.area);
+
+        // ----------------------------------------------------
+        // aspect
+        // ----------------------------------------------------
 
         network.aspect = network.width / Math.max(network.height, 1);
 
@@ -2917,7 +2814,10 @@ ForceLayout.prototype.packNetworks = function (networks: any[]): void {
     // ============================================================
     // 4. Sort
     //
-    // large → small
+    // 大 → 小
+    //
+    // size 是主要依据
+    // nodeCount 作为辅助
     // ============================================================
 
     const sortedNetworks = [...networks].sort((a: any, b: any) => {
@@ -2935,17 +2835,17 @@ ForceLayout.prototype.packNetworks = function (networks: any[]): void {
     // ============================================================
     // 5. Size normalization
     //
-    // use log(size) to calculate difference
+    // 用 log(size) 计算尺寸差异
     //
-    // so：
+    // 这样：
     //
     // 100 → 200
     //
-    // and
+    // 和
     //
     // 500 → 1000
     //
-    // are same 2 times difference。
+    // 都被认为是相同的 2 倍差异。
     // ============================================================
 
     const allSizes = sortedNetworks.map((n: any) => Math.log(Math.max(n.size, 1)));
@@ -2980,6 +2880,18 @@ ForceLayout.prototype.packNetworks = function (networks: any[]): void {
 
     // ============================================================
     // 7. Make rows
+    //
+    // 与原来的区别：
+    //
+    // 不只是 widthLimit。
+    //
+    // 每次准备加入一个 network 时，
+    // 会检查：
+    //
+    //     1. width 是否放得下
+    //     2. size 是否与当前 row 接近
+    //
+    // 但是这里仍然保持大 → 小的稳定顺序。
     // ============================================================
 
     const makeRows = (widthLimit: number): any[][] => {
@@ -3035,7 +2947,9 @@ ForceLayout.prototype.packNetworks = function (networks: any[]): void {
             const sizeDifference = Math.abs(network.normalizedSize - currentMeanSize);
 
             // -------------------------------------------------
-            // Avoid placing vastly different networks on the same line.
+            // 不要让尺寸差距太大的 network 自动进入同一行
+            //
+            // 但是不能太严格，否则会产生大量行。
             // -------------------------------------------------
 
             const SIZE_THRESHOLD = 0.35;
@@ -3051,6 +2965,10 @@ ForceLayout.prototype.packNetworks = function (networks: any[]): void {
                 return;
 
             }
+
+            // =================================================
+            // Add
+            // =================================================
 
             currentRow.push(network);
 
@@ -3123,16 +3041,20 @@ ForceLayout.prototype.packNetworks = function (networks: any[]): void {
     // ============================================================
     // 9. Calculate row size similarity score
     //
-    // 0 = good
-    // 1 = bad
+    // 0 = 非常好
+    // 1 = 非常差
     //
-    // using row max/min。
+    // 使用 row 内最大/最小尺寸比例。
     //
-    // case：
+    // 例如：
     //
-    // 100, 110, 120 → good
+    // 100, 110, 120
     //
-    // 100, 500, 1000 → bad
+    // → 很好
+    //
+    // 100, 500, 1000
+    //
+    // → 很差
     // ============================================================
 
     const calculateSizeSimilarity = (rows: any[][]): number => {
@@ -3163,6 +3085,10 @@ ForceLayout.prototype.packNetworks = function (networks: any[]): void {
 
             const difference = max - min;
 
+            // ------------------------------------------------
+            // row 越大，惩罚越大
+            // ------------------------------------------------
+
             const weight = row.length;
 
             totalPenalty += difference * weight;
@@ -3184,10 +3110,12 @@ ForceLayout.prototype.packNetworks = function (networks: any[]): void {
     // ============================================================
     // 10. Row balance score
     //
-    // avoid extreme case like：
+    // 避免：
     //
     // Row 1: 6 networks
     // Row 2: 1 network
+    //
+    // 这种极端情况。
     // ============================================================
 
     const calculateRowBalance = (rows: any[][]): number => {
@@ -3293,7 +3221,7 @@ ForceLayout.prototype.packNetworks = function (networks: any[]): void {
         // ========================================================
         // Row count
         //
-        // Very small penalty
+        // 非常轻微的惩罚
         // ========================================================
 
         const rowPenalty = rows.length / Math.max(sortedNetworks.length, 1);
@@ -3301,11 +3229,11 @@ ForceLayout.prototype.packNetworks = function (networks: any[]): void {
         // ========================================================
         // Final score
         //
-        // Key point:
+        // 重点：
         //
-        // Aspect ratio is still the primary objective
+        // aspect 仍然是第一目标
         //
-        // But size similarity clearly participates in the optimization.
+        // 但 size similarity 明显参与优化。
         // ========================================================
 
         const score = aspectError * ASPECT_WEIGHT *
@@ -3369,13 +3297,13 @@ ForceLayout.prototype.packNetworks = function (networks: any[]): void {
     // ============================================================
     // 13. Final order
     //
-    // search：
+    // 搜索：
     //
-    //     large → small
+    //     大 → 小
     //
-    // display：
+    // 显示：
     //
-    //     small → large
+    //     小 → 大
     // ============================================================
 
     const finalRows = bestRows.map((row: any[]) => {
@@ -3533,6 +3461,10 @@ ForceLayout.prototype.packNetworks = function (networks: any[]): void {
 ForceLayout.prototype.stop = function () {
     return this;
 };
+
+/**
+ * 改进版布局：让 'star' 类型的节点倾向于分布在外围
+ */
 
 /**
  * Navigate to a specific step in step-by-step mode
@@ -3694,3 +3626,5 @@ ForceLayout.prototype.clearVirtualNodes = function () {
     this.cy.$('.virtual-node, .virtual-edge').remove();
     return this;
 };
+
+

@@ -9,7 +9,6 @@
     "deploy": "./deploy.sh"
   },
   "devDependencies": {
-    "@types/cytoscape": "^3.21.9",
     "concurrently": "^9.2.4",
     "cytoscape": "^3.33.1",
     "gh-pages": "^6.3.0",
@@ -17,7 +16,7 @@
     "typescript": "^5.9.3",
     "vite-plugin-singlefile": "^2.3.3"
   },
-  "private": true,
+   "private": true,
   "keywords": [],
   "author": "",
   "license": "ISC",

@@ -1,14 +1,23 @@
 {
   "compilerOptions": {
-    "target": "ES6",
+    "target": "ES2020",
     "module": "ESNext",
-    "lib": ["ES2015","DOM","ES2016"],
+    "moduleResolution": "Bundler",
+    "lib": [
+      "ES2020",
+      "DOM"
+    ],
     "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "skipLibCheck": true,
     "outDir": "dist"
   },
-  "include": ["src/index.ts"],
-  "exclude": ["src/index_*"]
+  "include": [
+    "src/index.ts"
+  ],
+  "exclude": [
+    "src/index_*"
+  ]
 }

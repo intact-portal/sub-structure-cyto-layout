@@ -2,231 +2,231 @@
 
 <html>
 <head>
-    <meta charset="UTF-8">
-    <title>Structure Recognition Layout</title>
-    <link rel="icon" type="image/x-icon" href="./favicon.ico">
-    <script src="./cytoscape.min.js"></script>
+  <meta charset="UTF-8">
+  <title>Structure Recognition Layout</title>
+  <link rel="icon" type="image/x-icon" href="./favicon.ico">
+  <script src="./cytoscape.min.js"></script>
 
-    <style>
-        body {
-            margin: 0;
-            display: flex;
-            width: 100vw;
-            height: 100vh;
-            overflow: hidden;
-        }
+  <style>
+      body {
+          margin: 0;
+          display: flex;
+          width: 100vw;
+          height: 100vh;
+          overflow: hidden;
+      }
 
-        .sidebar {
-            width: 380px;
-            min-width: 320px;
-            height: 100vh;
-            background: #f4f4f4;
-            border-right: 1px solid #ccc;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            padding: 10px;
-            box-sizing: border-box;
-            overflow-y: auto;
-            z-index: 999;
-        }
+      .sidebar {
+          width: 380px;
+          min-width: 320px;
+          height: 100vh;
+          background: #f4f4f4;
+          border-right: 1px solid #ccc;
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+          padding: 10px;
+          box-sizing: border-box;
+          overflow-y: auto;
+          z-index: 999;
+      }
 
-        #cy {
-            flex-grow: 1;
-            height: 100vh;
-            display: block;
-            background: #ffffff;
-        }
+      #cy {
+          flex-grow: 1;
+          height: 100vh;
+          display: block;
+          background: #ffffff;
+      }
 
-        .panel {
-            background: rgba(255, 255, 255, 0.9);
-            padding: 12px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
+      .panel {
+          background: rgba(255, 255, 255, 0.9);
+          padding: 12px;
+          border: 1px solid #ccc;
+          border-radius: 4px;
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
 
-        .stats-panel {
-            font-size: 14px;
-            color: #333;
-            border-left: 4px solid #2196F3;
-            line-height: 1.5;
-        }
+      .stats-panel {
+          font-size: 14px;
+          color: #333;
+          border-left: 4px solid #2196F3;
+          line-height: 1.5;
+      }
 
-        .controls-panel {
-            border-left: 4px solid #4CAF50;
-        }
+      .controls-panel {
+          border-left: 4px solid #4CAF50;
+      }
 
-        .controls-panel h3 {
-            margin: 0 0 12px 0;
-            font-size: 16px;
-            color: #333;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+      .controls-panel h3 {
+          margin: 0 0 12px 0;
+          font-size: 16px;
+          color: #333;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+      }
 
-        .controls-section {
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #e0e0e0;
-        }
+      .controls-section {
+          margin-bottom: 15px;
+          padding-bottom: 10px;
+          border-bottom: 1px solid #e0e0e0;
+      }
 
-        .controls-section:last-child {
-            border-bottom: none;
-            margin-bottom: 0;
-        }
+      .controls-section:last-child {
+          border-bottom: none;
+          margin-bottom: 0;
+      }
 
-        .controls-section h4 {
-            margin: 0 0 8px 0;
-            font-size: 13px;
-            color: #666;
-            font-weight: 600;
-        }
+      .controls-section h4 {
+          margin: 0 0 8px 0;
+          font-size: 13px;
+          color: #666;
+          font-weight: 600;
+      }
 
-        .control-item {
-            margin-bottom: 8px;
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
+      .control-item {
+          margin-bottom: 8px;
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+      }
 
-        .control-item label {
-            font-size: 12px;
-            color: #555;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+      .control-item label {
+          font-size: 12px;
+          color: #555;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+      }
 
-        .file-input-container {
-            margin-bottom: 10px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
+      .file-input-container {
+          margin-bottom: 10px;
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+      }
 
-        .file-input-container input[type="file"] {
-            font-size: 12px;
-        }
+      .file-input-container input[type="file"] {
+          font-size: 12px;
+      }
 
-        .control-item input[type="range"] {
-            width: 100%;
-            height: 4px;
-            border-radius: 2px;
-            background: #ddd;
-            outline: none;
-            -webkit-appearance: none;
-        }
+      .control-item input[type="range"] {
+          width: 100%;
+          height: 4px;
+          border-radius: 2px;
+          background: #ddd;
+          outline: none;
+          -webkit-appearance: none;
+      }
 
-        .control-item input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 14px;
-            height: 14px;
-            border-radius: 50%;
-            background: #4CAF50;
-            cursor: pointer;
-        }
+      .control-item input[type="range"]::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          appearance: none;
+          width: 14px;
+          height: 14px;
+          border-radius: 50%;
+          background: #4CAF50;
+          cursor: pointer;
+      }
 
-        .control-item input[type="range"]::-moz-range-thumb {
-            width: 14px;
-            height: 14px;
-            border-radius: 50%;
-            background: #4CAF50;
-            cursor: pointer;
-            border: none;
-        }
+      .control-item input[type="range"]::-moz-range-thumb {
+          width: 14px;
+          height: 14px;
+          border-radius: 50%;
+          background: #4CAF50;
+          cursor: pointer;
+          border: none;
+      }
 
-        .control-item input[type="checkbox"] {
-            width: 16px;
-            height: 16px;
-            cursor: pointer;
-        }
+      .control-item input[type="checkbox"] {
+          width: 16px;
+          height: 16px;
+          cursor: pointer;
+      }
 
-        .value-display {
-            font-weight: 600;
-            color: #4CAF50;
-            font-size: 11px;
-            min-width: 50px;
-            text-align: right;
-        }
+      .value-display {
+          font-weight: 600;
+          color: #4CAF50;
+          font-size: 11px;
+          min-width: 50px;
+          text-align: right;
+      }
 
-        .btn {
-            padding: 8px 16px;
-            background: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 13px;
-            font-weight: 500;
-            transition: background 0.2s;
-        }
+      .btn {
+          padding: 8px 16px;
+          background: #4CAF50;
+          color: white;
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+          font-size: 13px;
+          font-weight: 500;
+          transition: background 0.2s;
+      }
 
-        .btn:hover {
-            background: #45a049;
-        }
+      .btn:hover {
+          background: #45a049;
+      }
 
-        .btn-secondary {
-            background: #2196F3;
-        }
+      .btn-secondary {
+          background: #2196F3;
+      }
 
-        .toggle-btn {
-            padding: 4px 8px;
-            font-size: 11px;
-            background: #666;
-        }
+      .toggle-btn {
+          padding: 4px 8px;
+          font-size: 11px;
+          background: #666;
+      }
 
-        .sidebar.minimized {
-            width: 60px;
-            min-width: 60px;
-        }
+      .sidebar.minimized {
+          width: 60px;
+          min-width: 60px;
+      }
 
-        .sidebar.minimized .stats-panel,
-        .sidebar.minimized .controls-section,
-        .sidebar.minimized .file-input-container,
-        .sidebar.minimized .btn-group {
-            display: none;
-        }
+      .sidebar.minimized .stats-panel,
+      .sidebar.minimized .controls-section,
+      .sidebar.minimized .file-input-container,
+      .sidebar.minimized .btn-group {
+          display: none;
+      }
 
-        .btn-group {
-            display: flex;
-            gap: 8px;
-            margin-top: 12px;
-        }
+      .btn-group {
+          display: flex;
+          gap: 8px;
+          margin-top: 12px;
+      }
 
-        /* Step list styling */
+      /* Step list styling */
 
-        #step-list-content > div {
-            border-bottom: 1px solid #e0e0e0;
-            transition: background 0.2s;
-        }
+      #step-list-content > div {
+          border-bottom: 1px solid #e0e0e0;
+          transition: background 0.2s;
+      }
 
-        #step-list-content > div:hover {
-            background: #f0f0f0 !important;
-        }
+      #step-list-content > div:hover {
+          background: #f0f0f0 !important;
+      }
 
-        #step-list-content > div:last-child {
-            border-bottom: none;
-        }
+      #step-list-content > div:last-child {
+          border-bottom: none;
+      }
 
-        .loading-spinner {
-            width: 24px;
-            height: 24px;
-            border: 3px solid #e3f2fd;
-            border-top: 3px solid #2196F3;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
+      .loading-spinner {
+          width: 24px;
+          height: 24px;
+          border: 3px solid #e3f2fd;
+          border-top: 3px solid #2196F3;
+          border-radius: 50%;
+          animation: spin 0.8s linear infinite;
+      }
 
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-    </style>
+      @keyframes spin {
+          to {
+              transform: rotate(360deg);
+          }
+      }
+  </style>
 
 </head>
 
@@ -234,646 +234,420 @@
 
 <div id="sidebar" class="sidebar">
 
-    <div class="panel file-input-container">
+  <div class="panel file-input-container">
 
-        <h4 style="margin:0 0 8px 0; font-size:13px; color:#666;">
-            Load Data
-        </h4>
+    <h4 style="margin:0 0 8px 0; font-size:13px; color:#666;">
+      Load Data </h4>
 
-        <select
-                id="dataFileSelect"
-                style="
+    <select id="dataFileSelect" style="
 width:100%;
 padding:6px;
 margin-bottom:8px;
 font-size:12px;
 border-radius:4px;
 border:1px solid #ccc;
-"
-        >
-            <option value="">-- Select a data file --</option>
-        </select>
+">
+      <option value="">-- Select a data file --</option>
+    </select>
 
-        <div
-                style="
+    <div style="
 text-align:center;
 margin:8px 0;
 color:#999;
 font-size:11px;
-"
-        >
-            or
-        </div>
+">
+      or
+    </div>
 
-        <input
-                type="file"
-                id="fileInput"
-                accept=".json,.cyjs"
-        >
+    <input type="file" id="fileInput" accept=".json,.cyjs">
 
-        <!-- Save File -->
-        <button
-                id="saveFileBtn"
-                onclick="showSaveDialog()"
-                style="
+    <!-- Save File -->
+    <button id="saveFileBtn" onclick="showSaveDialog()" style="
                 margin-top:8px;
                 width:auto;
                 padding:2px 8px;
                 font-size:13px;
                 cursor:pointer;
-            "
-        >
-            Save File
-        </button>
+            ">
+      Save File
+    </button>
 
-    </div>
-
+  </div>
 
 
-    <div id="stats" class="panel stats-panel">
-        Nodes: 0 | Edges: 0<br>
-        Render Time: --
-    </div>
+  <div id="stats" class="panel stats-panel">
+    Nodes: 0 | Edges: 0<br> Render Time: --
+  </div>
 
-    <div
-            id="step-controls"
-            class="panel controls-panel"
-            style="border-left: 4px solid #9C27B0;"
-    >
+  <div id="step-controls" class="panel controls-panel" style="border-left: 4px solid #9C27B0;">
 
-        <h3>
-            Step-by-Step Mode
-        </h3>
+    <h3>
+      Step-by-Step Mode </h3>
 
-        <div class="control-item">
+    <div class="control-item">
 
-            <label
-                    style="
+      <label style="
       flex-direction: row;
       gap: 8px;
-    "
-            >
+    ">
 
-                <input
-                        type="checkbox"
-                        id="STEP_BY_STEP"
-                >
+        <input type="checkbox" id="STEP_BY_STEP">
 
-                Enable Step-by-Step
+        Enable Step-by-Step
 
-            </label>
+      </label>
 
-        </div>
+    </div>
 
 
-        <div
-                id="step-navigation"
-                style="
+    <div id="step-navigation" style="
     display: none;
     margin-top: 10px;
-  "
-        >
+  ">
 
-            <div
-                    style="
+      <div style="
       display: flex;
       gap: 5px;
       margin-bottom: 10px;
-    "
-            >
+    ">
 
-                <button
-                        class="btn"
-                        onclick="goToFirstStep()"
-                        id="firstStepBtn"
-                        disabled
-                        style="
+        <button class="btn" onclick="goToFirstStep()" id="firstStepBtn" disabled style="
         flex: 1;
         white-space: nowrap;
-      "
-                >
-                    ⏮
-                </button>
+      ">
+          ⏮
+        </button>
 
-                <button
-                        class="btn"
-                        onclick="fasterPrevStepUI()"
-                        id="fasterPrevStepBtn"
-                        disabled
-                        style="flex: 1;"
-                >
-                    ◀◀
-                </button>
+        <button class="btn" onclick="fasterPrevStepUI()" id="fasterPrevStepBtn" disabled style="flex: 1;">
+          ◀◀
+        </button>
 
-                <button
-                        class="btn"
-                        onclick="prevStepUI()"
-                        id="prevStepBtn"
-                        disabled
-                        style="flex: 1;"
-                >
-                    ◀
-                </button>
+        <button class="btn" onclick="prevStepUI()" id="prevStepBtn" disabled style="flex: 1;">
+          ◀
+        </button>
 
-                <button
-                        class="btn"
-                        onclick="nextStepUI()"
-                        id="nextStepBtn"
-                        disabled
-                        style="flex: 1;"
-                >
-                    ▶
-                </button>
+        <button class="btn" onclick="nextStepUI()" id="nextStepBtn" disabled style="flex: 1;">
+          ▶
+        </button>
 
-                <button
-                        class="btn"
-                        onclick="fasterNextStepUI()"
-                        id="fasterNextStepBtn"
-                        disabled
-                        style="flex: 1;"
-                >
-                    ▶▶
-                </button>
+        <button class="btn" onclick="fasterNextStepUI()" id="fasterNextStepBtn" disabled style="flex: 1;">
+          ▶▶
+        </button>
 
-                <button
-                        class="btn"
-                        onclick="goToLastStep()"
-                        id="lastStepBtn"
-                        disabled
-                        style="
+        <button class="btn" onclick="goToLastStep()" id="lastStepBtn" disabled style="
         flex: 1;
         white-space: nowrap;
-      "
-                >
-                    ⏭
-                </button>
+      ">
+          ⏭
+        </button>
 
-            </div>
+      </div>
 
 
-            <div
-                    style="
+      <div style="
       margin-bottom: 10px;
       font-size: 12px;
       padding: 8px;
       background: #f0f0f0;
       border-radius: 4px;
-    "
-            >
+    ">
 
-                <div>
-                    <strong>Current Step:</strong>
-                    <span id="currentStepDisplay">-</span>
-                </div>
+        <div>
+          <strong>Current Step:</strong> <span id="currentStepDisplay">-</span>
+        </div>
 
-                <div style="margin-top: 4px;">
-                    <strong>Description:</strong>
-                    <span
-                            id="currentStepDesc"
-                            style="color: #666;"
-                    >
+        <div style="margin-top: 4px;">
+          <strong>Description:</strong> <span id="currentStepDesc" style="color: #666;">
         -
       </span>
-                </div>
+        </div>
 
-            </div>
-
-
-            <button
-                    class="btn btn-secondary"
-                    onclick="listAllSteps()"
-                    style="width: 100%;"
-            >
-                Show All Steps
-            </button>
+      </div>
 
 
-            <button
-                    class="btn"
-                    onclick="clearVirtualNodesUI()"
-                    style="
+      <button class="btn btn-secondary" onclick="listAllSteps()" style="width: 100%;">
+        Show All Steps
+      </button>
+
+
+      <button class="btn" onclick="clearVirtualNodesUI()" style="
       width: 100%;
       margin-top: 5px;
       background: #FF5722;
-    "
-            >
-                Clear Virtual Nodes
-            </button>
-
-        </div>
+    ">
+        Clear Virtual Nodes
+      </button>
 
     </div>
 
-    <div
-            id="step-list"
-            class="panel stats-panel"
-            style="
+  </div>
+
+  <div id="step-list" class="panel stats-panel" style="
       border-left: 4px solid #FF9800;
       display: none;
-    "
-    >
+    ">
 
-        <strong>All Steps:</strong>
+    <strong>All Steps:</strong>
 
-        <div
-                id="step-list-content"
-                style="
+    <div id="step-list-content" style="
     margin-top: 8px;
     font-size: 11px;
     line-height: 1.6;
     max-height: 250px;
     overflow-y: auto;
-  "
-        >
-        </div>
+  "></div>
 
-    </div>
+  </div>
 
-    <div id="controls" class="panel controls-panel">
+  <div id="controls" class="panel controls-panel">
 
-        <h3>
+    <h3>
 
-            Parameters
+      Parameters
 
-            <button
-                    class="btn toggle-btn"
-                    onclick="toggleControls()"
-            >
-                Hide
-            </button>
+      <button class="btn toggle-btn" onclick="toggleControls()">
+        Hide
+      </button>
 
-        </h3>
+    </h3>
 
 
-        <div class="controls-section">
+    <div class="controls-section">
 
-            <h4>Force-Directed</h4>
+      <h4>Force-Directed</h4>
 
-            <div class="control-item">
+      <div class="control-item">
 
-                <label>
-                    Ideal Edge Length
-                    <span
-                            class="value-display"
-                            id="val-IDEAL_LENGTH"
-                    >
+        <label> Ideal Edge Length <span class="value-display" id="val-IDEAL_LENGTH">
         100
-      </span>
-                </label>
+      </span> </label>
 
-                <input
-                        type="range"
-                        id="IDEAL_LENGTH"
-                        min="50"
-                        max="5000"
-                        value="100"
-                        step="100"
-                >
+        <input type="range" id="IDEAL_LENGTH" min="50" max="5000" value="100" step="100">
 
-            </div>
+      </div>
 
 
-            <div class="control-item">
+      <div class="control-item">
 
-                <label>
-                    Repulsion Force
-                    <span
-                            class="value-display"
-                            id="val-REPULSION"
-                    >
+        <label> Repulsion Force <span class="value-display" id="val-REPULSION">
         300
-      </span>
-                </label>
+      </span> </label>
 
-                <input
-                        type="range"
-                        id="REPULSION"
-                        min="0"
-                        max="500"
-                        value="300"
-                        step="10"
-                >
+        <input type="range" id="REPULSION" min="0" max="500" value="300" step="10">
 
-            </div>
+      </div>
 
 
-            <div class="control-item">
+      <div class="control-item">
 
-                <label>
-                    Spring Strength
-                    <span
-                            class="value-display"
-                            id="val-SPRING_K"
-                    >
+        <label> Spring Strength <span class="value-display" id="val-SPRING_K">
         0.15
-      </span>
-                </label>
+      </span> </label>
 
-                <input
-                        type="range"
-                        id="SPRING_K"
-                        min="0.01"
-                        max="0.5"
-                        value="0.15"
-                        step="0.01"
-                >
+        <input type="range" id="SPRING_K" min="0.01" max="0.5" value="0.15" step="0.01">
 
-            </div>
+      </div>
 
 
-            <div class="control-item">
+      <div class="control-item">
 
-                <label>
-                    Iterations
-                    <span
-                            class="value-display"
-                            id="val-ITERATIONS"
-                    >
+        <label> Iterations <span class="value-display" id="val-ITERATIONS">
         600
-      </span>
-                </label>
+      </span> </label>
 
-                <input
-                        type="range"
-                        id="ITERATIONS"
-                        min="50"
-                        max="1000"
-                        value="600"
-                        step="50"
-                >
+        <input type="range" id="ITERATIONS" min="50" max="1000" value="600" step="50">
 
-            </div>
+      </div>
 
 
-            <div class="control-item">
+      <div class="control-item">
 
-                <label>
-                    Angular Strength
-                    <span
-                            class="value-display"
-                            id="val-ANGULAR_STRENGTH"
-                    >
+        <label> Angular Strength <span class="value-display" id="val-ANGULAR_STRENGTH">
         0.2
-      </span>
-                </label>
+      </span> </label>
 
-                <input
-                        type="range"
-                        id="ANGULAR_STRENGTH"
-                        min="0"
-                        max="10"
-                        value="0.2"
-                        step="0.05"
-                >
+        <input type="range" id="ANGULAR_STRENGTH" min="0" max="10" value="0.2" step="0.05">
 
-            </div>
-
-        </div>
-
-
-        <div class="controls-section">
-
-            <h4>Structure Detection</h4>
-
-            <div class="control-item">
-
-                <label>
-                    Min Star Leaves
-                    <span
-                            class="value-display"
-                            id="val-MIN_STAR_LEAVES"
-                    >
-        3
-      </span>
-                </label>
-
-                <input
-                        type="range"
-                        id="MIN_STAR_LEAVES"
-                        min="2"
-                        max="10"
-                        value="3"
-                        step="1"
-                >
-
-            </div>
-
-
-            <div class="control-item">
-
-                <label>
-                    Min Cycle Length
-                    <span
-                            class="value-display"
-                            id="val-MIN_CYCLE_LENGTH"
-                    >
-        3
-      </span>
-                </label>
-
-                <input
-                        type="range"
-                        id="MIN_CYCLE_LENGTH"
-                        min="3"
-                        max="10"
-                        value="3"
-                        step="1"
-                >
-
-            </div>
-
-
-            <div class="control-item">
-
-                <label>
-                    Min Chain Length
-                    <span
-                            class="value-display"
-                            id="val-MIN_CHAIN_LENGTH"
-                    >
-        2
-      </span>
-                </label>
-
-                <input
-                        type="range"
-                        id="MIN_CHAIN_LENGTH"
-                        min="2"
-                        max="10"
-                        value="2"
-                        step="1"
-                >
-
-            </div>
-
-        </div>
-
-
-        <div class="controls-section">
-
-            <h4>Layout Options</h4>
-
-            <div class="control-item">
-
-                <label>
-                    Select layout Algorithm
-                </label>
-
-                <label
-                        style="
-        flex-direction: row;
-        justify-content: flex-start;
-        gap: 6px;
-      "
-                >
-
-                    <input
-                            type="radio"
-                            name="LAYOUT_ALGORITHM"
-                            value="MY_ForceLayout"
-                            checked
-                    >
-
-                    Force Layout
-
-                </label>
-
-
-                <label
-                        style="
-        flex-direction: row;
-        justify-content: flex-start;
-        gap: 6px;
-      "
-                >
-
-                    <input
-                            type="radio"
-                            name="LAYOUT_ALGORITHM"
-                            value="MY_StressLayout"
-                    >
-
-                    Stress Layout
-
-                </label>
-
-            </div>
-
-
-            <div class="control-item">
-
-                <label
-                        style="
-        flex-direction: row;
-        gap: 8px;
-      "
-                >
-
-                    <input
-                            type="checkbox"
-                            id="USE_ANGULAR_FORCE"
-                            checked
-                    >
-
-                    Use Angular Force
-
-                </label>
-
-            </div>
-
-
-            <div class="control-item">
-
-                <label
-                        style="
-        flex-direction: row;
-        gap: 8px;
-      "
-                >
-
-                    <input
-                            type="checkbox"
-                            id="SUBSTRUCTURE_LAYOUT"
-                    >
-
-                    Only Substructure Layout
-
-                </label>
-
-            </div>
-
-
-            <div class="control-item">
-
-                <label
-                        style="
-        flex-direction: row;
-        gap: 8px;
-      "
-                >
-
-                    <input
-                            type="checkbox"
-                            id="ENABLE_INITIAL_FORCE_LAYOUT"
-                    >
-
-                    Initial Force Layout
-
-                </label>
-
-            </div>
-
-
-            <div class="control-item">
-
-                <label
-                        style="
-        flex-direction: row;
-        gap: 8px;
-      "
-                >
-
-                    <input
-                            type="checkbox"
-                            id="RANDOMIZE_INITIAL_POSITION"
-                    >
-
-                    Randomize Initial Position
-
-                </label>
-
-            </div>
-
-        </div>
-
-
-        <div class="btn-group">
-
-            <button
-                    class="btn"
-                    onclick="applyLayout()"
-            >
-                Apply Layout
-            </button>
-
-            <button
-                    class="btn btn-secondary"
-                    onclick="resetParameters()"
-            >
-                Reset
-            </button>
-
-        </div>
+      </div>
 
     </div>
+
+
+    <div class="controls-section">
+
+      <h4>Structure Detection</h4>
+
+      <div class="control-item">
+
+        <label> Min Star Leaves <span class="value-display" id="val-MIN_STAR_LEAVES">
+        3
+      </span> </label>
+
+        <input type="range" id="MIN_STAR_LEAVES" min="2" max="10" value="3" step="1">
+
+      </div>
+
+
+      <div class="control-item">
+
+        <label> Min Cycle Length <span class="value-display" id="val-MIN_CYCLE_LENGTH">
+        3
+      </span> </label>
+
+        <input type="range" id="MIN_CYCLE_LENGTH" min="3" max="10" value="3" step="1">
+
+      </div>
+
+
+      <div class="control-item">
+
+        <label> Min Chain Length <span class="value-display" id="val-MIN_CHAIN_LENGTH">
+        2
+      </span> </label>
+
+        <input type="range" id="MIN_CHAIN_LENGTH" min="2" max="10" value="2" step="1">
+
+      </div>
+
+    </div>
+
+
+    <div class="controls-section">
+
+      <h4>Layout Options</h4>
+
+      <div class="control-item">
+
+        <label> Select layout Algorithm </label>
+
+        <label style="
+        flex-direction: row;
+        justify-content: flex-start;
+        gap: 6px;
+      ">
+
+          <input type="radio" name="LAYOUT_ALGORITHM" value="MY_ForceLayout">
+
+          Force Layout
+
+        </label>
+
+
+        <label style="
+        flex-direction: row;
+        justify-content: flex-start;
+        gap: 6px;
+      ">
+
+          <input type="radio" name="LAYOUT_ALGORITHM" value="MY_StressLayout" checked>
+
+          Stress Layout
+
+        </label>
+
+      </div>
+
+
+      <div class="control-item">
+
+        <label style="
+        flex-direction: row;
+        gap: 8px;
+      ">
+
+          <input type="checkbox" id="USE_ANGULAR_FORCE" checked>
+
+          Use Angular Force
+
+        </label>
+
+      </div>
+
+      <div class="control-item">
+
+        <label style="
+        flex-direction: row;
+        gap: 8px;
+      ">
+
+          <input type="checkbox" id="SUBSTRUCTURE_LAYOUT">
+
+          Only Substructure Layout
+
+        </label>
+
+      </div>
+
+      <div class="control-item">
+
+        <label style="
+        flex-direction: row;
+        gap: 8px;
+      ">
+
+          <input type="checkbox" id="SHOW_ALL_EDGES" checked>
+
+          Show All Edges
+
+        </label>
+
+      </div>
+
+
+      <div class="control-item">
+
+        <label style="
+        flex-direction: row;
+        gap: 8px;
+      ">
+
+          <input type="checkbox" id="ENABLE_INITIAL_FORCE_LAYOUT">
+
+          Initial Force Layout
+
+        </label>
+
+      </div>
+
+
+      <div class="control-item">
+
+        <label style="
+        flex-direction: row;
+        gap: 8px;
+      ">
+
+          <input type="checkbox" id="RANDOMIZE_INITIAL_POSITION">
+
+          Randomize Initial Position
+
+        </label>
+
+      </div>
+
+    </div>
+
+
+    <div class="btn-group">
+
+      <button class="btn" onclick="applyLayout()">
+        Apply Layout
+      </button>
+
+      <button class="btn btn-secondary" onclick="resetParameters()">
+        Reset
+      </button>
+
+    </div>
+
+  </div>
 
 </div>
 
 <div id="cy"></div>
 
 <!-- Save File Dialog -->
-<div id="saveDialog"
-     style="
+<div id="saveDialog" style="
         display:none;
         position:fixed;
         left:0;
@@ -886,7 +660,7 @@ font-size:11px;
         justify-content:center;
      ">
 
-    <div style="
+  <div style="
         width:300px;
         background:white;
         padding:20px;
@@ -894,119 +668,81 @@ font-size:11px;
         box-shadow:0 4px 20px rgba(0,0,0,0.25);
     ">
 
-        <h3 style="
+    <h3 style="
             margin:0 0 15px 0;
             font-size:16px;
         ">
-            Save File
-        </h3>
+      Save File </h3>
 
-        <div style="margin-bottom:12px;">
-            <label style="
+    <div style="margin-bottom:12px;">
+      <label style="
                 display:block;
                 margin-bottom:5px;
                 font-size:12px;
                 color:#666;
-            ">
-                File name
-            </label>
+            "> File name </label>
 
-            <input
-                    id="saveFileName"
-                    type="text"
-                    value="network"
-                    style="
+      <input id="saveFileName" type="text" value="network" style="
                     width:100%;
                     box-sizing:border-box;
                     padding:6px;
                     border:1px solid #ccc;
                     border-radius:4px;
-                "
-            >
-        </div>
+                ">
+    </div>
 
-        <div style="margin-bottom:15px;">
+    <div style="margin-bottom:15px;">
 
-            <label style="
+      <label style="
                 display:block;
                 margin-bottom:7px;
                 font-size:12px;
                 color:#666;
-            ">
-                Format
-            </label>
+            "> Format </label>
 
-            <label style="
+      <label style="
                 display:block;
                 margin:6px 0;
                 font-size:13px;
-            ">
-                <input
-                        type="radio"
-                        name="saveFormat"
-                        value="cyjs"
-                        checked
-                >
-                CYJS
-            </label>
+            "> <input type="radio" name="saveFormat" value="cyjs" checked> CYJS </label>
 
-            <label style="
+      <label style="
                 display:block;
                 margin:6px 0;
                 font-size:13px;
-            ">
-                <input
-                        type="radio"
-                        name="saveFormat"
-                        value="json"
-                >
-                JSON
-            </label>
+            "> <input type="radio" name="saveFormat" value="json"> JSON </label>
 
-            <label style="
+      <label style="
                 display:block;
                 margin:6px 0;
                 font-size:13px;
-            ">
-                <input
-                        type="radio"
-                        name="saveFormat"
-                        value="graphml"
-                >
-                GraphML
-            </label>
+            "> <input type="radio" name="saveFormat" value="graphml"> GraphML </label>
 
-        </div>
+    </div>
 
-        <div style="
+    <div style="
             display:flex;
             justify-content:flex-end;
             gap:8px;
         ">
 
-            <button
-                    onclick="closeSaveDialog()"
-                    style="
+      <button onclick="closeSaveDialog()" style="
                     padding:5px 12px;
                     cursor:pointer;
-                "
-            >
-                Cancel
-            </button>
+                ">
+        Cancel
+      </button>
 
-            <button
-                    onclick="saveNetwork()"
-                    style="
+      <button onclick="saveNetwork()" style="
                     padding:5px 12px;
                     cursor:pointer;
-                "
-            >
-                Save
-            </button>
-
-        </div>
+                ">
+        Save
+      </button>
 
     </div>
+
+  </div>
 </div>
 
 <script type="module">
@@ -1083,7 +819,9 @@ font-size:11px;
 
         STEP_BY_STEP: false,
 
-        LAYOUT_ALGORITHM: 'MY_ForceLayout'
+        LAYOUT_ALGORITHM: 'MY_StressLayout',
+
+        SHOW_ALL_EDGES: true
 
     };
 
@@ -1095,112 +833,80 @@ font-size:11px;
 
     function setupControls() {
 
-        const rangeInputs =
-            document.querySelectorAll(
-                'input[type="range"]'
-            );
+        const rangeInputs = document.querySelectorAll('input[type="range"]');
 
 
         rangeInputs.forEach(input => {
 
-            input.addEventListener(
-                'input',
-                (e) => {
+            input.addEventListener('input', (e) => {
 
-                    const value =
-                        parseFloat(
-                            e.target.value
-                        );
+                const value = parseFloat(e.target.value);
 
-                    document.getElementById(
-                        `val-${input.id}`
-                    ).textContent = value;
+                document.getElementById(`val-${input.id}`).textContent = value;
 
-                    currentParams[input.id] =
-                        value;
+                currentParams[input.id] = value;
 
-                }
-            );
+            });
 
         });
 
 
         document
-            .querySelectorAll(
-                'input[type="checkbox"]'
-            )
+            .querySelectorAll('input[type="checkbox"]')
             .forEach(input => {
 
-                input.addEventListener(
-                    'change',
-                    (e) => {
+                input.addEventListener('change', (e) => {
 
-                        if (
-                            input.id ===
-                            'STEP_BY_STEP'
-                        ) {
+                    if (input.id === 'STEP_BY_STEP') {
 
-                            currentParams.STEP_BY_STEP =
-                                e.target.checked;
+                        currentParams.STEP_BY_STEP = e.target.checked;
 
-                            document.getElementById(
-                                'step-navigation'
-                            ).style.display =
-                                e.target.checked
-                                    ? 'block'
-                                    : 'none';
+                        document.getElementById('step-navigation').style.display = e.target.checked ? 'block' : 'none';
 
-                        } else {
+                    } else {
 
-                            currentParams[input.id] =
-                                e.target.checked;
+                        currentParams[input.id] = e.target.checked;
+
+                        // ==========================================
+                        // Show All Parallel Edges
+                        // ==========================================
+
+                        if (input.id === 'SHOW_ALL_EDGES') {
+
+                            updateEdgeDisplay();
 
                         }
 
                     }
-                );
+
+                });
 
             });
 
 
         document
-            .querySelectorAll(
-                'input[name="LAYOUT_ALGORITHM"]'
-            )
+            .querySelectorAll('input[name="LAYOUT_ALGORITHM"]')
             .forEach(input => {
 
-                input.addEventListener(
-                    'change',
-                    (e) => {
+                input.addEventListener('change', (e) => {
 
-                        currentParams.LAYOUT_ALGORITHM =
-                            e.target.value;
+                    currentParams.LAYOUT_ALGORITHM = e.target.value;
 
-                        console.log(
-                            'Selected layout:',
-                            currentParams.LAYOUT_ALGORITHM
-                        );
+                    console.log('Selected layout:', currentParams.LAYOUT_ALGORITHM);
 
-                    }
-                );
+                });
 
             });
 
 
         document
             .getElementById('fileInput')
-            .addEventListener(
-                'change',
-                handleFileSelect
-            );
+            .addEventListener('change', handleFileSelect);
 
 
         document
             .getElementById('dataFileSelect')
-            .addEventListener(
-                'change',
-                handleDataFileSelect
-            );
+            .addEventListener('change', handleDataFileSelect);
 
 
         loadDataFileList();
@@ -1211,111 +917,65 @@ font-size:11px;
 
         const dataFiles = [
 
-            'layout2.cyjs',
-            'layout3.cyjs',
-            'layout4.cyjs',
-            'layout7.cyjs',
-            'layout1.cyjs',
-            'layout6.cyjs',
-            'layout5.cyjs',
-            'Ndc80.cyjs',
-            '2_35922511.cyjs',
-            '3_38413612.cyjs',
-            'RAD51.cyjs',
-            'BRCA2.cyjs',
-            'BRCA1.cyjs',
-            '5_34524948.cyjs',
-            '4_37316325.cyjs',
-            'TP53.cyjs',
-            '1_Q14195.cyjs',
-            'spliceosome.cyjs',
-            'proteasome.cyjs',
-            'MAPK signaling.cyjs'
+            'layout2.cyjs', 'layout3.cyjs', 'layout4.cyjs', 'layout7.cyjs', 'layout1.cyjs', 'layout6.cyjs', 'layout5.cyjs', 'Ndc80.cyjs', '2_35922511.cyjs', '3_38413612.cyjs', 'RAD51.cyjs', 'BRCA2.cyjs', 'BRCA1.cyjs', '5_34524948.cyjs', '4_37316325.cyjs', 'TP53.cyjs', '1_Q14195.cyjs', 'spliceosome.cyjs', 'proteasome.cyjs', 'MAPK signaling.cyjs'
 
         ];
 
 
-        const select =
-            document.getElementById(
-                'dataFileSelect'
-            );
+        const select = document.getElementById('dataFileSelect');
 
 
-        dataFiles.forEach(
-            file => {
+        dataFiles.forEach(file => {
 
-                const option =
-                    document.createElement(
-                        'option'
-                    );
+            const option = document.createElement('option');
 
-                option.value =
-                    file;
+            option.value = file;
 
-                option.textContent =
-                    file;
+            option.textContent = file;
 
-                select.appendChild(
-                    option
-                );
+            select.appendChild(option);
 
-            }
-        );
+        });
 
     }
 
 
     async function handleDataFileSelect(event) {
 
-        const fileName =
-            event.target.value;
+        const fileName = event.target.value;
 
         if (!fileName) {
             return;
         }
 
 
-        const statsEl =
-            document.getElementById(
-                'stats'
-            );
+        const statsEl = document.getElementById('stats');
 
-        statsEl.innerHTML =
-            '<div class="loading-spinner"></div>';
+        statsEl.innerHTML = '<div class="loading-spinner"></div>';
 
 
         try {
 
-            const response =
-                await fetch(
-                    `./data/${fileName}`
-                );
+            const response = await fetch(`./data/${fileName}`);
 
 
             if (!response.ok) {
 
-                throw new Error(
-                    `Failed to load ${fileName}`
-                );
+                throw new Error(`Failed to load ${fileName}`);
 
             }
 
 
-            const data =
-                await response.json();
+            const data = await response.json();
 
 
             renderCytoscape(data);
 
         } catch (err) {
 
-            console.error(
-                "加载数据文件失败:",
-                err
-            );
+            console.error("加载数据文件失败:", err);
 
-            statsEl.innerHTML =
-                '<span style="color:red">Error loading file</span>';
+            statsEl.innerHTML = '<span style="color:red">Error loading file</span>';
 
         }
 
@@ -1324,64 +984,182 @@ font-size:11px;
 
     function handleFileSelect(event) {
 
-        const file =
-            event.target.files[0];
+        const file = event.target.files[0];
 
         if (!file) {
             return;
         }
 
 
-        const reader =
-            new FileReader();
+        const reader = new FileReader();
 
 
-        reader.onload =
-            function (e) {
+        reader.onload = function (e) {
 
-                try {
+            try {
 
-                    const data =
-                        JSON.parse(
-                            e.target.result
-                        );
+                const data = JSON.parse(e.target.result);
 
-                    renderCytoscape(data);
+                renderCytoscape(data);
 
-                    document
-                        .getElementById(
-                            'dataFileSelect'
-                        )
-                        .value = '';
+                document
+                    .getElementById('dataFileSelect').value = '';
 
-                } catch (err) {
+            } catch (err) {
 
-                    console.error(
-                        "解析文件失败:",
-                        err
-                    );
+                console.error("解析文件失败:", err);
 
-                    document.getElementById(
-                        'stats'
-                    ).innerHTML =
-                        '<span style="color:red">Error parsing JSON</span>';
+                document.getElementById('stats').innerHTML = '<span style="color:red">Error parsing JSON</span>';
 
-                }
+            }
 
-            };
+        };
 
 
         reader.readAsText(file);
 
     }
 
+    function updateEdgeDisplay() {
+
+        if (!cy) {
+            return;
+        }
+
+        const showAll = currentParams.SHOW_ALL_EDGES;
+
+        if (showAll) {
+
+            // 所有边都显示成 Bezier
+            cy.edges().style({
+
+                'curve-style': 'bezier',
+
+                'width': 4,
+
+                'line-color': '#aaa',
+
+                'opacity': 1
+
+            });
+
+            updateParallelEdgeCurves();
+
+        } else {
+
+            // 恢复普通显示
+            cy.edges().style({
+
+                'curve-style': 'haystack',
+
+                'width': 2,
+
+                'line-color': '#aaa',
+
+                'opacity': 1, 'haystack-radius': 0.5
+
+            });
+
+        }
+
+    }
+
+    function updateParallelEdgeCurves() {
+
+        if (!cy) {
+            return;
+        }
+
+        // ==========================================
+        // 按 source-target 分组
+        // ==========================================
+
+        const edgeGroups = new Map();
+
+        cy.edges().forEach(edge => {
+
+            const source = edge.source().id();
+            const target = edge.target().id();
+
+            // 无向意义下统一顺序
+            const key = source < target ? `${source}___${target}` : `${target}___${source}`;
+
+            if (!edgeGroups.has(key)) {
+                edgeGroups.set(key, []);
+            }
+
+            edgeGroups.get(key).push(edge);
+
+        });
+
+
+        // ==========================================
+        // 为每组平行边设置不同弧度
+        // ==========================================
+
+        edgeGroups.forEach(edges => {
+
+            const count = edges.length;
+
+            if (count === 1) {
+
+                edges[0].style({
+                    'curve-style': 'bezier', 'control-point-distance': 0
+                });
+
+                return;
+            }
+
+
+            edges.forEach((edge, index) => {
+
+                let distance;
+
+                const gap = 60;
+
+                // ------------------------------
+                // 奇数条
+                // ------------------------------
+
+                if (count % 2 === 1) {
+
+                    const center = Math.floor(count / 2);
+
+                    distance = (index - center) * gap;
+
+                }
+
+                    // ------------------------------
+                    // 偶数条
+                // ------------------------------
+
+                else {
+
+                    const center = (count - 1) / 2;
+
+                    distance = (index - center) * gap;
+
+                }
+
+
+                edge.style({
+
+                    'curve-style': 'bezier',
+
+                    'control-point-distance': distance
+
+                });
+
+            });
+
+        });
+
+    }
+
 
     function renderCytoscape(data) {
 
-        const statsEl =
-            document.getElementById(
-                'stats'
-            );
+        const statsEl = document.getElementById('stats');
 
 
         if (cy) {
@@ -1389,134 +1167,146 @@ font-size:11px;
         }
 
 
-        cy = window.cy =
-            cytoscape({
+        cy = window.cy = cytoscape({
 
-                container:
-                    document.getElementById(
-                        'cy'
-                    ),
+            container: document.getElementById('cy'),
 
-                elements:
-                    data.elements || data,
+            elements: data.elements || data,
 
-                style: [
+            style: [{
+                selector: 'node.substructure-star',
 
-                    {
-                        selector:
-                            'node[structColor]',
+                style: {
+                    'background-color': '#F48FB1'
+                }
 
-                        style: {
-                            'background-color':
-                                'data(structColor)'
-                        }
+            }, {
+                selector: 'node.substructure-star-center',
 
-                    },
+                style: {
+                    'shape': 'rectangle'
+                }
 
-                    {
-                        selector:
-                            'node',
+            }, {
+                selector: 'node.substructure-cycle',
 
-                        style: {
+                style: {
+                    'background-color': '#2196F3'
+                }
 
-                            'label':
-                                'data(id)',
+            }, {
+                selector: 'node.substructure-parallel',
 
-                            'color':
-                                '#333',
+                style: {
+                    'background-color': '#50C878'
+                }
 
-                            'font-size':
-                                '20px',
+            }, {
+                selector: 'node.substructure-chain',
 
-                            'width':
-                                50,
+                style: {
+                    'background-color': '#FFF176'
+                }
 
-                            'height':
-                                50
+            },
 
-                        }
 
-                    },
+                // {
+                //     selector:
+                //         'node[structType]',
+                //
+                //     style: {
+                //         'background-color': (ele) => {
+                //             switch (ele.data('structType')) {
+                //                 case 'Cycle':
+                //                     return 'pink'
+                //                 case 'Star-Center':
+                //             }
+                //         }
+                //     }
+                //
+                // },
 
-                    {
-                        selector:
-                            'edge',
+                {
+                    selector: 'node',
 
-                        style: {
+                    style: {
 
-                            'width':
-                                8,
+                        'label': 'data(id)',
 
-                            'line-color': '#aaa',
+                        'color': '#333',
 
-                            'curve-style':
-                                'haystack',
+                        'font-size': '20px',
 
-                            'z-index':
-                                1
+                        'width': 50,
 
-                        }
+                        'height': 50
 
-                    },
-
-                    {
-                        selector: 'node.network-parent',
-
-                        style: {
-                            'shape': 'ellipse',
-
-                            'background-color': '#e8e8e8',
-                            'background-opacity': 0.35,
-
-                            'border-width': 0,
-
-                            'label': '',
-                            'color': '#333',
-                            'font-size': '18px',
-                            'font-weight': 'bold',
-
-                            'text-valign': 'top',
-                            'text-halign': 'center',
-
-                            'z-index': 0,
-                            'z-compound-depth': 'bottom'
-                        }
                     }
-                ]
 
-            });
+                },
+
+                {
+                    selector: 'edge',
+
+                    style: {
+
+                        'width': 4,
+
+                        'line-color': '#aaa',
+
+                        'curve-style': 'haystack',
+
+                        // 'control-point-step-size': 60,
+
+                        'z-index': 1
+
+                    }
+
+                },
+
+                {
+                    selector: 'node.substructure-group',
+
+                    style: {
+                        'shape': 'ellipse',
+
+                        'background-color': '#e8e8e8', 'background-opacity': 0.35,
+
+                        'border-width': 0,
+
+                        'label': '', 'color': '#333', 'font-size': '18px', 'font-weight': 'bold',
+
+                        'text-valign': 'top', 'text-halign': 'center',
+
+                        'z-index': 0, 'z-compound-depth': 'bottom'
+                    }
+                }]
+
+        });
+
+        updateEdgeDisplay();
 
 
-        const nodeCount =
-            cy.nodes().length;
+        const nodeCount = cy.nodes().length;
 
-        const edgeCount =
-            cy.edges().length;
+        const edgeCount = cy.edges().length;
 
 
-        const startTime =
-            performance.now();
+        const startTime = performance.now();
 
 
-        cy.one(
-            'layoutstop',
-            () => {
+        cy.one('layoutstop', () => {
 
-                const endTime =
-                    performance.now();
+            const endTime = performance.now();
 
-                const duration =
-                    (endTime - startTime)
-                        .toFixed(2);
+            const duration = (endTime - startTime)
+                .toFixed(2);
 
 
-                statsEl.innerHTML =
-                    `<strong>Nodes:</strong> ${nodeCount} | ` +
-                    `<strong>Edges:</strong> ${edgeCount}<br>` +
-                    `<strong>Render Time:</strong> ${duration} ms`;
+            statsEl.innerHTML = `<strong>Nodes:</strong> ${nodeCount} | ` + `<strong>Edges:</strong> ${edgeCount}<br>` + `<strong>Render Time:</strong> ${duration} ms`;
 
-            }
-        );
+        });
 
 
         initialPositions = null;
@@ -1530,195 +1320,124 @@ font-size:11px;
     // Step navigation
     // ============================================================
 
-    window.nextStepUI =
-        function () {
+    window.nextStepUI = function () {
 
-            if (
-                currentLayout &&
-                currentLayout.nextStep
-            ) {
+        if (currentLayout && currentLayout.nextStep) {
 
-                currentLayout.nextStep();
+            currentLayout.nextStep();
 
-                updateStepDisplay();
+            updateStepDisplay();
 
-            }
+        }
 
-        };
+    };
 
 
-    window.prevStepUI =
-        function () {
+    window.prevStepUI = function () {
 
-            if (
-                currentLayout &&
-                currentLayout.prevStep
-            ) {
+        if (currentLayout && currentLayout.prevStep) {
 
-                currentLayout.prevStep();
+            currentLayout.prevStep();
 
-                updateStepDisplay();
+            updateStepDisplay();
 
-            }
+        }
 
-        };
+    };
 
 
-    window.fasterNextStepUI =
-        function () {
+    window.fasterNextStepUI = function () {
 
-            if (
-                currentLayout &&
-                currentLayout.goToStep &&
-                currentLayout.steps
-            ) {
+        if (currentLayout && currentLayout.goToStep && currentLayout.steps) {
 
-                const targetIndex =
-                    Math.min(
-                        currentLayout.currentStepIndex + 20,
-                        currentLayout.steps.length - 1
-                    );
+            const targetIndex = Math.min(currentLayout.currentStepIndex + 20, currentLayout.steps.length - 1);
 
 
-                currentLayout.goToStep(
-                    targetIndex
-                );
+            currentLayout.goToStep(targetIndex);
 
-                updateStepDisplay();
+            updateStepDisplay();
 
-            }
+        }
 
-        };
+    };
 
 
-    window.fasterPrevStepUI =
-        function () {
+    window.fasterPrevStepUI = function () {
 
-            if (
-                currentLayout &&
-                currentLayout.goToStep
-            ) {
+        if (currentLayout && currentLayout.goToStep) {
 
-                const targetIndex =
-                    Math.max(
-                        currentLayout.currentStepIndex - 20,
-                        0
-                    );
+            const targetIndex = Math.max(currentLayout.currentStepIndex - 20, 0);
 
 
-                currentLayout.goToStep(
-                    targetIndex
-                );
+            currentLayout.goToStep(targetIndex);
 
-                updateStepDisplay();
+            updateStepDisplay();
 
-            }
+        }
 
-        };
+    };
 
 
-    window.goToFirstStep =
-        function () {
+    window.goToFirstStep = function () {
 
-            if (
-                currentLayout &&
-                currentLayout.goToStep
-            ) {
+        if (currentLayout && currentLayout.goToStep) {
 
-                currentLayout.goToStep(0);
+            currentLayout.goToStep(0);
 
-                updateStepDisplay();
+            updateStepDisplay();
 
-            }
+        }
 
-        };
+    };
 
 
-    window.goToLastStep =
-        function () {
+    window.goToLastStep = function () {
 
-            if (
-                currentLayout &&
-                currentLayout.steps &&
-                currentLayout.goToStep
-            ) {
+        if (currentLayout && currentLayout.steps && currentLayout.goToStep) {
 
-                currentLayout.goToStep(
-                    currentLayout.steps.length - 1
-                );
+            currentLayout.goToStep(currentLayout.steps.length - 1);
 
-                updateStepDisplay();
+            updateStepDisplay();
 
-            }
+        }
 
-        };
+    };
 
 
-    window.listAllSteps =
-        function () {
+    window.listAllSteps = function () {
 
-            if (
-                !currentLayout ||
-                !currentLayout.steps ||
-                currentLayout.steps.length === 0
-            ) {
+        if (!currentLayout || !currentLayout.steps || currentLayout.steps.length === 0) {
 
-                alert(
-                    'No steps available. Run the layout with Step-by-Step mode enabled first.'
-                );
+            alert('No steps available. Run the layout with Step-by-Step mode enabled first.');
 
-                return;
+            return;
 
-            }
+        }
 
 
-            const stepListPanel =
-                document.getElementById(
-                    'step-list'
-                );
+        const stepListPanel = document.getElementById('step-list');
 
 
-            const stepListContent =
-                document.getElementById(
-                    'step-list-content'
-                );
+        const stepListContent = document.getElementById('step-list-content');
 
 
-            if (
-                stepListPanel.style.display ===
-                'none'
-            ) {
+        if (stepListPanel.style.display === 'none') {
 
-                let html = '';
+            let html = '';
 
 
-                currentLayout.steps.forEach(
-                    (step, index) => {
+            currentLayout.steps.forEach((step, index) => {
 
-                        const current =
-                            index ===
-                            currentLayout.currentStepIndex
-                                ? ' 👉'
-                                : '';
+                const current = index === currentLayout.currentStepIndex ? ' 👉' : '';
 
 
-                        const hasVNodes =
-                            step.virtualNodes &&
-                            step.virtualNodes.length > 0
-                                ? ' 🔵'
-                                : '';
+                const hasVNodes = step.virtualNodes && step.virtualNodes.length > 0 ? ' 🔵' : '';
 
 
-                        html +=
-                            `<div style="
+                html += `<div style="
                 padding: 4px;
                 cursor: pointer;
-                ${
-                                index ===
-                                currentLayout.currentStepIndex
-                                    ? 'background: #ffe082;'
-                                    : ''
-                            }
+                ${index === currentLayout.currentStepIndex ? 'background: #ffe082;' : ''}
               "
               onclick="goToStepByIndex(${index})">
 
@@ -1738,149 +1457,92 @@ font-size:11px;
 
               </div>`;
 
-                    }
-                );
+            });
 
 
-                stepListContent.innerHTML =
-                    html;
+            stepListContent.innerHTML = html;
 
-                stepListPanel.style.display =
-                    'block';
+            stepListPanel.style.display = 'block';
 
-            } else {
+        } else {
 
-                stepListPanel.style.display =
-                    'none';
+            stepListPanel.style.display = 'none';
 
-            }
+        }
 
-        };
+    };
 
 
-    window.goToStepByIndex =
-        function (index) {
+    window.goToStepByIndex = function (index) {
 
-            if (
-                currentLayout &&
-                currentLayout.goToStep
-            ) {
+        if (currentLayout && currentLayout.goToStep) {
 
-                currentLayout.goToStep(
-                    index
-                );
+            currentLayout.goToStep(index);
 
-                updateStepDisplay();
+            updateStepDisplay();
 
 
-                const stepListPanel =
-                    document.getElementById(
-                        'step-list'
-                    );
+            const stepListPanel = document.getElementById('step-list');
 
 
-                if (
-                    stepListPanel.style.display !==
-                    'none'
-                ) {
+            if (stepListPanel.style.display !== 'none') {
 
-                    stepListPanel.style.display =
-                        'none';
+                stepListPanel.style.display = 'none';
 
-                    window.listAllSteps();
-
-                }
+                window.listAllSteps();
 
             }
 
-        };
+        }
+
+    };
 
 
-    window.clearVirtualNodesUI =
-        function () {
+    window.clearVirtualNodesUI = function () {
 
-            if (
-                currentLayout &&
-                currentLayout.clearVirtualNodes
-            ) {
+        if (currentLayout && currentLayout.clearVirtualNodes) {
 
-                currentLayout.clearVirtualNodes();
+            currentLayout.clearVirtualNodes();
 
-            }
+        }
 
-        };
+    };
 
 
     function updateStepDisplay() {
 
-        if (
-            !currentLayout ||
-            !currentLayout.steps ||
-            currentLayout.steps.length === 0
-        ) {
+        if (!currentLayout || !currentLayout.steps || currentLayout.steps.length === 0) {
 
             return;
 
         }
 
 
-        const currentStep =
-            currentLayout.steps[
-                currentLayout.currentStepIndex
-                ];
+        const currentStep = currentLayout.steps[currentLayout.currentStepIndex];
 
 
-        document.getElementById(
-            'currentStepDisplay'
-        ).textContent =
-            `${currentLayout.currentStepIndex + 1} / ` +
-            `${currentLayout.steps.length}: ` +
-            `${currentStep.stepName}`;
+        document.getElementById('currentStepDisplay').textContent = `${currentLayout.currentStepIndex + 1} / ` + `${currentLayout.steps.length}: ` + `${currentStep.stepName}`;
 
 
-        document.getElementById(
-            'currentStepDesc'
-        ).textContent =
-            currentStep.description;
+        document.getElementById('currentStepDesc').textContent = currentStep.description;
 
 
-        document.getElementById(
-            'firstStepBtn'
-        ).disabled =
-            currentLayout.currentStepIndex === 0;
+        document.getElementById('firstStepBtn').disabled = currentLayout.currentStepIndex === 0;
 
 
-        document.getElementById(
-            'fasterPrevStepBtn'
-        ).disabled =
-            currentLayout.currentStepIndex === 0;
+        document.getElementById('fasterPrevStepBtn').disabled = currentLayout.currentStepIndex === 0;
 
 
-        document.getElementById(
-            'prevStepBtn'
-        ).disabled =
-            currentLayout.currentStepIndex === 0;
+        document.getElementById('prevStepBtn').disabled = currentLayout.currentStepIndex === 0;
 
 
-        document.getElementById(
-            'nextStepBtn'
-        ).disabled =
-            currentLayout.currentStepIndex ===
-            currentLayout.steps.length - 1;
+        document.getElementById('nextStepBtn').disabled = currentLayout.currentStepIndex === currentLayout.steps.length - 1;
 
 
-        document.getElementById(
-            'fasterNextStepBtn'
-        ).disabled =
-            currentLayout.currentStepIndex ===
-            currentLayout.steps.length - 1;
+        document.getElementById('fasterNextStepBtn').disabled = currentLayout.currentStepIndex === currentLayout.steps.length - 1;
 
 
-        document.getElementById(
-            'lastStepBtn'
-        ).disabled =
-            currentLayout.currentStepIndex ===
-            currentLayout.steps.length - 1;
+        document.getElementById('lastStepBtn').disabled = currentLayout.currentStepIndex === currentLayout.steps.length - 1;
 
     }
 
@@ -1897,23 +1559,17 @@ font-size:11px;
         initialPositions = {};
 
 
-        cy.nodes().forEach(
-            node => {
+        cy.nodes().forEach(node => {
 
-                initialPositions[
-                    node.id()
-                    ] = {
+            initialPositions[node.id()] = {
 
-                    x:
-                        node.position('x'),
+                x: node.position('x'),
 
-                    y:
-                        node.position('y')
+                y: node.position('y')
 
-                };
+            };
 
-            }
-        );
+        });
 
     }
 
@@ -1925,31 +1581,24 @@ font-size:11px;
         }
 
 
-        cy.nodes().forEach(
-            node => {
+        cy.nodes().forEach(node => {
 
-                const pos =
-                    initialPositions[
-                        node.id()
-                        ];
+            const pos = initialPositions[node.id()];
 
 
-                if (pos) {
+            if (pos) {
 
-                    node.position({
+                node.position({
 
-                        x:
-                        pos.x,
+                    x: pos.x,
 
-                        y:
-                        pos.y
+                    y: pos.y
 
-                    });
-
-                }
+                });
 
             }
-        );
+
+        });
 
     }
 
@@ -1958,278 +1607,201 @@ font-size:11px;
     // Apply Layout
     // ============================================================
 
-    window.applyLayout =
-        async function () {
+    window.applyLayout = async function () {
 
-            if (!cy) {
-                return;
-            }
-
-
-            // ==========================================================
-            // Randomize initial positions
-            // ==========================================================
-
-            if (1) {
-
-                const spread = 500;
+        if (!cy) {
+            return;
+        }
 
 
-                cy.nodes().forEach(
-                    node => {
+        // ==========================================================
+        // Randomize initial positions
+        // ==========================================================
 
-                        node.position({
+        if (1) {
 
-                            x:
-                                Math.random() *
-                                spread,
-
-                            y:
-                                Math.random() *
-                                spread
-
-                        });
-
-                    }
-                );
-
-            }
+            const spread = 500;
 
 
-            // ==========================================================
-            // 保存 / 恢复初始位置
-            // ==========================================================
+            cy.nodes().forEach(node => {
 
-            if (!initialPositions) {
+                node.position({
 
-                saveInitialPositions();
+                    x: Math.random() * spread,
 
-            }
-
-
-            restoreInitialPositions();
-
-
-            // ==========================================================
-            // Resize
-            // ==========================================================
-
-            cy.resize();
-
-
-            // ==========================================================
-            // 创建 Layout
-            // ==========================================================
-
-            currentLayout =
-                cy.layout({
-
-                    name:
-                        'ForceLayout',
-
-                    params:
-                    currentParams
+                    y: Math.random() * spread
 
                 });
 
+            });
 
-            // ==========================================================
-            // Layout 完成
-            // ==========================================================
-
-            cy.one(
-                'layoutstop',
-                () => {
-
-                    // Step-by-step
-
-                    if (
-                        currentParams.STEP_BY_STEP &&
-                        currentLayout.steps &&
-                        currentLayout.steps.length > 0
-                    ) {
-
-                        document.getElementById(
-                            'firstStepBtn'
-                        ).disabled = false;
+        }
 
 
-                        document.getElementById(
-                            'fasterNextStepBtn'
-                        ).disabled = false;
+        // ==========================================================
+        // 保存 / 恢复初始位置
+        // ==========================================================
+
+        if (!initialPositions) {
+
+            saveInitialPositions();
+
+        }
 
 
-                        document.getElementById(
-                            'nextStepBtn'
-                        ).disabled = false;
+        restoreInitialPositions();
 
 
-                        document.getElementById(
-                            'lastStepBtn'
-                        ).disabled = false;
+        // ==========================================================
+        // Resize
+        // ==========================================================
+
+        cy.resize();
+
+        // ==========================================================
+        // 创建 Layout
+        // ==========================================================
+
+        currentLayout = cy.layout({
+
+            name: 'ForceLayout',
+
+            params: currentParams
+
+        });
+
+        // ==========================================================
+        // Layout 完成
+        // ==========================================================
+
+        cy.one('layoutstop', () => {
+
+            // Step-by-step
+
+            if (currentParams.STEP_BY_STEP && currentLayout.steps && currentLayout.steps.length > 0) {
+
+                document.getElementById('firstStepBtn').disabled = false;
 
 
-                        updateStepDisplay();
+                document.getElementById('fasterNextStepBtn').disabled = false;
 
 
-                        console.log(
-                            `✅ Step-by-step mode: ` +
-                            `${currentLayout.steps.length} steps captured`
-                        );
-
-                    }
-
-                }
-            );
+                document.getElementById('nextStepBtn').disabled = false;
 
 
-            // ==========================================================
-            // Run Layout
-            // ==========================================================
+                document.getElementById('lastStepBtn').disabled = false;
 
-            currentLayout.run();
 
-        };
+                updateStepDisplay();
+
+
+                console.log(`✅ Step-by-step mode: ` + `${currentLayout.steps.length} steps captured`);
+
+            }
+
+        });
+
+
+        // ==========================================================
+        // Run Layout
+        // ==========================================================
+
+        currentLayout.run();
+
+    };
 
 
     // ============================================================
     // Reset parameters
     // ============================================================
 
-    window.resetParameters =
-        function () {
+    window.resetParameters = function () {
 
-            currentParams =
-                {
-                    ...DEFAULT_PARAMS
-                };
+        currentParams = {
+            ...DEFAULT_PARAMS
+        };
 
+        Object.keys(DEFAULT_PARAMS).forEach(key => {
 
-            Object.keys(
-                DEFAULT_PARAMS
-            ).forEach(
-                key => {
-
-                    const input =
-                        document.getElementById(
-                            key
-                        );
+            const input = document.getElementById(key);
 
 
-                    if (input) {
+            if (input) {
 
-                        if (
-                            input.type ===
-                            'checkbox'
-                        ) {
+                if (input.type === 'checkbox') {
 
-                            input.checked =
-                                DEFAULT_PARAMS[key];
+                    input.checked = DEFAULT_PARAMS[key];
 
-                        } else {
+                } else {
 
-                            input.value =
-                                DEFAULT_PARAMS[key];
+                    input.value = DEFAULT_PARAMS[key];
 
 
-                            const display =
-                                document.getElementById(
-                                    `val-${key}`
-                                );
+                    const display = document.getElementById(`val-${key}`);
 
 
-                            if (display) {
+                    if (display) {
 
-                                display.textContent =
-                                    DEFAULT_PARAMS[key];
-
-                            }
-
-                        }
+                        display.textContent = DEFAULT_PARAMS[key];
 
                     }
 
                 }
-            );
+
+            }
+
+        });
 
 
-            initialPositions =
-                null;
+        initialPositions = null;
 
 
-            applyLayout();
+        applyLayout();
 
-        };
+    };
 
 
     // ============================================================
     // Toggle sidebar
     // ============================================================
 
-    window.toggleControls =
-        function () {
+    window.toggleControls = function () {
 
-            const sidebar =
-                document.getElementById(
-                    'sidebar'
-                );
+        const sidebar = document.getElementById('sidebar');
 
 
-            const panel =
-                document.getElementById(
-                    'controls'
-                );
+        const panel = document.getElementById('controls');
 
 
-            const btn =
-                panel.querySelector(
-                    '.toggle-btn'
-                );
+        const btn = panel.querySelector('.toggle-btn');
 
 
-            if (
-                sidebar.classList.contains(
-                    'minimized'
-                )
-            ) {
+        if (sidebar.classList.contains('minimized')) {
 
-                sidebar.classList.remove(
-                    'minimized'
-                );
+            sidebar.classList.remove('minimized');
 
-                panel.classList.remove(
-                    'collapsed'
-                );
+            panel.classList.remove('collapsed');
 
-                btn.textContent =
-                    'Hide';
+            btn.textContent = 'Hide';
 
-            } else {
+        } else {
 
-                sidebar.classList.add(
-                    'minimized'
-                );
+            sidebar.classList.add('minimized');
 
-                panel.classList.add(
-                    'collapsed'
-                );
+            panel.classList.add('collapsed');
 
-                btn.textContent =
-                    'Show';
+            btn.textContent = 'Show';
 
-            }
+        }
 
 
-            if (cy) {
+        if (cy) {
 
-                setTimeout(
-                    () => cy.resize(),
-                    100
-                );
+            setTimeout(() => cy.resize(), 100);
 
-            }
+        }
 
-        };
+    };
 
 
     // ============================================================
@@ -2265,17 +1837,13 @@ font-size:11px;
             return;
         }
 
-        let fileName =
-            document.getElementById('saveFileName').value.trim();
+        let fileName = document.getElementById('saveFileName').value.trim();
 
         if (!fileName) {
             fileName = 'network';
         }
 
-        const format =
-            document.querySelector(
-                'input[name="saveFormat"]:checked'
-            ).value;
+        const format = document.querySelector('input[name="saveFormat"]:checked').value;
 
 
         /*
@@ -2297,8 +1865,7 @@ font-size:11px;
                 data: data,
 
                 position: {
-                    x: node.position('x'),
-                    y: node.position('y')
+                    x: node.position('x'), y: node.position('y')
                 },
 
                 classes: node.classes()
@@ -2335,8 +1902,7 @@ font-size:11px;
 
             const output = {
                 elements: {
-                    nodes: nodes,
-                    edges: edges
+                    nodes: nodes, edges: edges
                 }
             };
 
@@ -2354,8 +1920,7 @@ font-size:11px;
         else if (format === 'json') {
 
             const output = {
-                nodes: nodes,
-                edges: edges
+                nodes: nodes, edges: edges
             };
 
             content = JSON.stringify(output, null, 2);
@@ -2382,10 +1947,7 @@ font-size:11px;
         // Download
         // ==========================================
 
-        const blob = new Blob(
-            [content],
-            { type: mimeType }
-        );
+        const blob = new Blob([content], {type: mimeType});
 
         const url = URL.createObjectURL(blob);
 
@@ -2455,10 +2017,7 @@ font-size:11px;
 
             const id = node.data.id;
 
-            const label =
-                node.data.label !== undefined
-                    ? node.data.label
-                    : id;
+            const label = node.data.label !== undefined ? node.data.label : id;
 
             xml += `    <node id="${escapeXML(id)}">\n`;
 
@@ -2468,13 +2027,9 @@ font-size:11px;
 
             xml += `      <data key="y">${node.position.y}</data>\n`;
 
-            xml += `      <data key="cy_data">${escapeXML(
-                JSON.stringify(node.data)
-            )}</data>\n`;
+            xml += `      <data key="cy_data">${escapeXML(JSON.stringify(node.data))}</data>\n`;
 
-            xml += `      <data key="cy_classes">${escapeXML(
-                node.classes || ''
-            )}</data>\n`;
+            xml += `      <data key="cy_classes">${escapeXML(node.classes || '')}</data>\n`;
 
             xml += '    </node>\n';
         });
@@ -2486,9 +2041,7 @@ font-size:11px;
 
         edges.forEach((edge, index) => {
 
-            const id =
-                edge.data.id ||
-                `edge_${index + 1}`;
+            const id = edge.data.id || `edge_${index + 1}`;
 
             const source = edge.data.source;
             const target = edge.data.target;
@@ -2497,13 +2050,9 @@ font-size:11px;
             xml += `source="${escapeXML(source)}" `;
             xml += `target="${escapeXML(target)}">\n`;
 
-            xml += `      <data key="edge_data">${escapeXML(
-                JSON.stringify(edge.data)
-            )}</data>\n`;
+            xml += `      <data key="edge_data">${escapeXML(JSON.stringify(edge.data))}</data>\n`;
 
-            xml += `      <data key="edge_classes">${escapeXML(
-                edge.classes || ''
-            )}</data>\n`;
+            xml += `      <data key="edge_classes">${escapeXML(edge.classes || '')}</data>\n`;
 
             xml += '    </edge>\n';
         });
