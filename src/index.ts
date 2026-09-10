@@ -3,11 +3,13 @@ import type {
     EdgeCollection, EdgeSingular, NodeCollection, NodeSingular
 } from 'cytoscape';
 
+export type LayoutAlgorithm =
+    | 'force'
+    | 'stress';
+
 // Centralized Layout Parameters
 export interface LayoutParameters {
-    //layout algorithm
-    FORCE_LAYOUT: boolean;
-    STRESS_LAYOUT: boolean;
+    LAYOUT_ALGORITHM: LayoutAlgorithm;
 
     // Force-directed parameters
     IDEAL_LENGTH: number;
@@ -52,9 +54,7 @@ export interface LayoutParameters {
 
 // @ts-ignore
 export const DEFAULT_PARAMS: LayoutParameters = {
-    //layout algorithm
-    FORCE_LAYOUT: false,
-    STRESS_LAYOUT: true,
+    LAYOUT_ALGORITHM:'force',
 
     // Force-directed parameters
     IDEAL_LENGTH: 100,
@@ -199,7 +199,7 @@ class VEdge {
 
 // export default function register(cytoscape: any) {
 //     if (!cytoscape) return;
-//     cytoscape('layout', 'ForceLayout', ForceLayout);
+//     cytoscape('layout', 'SubstructureLayout', SubstructureLayout);
 // }
 
 /**
@@ -212,7 +212,7 @@ class VEdge {
  *   substructureLayout(cytoscape);
  *
  *   cy.layout({
- *       name: 'substructure',
+ *       name: 'substructure-layout',
  *       layoutAlgorithm: 'force',
  *       idealLength: 100,
  *       repulsion: 10000,
@@ -228,7 +228,7 @@ export default function register(cytoscapeInstance: any) {
 
     // Avoid duplicate registration when the plugin is initialized more than once.
     try {
-        cytoscapeInstance('layout', 'ForceLayout', ForceLayout);
+        cytoscapeInstance('layout', 'substructure-layout', SubstructureLayout);
     } catch (error) {
         // Cytoscape normally throws if an extension with the same name is already
         // registered. Keeping registration idempotent makes the plugin easier to use
@@ -241,18 +241,21 @@ export default function register(cytoscapeInstance: any) {
 }
 
 // Optional named export for consumers that prefer: import { register } ...
-export {ForceLayout};
+export {SubstructureLayout};
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
  * Enhanced force-directed layout with structure awareness
  */
-function ForceLayout(this: any, options: any) {
+function SubstructureLayout(this: any, options: any) {
     this.options = options || {};
     this.cy = this.options.cy;
     this.eles = this.options.eles || this.cy.elements();
     this.boundingBox = this.options.boundingBox;
+
+    // 1. trigger layoutstart event
+    this.eles.emit('layoutstart');
     this.stopped = false;
 
     if (!this.cy) {
@@ -264,8 +267,6 @@ function ForceLayout(this: any, options: any) {
     // `params` is still accepted for backward compatibility with the old demo.
     const p = this.options.params || {};
     const publicParams = {
-        FORCE_LAYOUT: this.options.layoutAlgorithm === 'force' || this.options.layoutAlgorithm === 'MY_ForceLayout',
-        STRESS_LAYOUT: this.options.layoutAlgorithm === 'stress' || this.options.layoutAlgorithm === 'MY_StressLayout',
 
         IDEAL_LENGTH: this.options.idealLength,
         REPULSION: this.options.repulsion,
@@ -316,12 +317,6 @@ function ForceLayout(this: any, options: any) {
         ...DEFAULT_PARAMS, ...p, ...camelToInternal
     };
 
-    // If no algorithm was explicitly supplied, use force.
-    if (this.options.layoutAlgorithm === undefined && p.LAYOUT_ALGORITHM === undefined) {
-        this.params.FORCE_LAYOUT = true;
-        this.params.STRESS_LAYOUT = false;
-    }
-
     // Instance-specific arrays instead of global
     this.vnodes = [];
     this.vedges = [];
@@ -334,7 +329,7 @@ function ForceLayout(this: any, options: any) {
 /**
  * Capture a snapshot of the current layout state
  */
-ForceLayout.prototype.captureStep = function (stepName: string, description: string, metadata?: any) {
+SubstructureLayout.prototype.captureStep = function (stepName: string, description: string, metadata?: any) {
     if (!this.params.STEP_BY_STEP) return;
 
     const nodes = this.cy.nodes();
@@ -514,12 +509,12 @@ function layoutRectangular(nodes: NodeSingular[], center: { x: number, y: number
     });
 }
 
-ForceLayout.prototype.identifyStructures = function (nodes: NodeCollection) {
+SubstructureLayout.prototype.identifyStructures = function (nodes: NodeCollection) {
     const params = this.params;
 
     // 0. Reset all markers
     nodes.data('structType', 'Normal');
-    nodes.data('structColor', '#999999');
+    // nodes.data('structColor', '#999999');
     nodes.data('groupId', null); // Added: reset group ID for cycles
     nodes.data('innerId', null);  // index inner a circle
     nodes.data('parallelGroupIdVec', []);
@@ -614,7 +609,7 @@ ForceLayout.prototype.identifyStructures = function (nodes: NodeCollection) {
                 if (node.data('structType') === 'Normal' && node.id() === circle_node) {
                     node.addClass('substructure-cycle')
                     node.data('structType', 'Cycle');
-                    node.data('structColor', '#2196F3');
+                    // node.data('structColor', '#2196F3');
                     node.data('groupId', 'Cycle_' + circleIndex);
                     node.data('innerId', innerIndex);
 
@@ -688,7 +683,7 @@ ForceLayout.prototype.identifyStructures = function (nodes: NodeCollection) {
             currentChainNodes.forEach((node: any) => {
                 node.addClass('substructure-chain')
                 node.data('structType', 'Chain');
-                node.data('structColor', '#FFF176');
+                // node.data('structColor', '#FFF176');
                 node.data('groupId', 'Chain_' + chainId);
                 node.data('innerId', nodeId);
 
@@ -709,7 +704,7 @@ ForceLayout.prototype.identifyStructures = function (nodes: NodeCollection) {
             currentChainNodes.forEach((node: any) => {
 
                 node.data('structType', 'LeafButNotChain');
-                node.data('structColor', '#aaa');
+                // node.data('structColor', '#aaa');
                 node.data('groupId', null);
                 node.data('innerId', null);
 
@@ -743,7 +738,7 @@ ForceLayout.prototype.identifyStructures = function (nodes: NodeCollection) {
 
                 node.addClass(['substructure-star', 'substructure-star-center'])
                 node.data('structType', 'Star-Center');
-                node.data('structColor', '#F48FB1');
+                // node.data('structColor', '#F48FB1');
                 node.data('groupId', groupId);
 
                 node.data('structs', {
@@ -756,7 +751,7 @@ ForceLayout.prototype.identifyStructures = function (nodes: NodeCollection) {
                     leaf.addClass(['substructure-star', 'substructure-member'])
 
                     leaf.data('structType', 'Star-Member');
-                    leaf.data('structColor', '#F48FB1');
+                    // leaf.data('structColor', '#F48FB1');
                     leaf.data('groupId', groupId);
 
                     leaf.data('structs', {
@@ -802,7 +797,7 @@ ForceLayout.prototype.identifyStructures = function (nodes: NodeCollection) {
                     if (node.id() == v) {
                         node.addClass('substructure-parallel')
                         node.data('structType', 'Parallel');
-                        node.data('structColor', '#50C878');
+                        // node.data('structColor', '#50C878');
                         node.data('groupId', 'Parallel' + parallelId);
 
                         node.data('structs', {
@@ -841,13 +836,10 @@ interface NetworkInfo {
     bb: cytoscape.BoundingBox12;
 }
 
-ForceLayout.prototype.run = function () {
+SubstructureLayout.prototype.run = function () {
 
     const params = this.params;
 
-    const layout_algorithm = this.options.params.LAYOUT_ALGORITHM;
-
-    this.cy
     const components = this.cy.elements().components();
 
     const networkInfos: NetworkInfo[] = [];
@@ -887,7 +879,7 @@ ForceLayout.prototype.run = function () {
         });
 
         // 2. NOW define your collections to get the updated state
-        if (params.RANDOMIZE_INITIAL_POSITION) {
+        if (params.RANDOMIZE_INITIAL_POSITIONS) {
             nodes.forEach((node: NodeSingular) => {
                 node.position({
                     x: bb.x1 + Math.random() * width, y: bb.y1 + Math.random() * height
@@ -1236,7 +1228,7 @@ ForceLayout.prototype.run = function () {
         this.captureStep('Virtual Nodes Positioned', 'Virtual node centers and radii calculated', null);
 
         //******************** virtual node force layout ************************
-        if (layout_algorithm === 'MY_ForceLayout') {
+        if (params.LAYOUT_ALGORITHM === 'force') {
             const IDEAL_LENGTH = params.IDEAL_LENGTH;
             // const IDEAL_LENGTH=3000;
 
@@ -1291,6 +1283,9 @@ ForceLayout.prototype.run = function () {
             });
 
             while (iter < ITERATIONS) {
+                if(this.stopped){
+                    break;
+                }
                 iter++;
 
                 // Reset total movement-energy statistics before each iteration
@@ -1517,6 +1512,9 @@ ForceLayout.prototype.run = function () {
                 const padding = IDEAL_LENGTH;
                 let iter = 0;
                 while (colisionFlag) {
+                    if(this.stopped){
+                        break;
+                    }
                     iter++;
                     colisionFlag = false;
                     for (let i = 0; i < this.vnodes.length; i++) {
@@ -1598,7 +1596,7 @@ ForceLayout.prototype.run = function () {
         // Stress Majorization algorithm
         // All-Pairs shortest-path calculation and Guttman Transform (weighted Laplacian updates),
         // while retaining the polar-coordinate initialization for leaf nodes and the Anti-Collision post-processing in the original code
-        if (layout_algorithm === 'MY_StressLayout') {
+        if (params.LAYOUT_ALGORITHM === 'stress') {
             const IDEAL_LENGTH = params.IDEAL_LENGTH;
             const ITERATIONS = params.ITERATIONS;
             const ENERGY_THRESHOLD = 0.5;
@@ -1692,6 +1690,9 @@ ForceLayout.prototype.run = function () {
             // -------------------------------------------------------------
             let iter = 0;
             while (iter < ITERATIONS) {
+                if (this.stopped) {
+                    break;
+                }
                 iter++;
                 let maxStressMove = 0;
 
@@ -1775,6 +1776,9 @@ ForceLayout.prototype.run = function () {
                 let overlapIter = 0;
 
                 while (colisionFlag) {
+                    if (this.stopped) {
+                        break;
+                    }
                     overlapIter++;
                     colisionFlag = false;
 
@@ -2512,6 +2516,62 @@ ForceLayout.prototype.run = function () {
     return this;
 };
 
+SubstructureLayout.prototype.destroy = function () {
+    this.stop();
+
+    const nodes = this.eles ? this.eles.nodes() : (this.cy ? this.cy.nodes() : null);
+
+    if (nodes && nodes.length > 0) {
+        nodes.forEach((node: any) => {
+            node.removeClass([
+                'substructure-cycle',
+                'substructure-chain',
+                'substructure-star',
+                'substructure-star-center',
+                'substructure-member',
+                'substructure-parallel'
+            ].join(' '));
+
+            node.removeData('structType');
+            node.removeData('groupId');
+            node.removeData('innerId');
+            node.removeData('parallelGroupIdVec');
+            node.removeData('structs');
+        });
+    }
+
+    if (this.cy && this._onEventHandler) {
+        this.cy.off('tap', this._onEventHandler);
+        this._onEventHandler = null;
+    }
+
+    this.vnodes = [];
+    this.vedges = [];
+    this.steps = [];
+    this.currentStepIndex = -1;
+
+    if (this.eles) {
+        this.eles.emit('layoutdestroy');
+    }
+
+    return this;
+};
+
+SubstructureLayout.prototype.stop = function () {
+    this.stopped = true;
+
+    if (this.frameId) {
+        cancelAnimationFrame(this.frameId);
+        this.frameId = null;
+    }
+
+    if (this.eles) {
+        this.eles.emit('layoutstop');
+    }
+
+    return this;
+};
+
 /**
  * get minimum bounding box , then rotate bounding box and make network rotate to rectangle
  * @param nodes
@@ -2842,7 +2902,7 @@ function rotateNetworkToMinimumBoundingBox(nodes: any) {
 
 // If there are multiple networks, organize them into multiple rows.
 // Networks with similar sizes are preferentially placed in the same row.
-ForceLayout.prototype.packNetworks = function (networks: any[]): void {
+SubstructureLayout.prototype.packNetworks = function (networks: any[]): void {
 
     if (!networks || networks.length === 0) {
         return;
@@ -3530,14 +3590,15 @@ ForceLayout.prototype.packNetworks = function (networks: any[]): void {
 
 };
 
-ForceLayout.prototype.stop = function () {
+SubstructureLayout.prototype.stop = function () {
+    this.stopped = true;
     return this;
 };
 
 /**
  * Navigate to a specific step in step-by-step mode
  */
-ForceLayout.prototype.goToStep = function (stepIndex: number) {
+SubstructureLayout.prototype.goToStep = function (stepIndex: number) {
     if (!this.params.STEP_BY_STEP || this.steps.length === 0) {
         console.warn('Step-by-step mode is not enabled or no steps have been captured');
         return this;
@@ -3572,7 +3633,7 @@ ForceLayout.prototype.goToStep = function (stepIndex: number) {
 /**
  * Go to the next step
  */
-ForceLayout.prototype.nextStep = function () {
+SubstructureLayout.prototype.nextStep = function () {
     if (this.currentStepIndex < this.steps.length - 1) {
         return this.goToStep(this.currentStepIndex + 1);
     } else {
@@ -3584,7 +3645,7 @@ ForceLayout.prototype.nextStep = function () {
 /**
  * Go to the previous step
  */
-ForceLayout.prototype.prevStep = function () {
+SubstructureLayout.prototype.prevStep = function () {
     if (this.currentStepIndex > 0) {
         return this.goToStep(this.currentStepIndex - 1);
     } else {
@@ -3596,7 +3657,7 @@ ForceLayout.prototype.prevStep = function () {
 /**
  * Get information about all steps
  */
-ForceLayout.prototype.listSteps = function () {
+SubstructureLayout.prototype.listSteps = function () {
     if (!this.params.STEP_BY_STEP || this.steps.length === 0) {
         console.log('No steps available');
         return [];
@@ -3620,7 +3681,7 @@ ForceLayout.prototype.listSteps = function () {
 /**
  * Visualize virtual nodes and edges on the canvas
  */
-ForceLayout.prototype.visualizeVirtualNodes = function (step: LayoutStep) {
+SubstructureLayout.prototype.visualizeVirtualNodes = function (step: LayoutStep) {
     // Remove previous virtual node visualizations
     this.cy.$('.virtual-node, .virtual-edge').remove();
 
@@ -3680,7 +3741,7 @@ ForceLayout.prototype.visualizeVirtualNodes = function (step: LayoutStep) {
 /**
  * Get color for virtual node based on type
  */
-ForceLayout.prototype.getVirtualNodeColor = function (type: string) {
+SubstructureLayout.prototype.getVirtualNodeColor = function (type: string) {
     const colorMap: { [key: string]: string } = {
         'Normal': '#999999', 'Cycle': '#2196F3', 'Star': '#F48FB1', 'Chain': '#FFF176', 'Parallel': '#50C878'
     };
@@ -3690,7 +3751,7 @@ ForceLayout.prototype.getVirtualNodeColor = function (type: string) {
 /**
  * Clear all virtual node visualizations
  */
-ForceLayout.prototype.clearVirtualNodes = function () {
+SubstructureLayout.prototype.clearVirtualNodes = function () {
     this.cy.$('.virtual-node, .virtual-edge').remove();
     return this;
 };

@@ -526,7 +526,7 @@ font-size:11px;
         gap: 6px;
       ">
 
-          <input type="radio" name="LAYOUT_ALGORITHM" value="MY_ForceLayout">
+          <input type="radio" name="LAYOUT_ALGORITHM" value="force">
 
           Force Layout
 
@@ -539,7 +539,7 @@ font-size:11px;
         gap: 6px;
       ">
 
-          <input type="radio" name="LAYOUT_ALGORITHM" value="MY_StressLayout" checked>
+          <input type="radio" name="LAYOUT_ALGORITHM" value="stress" checked>
 
           Stress Layout
 
@@ -819,7 +819,7 @@ font-size:11px;
 
         STEP_BY_STEP: false,
 
-        LAYOUT_ALGORITHM: 'MY_StressLayout',
+        LAYOUT_ALGORITHM: 'stress',
 
         SHOW_ALL_EDGES: true
 
@@ -1664,7 +1664,7 @@ font-size:11px;
 
         currentLayout = cy.layout({
 
-            name: 'ForceLayout',
+            name: 'substructure-layout',
 
             params: currentParams
 
