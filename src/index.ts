@@ -254,8 +254,6 @@ function SubstructureLayout(this: any, options: any) {
     this.eles = this.options.eles || this.cy.elements();
     this.boundingBox = this.options.boundingBox;
 
-    // 1. trigger layoutstart event
-    this.eles.emit('layoutstart');
     this.stopped = false;
 
     if (!this.cy) {
@@ -837,6 +835,12 @@ interface NetworkInfo {
 }
 
 SubstructureLayout.prototype.run = function () {
+
+    this.stopped = false;
+    this.trigger({
+        type:'layoutstart',
+        layout:this
+    });
 
     const params = this.params;
 
@@ -2558,6 +2562,10 @@ SubstructureLayout.prototype.destroy = function () {
 };
 
 SubstructureLayout.prototype.stop = function () {
+    if (this.stopped) {
+        return this;
+    }
+
     this.stopped = true;
 
     if (this.frameId) {
@@ -2565,9 +2573,10 @@ SubstructureLayout.prototype.stop = function () {
         this.frameId = null;
     }
 
-    if (this.eles) {
-        this.eles.emit('layoutstop');
-    }
+    this.trigger({
+        type: 'layoutstop',
+        layout:this
+        });
 
     return this;
 };
@@ -3588,11 +3597,6 @@ SubstructureLayout.prototype.packNetworks = function (networks: any[]): void {
 
     });
 
-};
-
-SubstructureLayout.prototype.stop = function () {
-    this.stopped = true;
-    return this;
 };
 
 /**
