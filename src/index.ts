@@ -1271,7 +1271,6 @@ SubstructureLayout.prototype.run = function () {
 
         this.captureStep('Virtual Nodes Positioned', 'Virtual node centers and radii calculated', null);
 
-        console.log("@@@@@@@@@@@@@",params.LAYOUT_ALGORITHM);
         //******************** virtual node force layout ************************
         if (params.LAYOUT_ALGORITHM === 'force') {
             const IDEAL_LENGTH = params.IDEAL_LENGTH;
