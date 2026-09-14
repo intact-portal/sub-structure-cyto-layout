@@ -369,7 +369,6 @@ font-size:11px;
         Show All Steps
       </button>
 
-
       <button class="btn" onclick="clearVirtualNodesUI()" style="
       width: 100%;
       margin-top: 5px;
@@ -751,77 +750,75 @@ font-size:11px;
 
     register(cytoscape);
 
-
     let cy = null;
 
     let currentParams = {};
 
     let currentLayout = null;
 
-
     const DEFAULT_PARAMS = {
+        //
+        // IDEAL_LENGTH: 100,
+        //
+        // REPULSION: 300,
+        //
+        // SPRING_K: 0.15,
+        //
+        // ITERATIONS: 600,
+        //
+        // ANGULAR_STRENGTH: 0.2,
+        //
+        // CENTER_GRAVITY: 0.01,
+        //
+        // USE_ANGULAR_FORCE: true,
+        //
+        // RANDOMIZE_INITIAL_POSITION: false,
+        //
+        // MIN_STAR_LEAVES: 3,
+        //
+        // MIN_CYCLE_LENGTH: 3,
+        //
+        // MAX_CYCLE_LENGTH: 30,
+        //
+        // MIN_CHAIN_LENGTH: 2,
+        //
+        // MIN_PARALLEL_NEIGHBORS: 2,
+        //
+        // CYCLE_NODE_SPACING: 100,
+        //
+        // STAR_RING_SPACING: 100,
+        //
+        // STAR_BASE_NODES_PER_RING: 6,
+        //
+        // CHAIN_MIN_RADIUS: 150,
+        //
+        // PARALLEL_GAP: 80,
+        //
+        // LEAF_NODE_DISTANCE: 200,
+        //
+        // VNODE_RADIUS_MULTIPLIER: 0.2,
+        //
+        // VNODE_IDEAL_LENGTH: 100,
+        //
+        // VNODE_REPULSION: 10000,
+        //
+        // VNODE_SPRING_K: 0.15,
+        //
+        // VNODE_ITERATIONS: 1000,
+        //
+        // VNODE_ANGULAR_STRENGTH: 0.1,
 
-        IDEAL_LENGTH: 100,
+        // SPREAD_V_NODES: true,
 
-        REPULSION: 300,
-
-        SPRING_K: 0.15,
-
-        ITERATIONS: 600,
-
-        ANGULAR_STRENGTH: 0.2,
-
-        CENTER_GRAVITY: 0.01,
-
-        USE_ANGULAR_FORCE: true,
-
-        RANDOMIZE_INITIAL_POSITION: false,
-
-        MIN_STAR_LEAVES: 3,
-
-        MIN_CYCLE_LENGTH: 3,
-
-        MAX_CYCLE_LENGTH: 30,
-
-        MIN_CHAIN_LENGTH: 2,
-
-        MIN_PARALLEL_NEIGHBORS: 2,
-
-        CYCLE_NODE_SPACING: 100,
-
-        STAR_RING_SPACING: 100,
-
-        STAR_BASE_NODES_PER_RING: 6,
-
-        CHAIN_MIN_RADIUS: 150,
-
-        PARALLEL_GAP: 80,
-
-        LEAF_NODE_DISTANCE: 200,
-
-        VNODE_RADIUS_MULTIPLIER: 0.2,
-
-        VNODE_IDEAL_LENGTH: 100,
-
-        VNODE_REPULSION: 10000,
-
-        VNODE_SPRING_K: 0.15,
-
-        VNODE_ITERATIONS: 1000,
-
-        VNODE_ANGULAR_STRENGTH: 0.1,
-
-        SPREAD_V_NODES: true,
-
-        SUBSTRUCTURE_LAYOUT: false,
-
-        ENABLE_INITIAL_FORCE_LAYOUT: false,
-
-        STEP_BY_STEP: false,
-
-        LAYOUT_ALGORITHM: 'stress',
-
-        SHOW_ALL_EDGES: true
+        // SUBSTRUCTURE_LAYOUT: false,
+        //
+        // ENABLE_INITIAL_FORCE_LAYOUT: false,
+        //
+        // STEP_BY_STEP: false,
+        //
+        // LAYOUT_ALGORITHM: 'stress',
+        //
+        // SHOW_ALL_EDGES: true
 
     };
 

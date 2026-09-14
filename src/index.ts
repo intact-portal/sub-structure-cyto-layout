@@ -50,20 +50,21 @@ export interface LayoutParameters {
 
     // Step-by-step mode
     STEP_BY_STEP: boolean;
+
+    SHOW_ALL_EDGES: boolean;
 }
 
 // @ts-ignore
 export const DEFAULT_PARAMS: LayoutParameters = {
-    LAYOUT_ALGORITHM:'force',
 
     // Force-directed parameters
     IDEAL_LENGTH: 100,
-    REPULSION: 10000,
+    REPULSION: 300,
     SPRING_K: 0.15,
-    ITERATIONS: 400,
-    ANGULAR_STRENGTH: 0.1,
+    ITERATIONS: 600,
+    ANGULAR_STRENGTH: 0.2,
     CENTER_GRAVITY: 0.01,
-    USE_ANGULAR_FORCE: true,
+    USE_ANGULAR_FORCE: false,
     RANDOMIZE_INITIAL_POSITIONS: false,
 
     // Structure detection parameters
@@ -82,7 +83,8 @@ export const DEFAULT_PARAMS: LayoutParameters = {
     LEAF_NODE_DISTANCE: 200,
 
     // Virtual node parameters
-    VNODE_RADIUS_MULTIPLIER: 0.2, //    VNODE_IDEAL_LENGTH: 100,
+    VNODE_RADIUS_MULTIPLIER: 0.2,
+    //    VNODE_IDEAL_LENGTH: 100,
     VNODE_REPULSION: 10000,
     VNODE_SPRING_K: 0.15,
     VNODE_ITERATIONS: 1000,
@@ -90,11 +92,15 @@ export const DEFAULT_PARAMS: LayoutParameters = {
 
     // Layout control flags
     SPREAD_V_NODES: true,
-    SUBSTRUCTURE_LAYOUT: true,
+    SUBSTRUCTURE_LAYOUT: false,
     ENABLE_INITIAL_FORCE_LAYOUT: false,
 
     // Step-by-step mode
     STEP_BY_STEP: false,
+
+    LAYOUT_ALGORITHM: 'stress',
+
+    SHOW_ALL_EDGES: true
 };
 
 // Step snapshot for debugging and visualization
@@ -297,7 +303,11 @@ function SubstructureLayout(this: any, options: any) {
         SPREAD_V_NODES: this.options.spreadVNodes,
         SUBSTRUCTURE_LAYOUT: this.options.substructureLayout,
         ENABLE_INITIAL_FORCE_LAYOUT: this.options.enableInitialForceLayout,
-        STEP_BY_STEP: this.options.stepByStep
+        STEP_BY_STEP: this.options.stepByStep,
+
+        LAYOUT_ALGORITHM: 'stress',
+
+        SHOW_ALL_EDGES: true
     };
 
     // Merge defaults -> legacy params -> public camelCase options. Undefined
@@ -637,7 +647,7 @@ SubstructureLayout.prototype.identifyStructures = function (nodes: NodeCollectio
     const processedNodeIds = new Set<string>(); // avoid processing nodes more than once
 
     // 2. Find all leaf nodes (Normal type with degree 1)
-    const leafNodes = nodes.filter((n: any) => n.data('structType') === 'Normal' && n.degree() === 1);
+    const leafNodes = nodes.filter((n: any) => n.data('structType') === 'Normal' && n.neighborhood().nodes().length === 1);
 
     let chainId = 0;
     leafNodes.forEach((leaf: any) => {
@@ -654,7 +664,13 @@ SubstructureLayout.prototype.identifyStructures = function (nodes: NodeCollectio
             processedNodeIds.add(currentNode.id());
 
             // Find the next neighbor
-            const neighbors = currentNode.neighborhood().nodes().filter((n: any) => n.data('structType') === 'Normal' && !processedNodeIds.has(n.id()));
+            const neighbors = currentNode
+                .neighborhood('node')
+                .filter((n: any) =>
+                    n.id() !== currentNode.id() &&
+                    n.data('structType') === 'Normal' &&
+                    !processedNodeIds.has(n.id())
+                );
 
             // Chain continuation conditions:
             // 1. There is exactly one unvisited Normal neighbor
@@ -662,9 +678,12 @@ SubstructureLayout.prototype.identifyStructures = function (nodes: NodeCollectio
             if (neighbors.length === 1) {
                 const nextNode = neighbors[0];
 
-                // If the next node is a branching point (degree > 2), treat it as the endpoint of the chain and stop extending
-                if (nextNode.degree() > 2) {
-                    // Optional: should the branching point also be included in the chain? Usually not, to keep the chain independent
+                const nextNodeNeighborCount = nextNode
+                    .neighborhood('node')
+                    .filter((n: any) => n.id() !== nextNode.id())
+                    .length;
+
+                if (nextNodeNeighborCount > 2) {
                     break;
                 }
 
