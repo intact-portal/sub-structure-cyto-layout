@@ -1,0 +1,757 @@
+{
+  "format_version" : "1.0",
+  "generated_by" : "cytoscape-3.10.4",
+  "target_cytoscapejs_version" : "~2.1",
+  "data" : {
+    "shared_name" : "G_2",
+    "name" : "G_2",
+    "SUID" : 817,
+    "__Annotations" : [ ],
+    "selected" : true
+  },
+  "elements" : {
+    "nodes" : [ {
+      "data" : {
+        "id" : "904",
+        "shared_name" : "n27",
+        "name" : "n27",
+        "SUID" : 904,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 470.91252595186234,
+        "y" : 180.79160218685865
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "902",
+        "shared_name" : "n26",
+        "name" : "n26",
+        "SUID" : 902,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 275.03069001436234,
+        "y" : 300.31011109799147
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "900",
+        "shared_name" : "n25",
+        "name" : "n25",
+        "SUID" : 900,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 368.98442536592484,
+        "y" : 345.3992071673274
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "898",
+        "shared_name" : "n24",
+        "name" : "n24",
+        "SUID" : 898,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 464.2050674557686,
+        "y" : 289.0628576800227
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "896",
+        "shared_name" : "n23",
+        "name" : "n23",
+        "SUID" : 896,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -74.33275908231735,
+        "y" : -411.7612695172429
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "894",
+        "shared_name" : "n22",
+        "name" : "n22",
+        "SUID" : 894,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -108.5803729891777,
+        "y" : -520.3160180523992
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "892",
+        "shared_name" : "n21",
+        "name" : "n21",
+        "SUID" : 892,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -217.97413939237595,
+        "y" : -499.7462548688054
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "890",
+        "shared_name" : "n20",
+        "name" : "n20",
+        "SUID" : 890,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -214.92577666044235,
+        "y" : -385.8331384137273
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "888",
+        "shared_name" : "n19",
+        "name" : "n19",
+        "SUID" : 888,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -128.30071371793747,
+        "y" : -306.41193480044603
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "886",
+        "shared_name" : "n18",
+        "name" : "n18",
+        "SUID" : 886,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -125.26980513334274,
+        "y" : -180.06531614810228
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "884",
+        "shared_name" : "n17",
+        "name" : "n17",
+        "SUID" : 884,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 401.5007522702217,
+        "y" : -67.21398252993822
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "882",
+        "shared_name" : "n16",
+        "name" : "n16",
+        "SUID" : 882,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 329.0263565182686,
+        "y" : 22.514128737151623
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "880",
+        "shared_name" : "n15",
+        "name" : "n15",
+        "SUID" : 880,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 361.3174942135811,
+        "y" : 226.34743409603834
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "878",
+        "shared_name" : "n14",
+        "name" : "n14",
+        "SUID" : 878,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 264.3289993405342,
+        "y" : 127.78154116123915
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "876",
+        "shared_name" : "n13",
+        "name" : "n13",
+        "SUID" : 876,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -124.45769613981247,
+        "y" : -50.56452269107103
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "874",
+        "shared_name" : "n12",
+        "name" : "n12",
+        "SUID" : 874,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -18.93437329004135,
+        "y" : -11.233271903363523
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "872",
+        "shared_name" : "n11",
+        "name" : "n11",
+        "SUID" : 872,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 88.34811924293747,
+        "y" : -77.05089717022604
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "870",
+        "shared_name" : "n10",
+        "name" : "n10",
+        "SUID" : 870,
+        "selected" : false
+      },
+      "position" : {
+        "x" : 127.54393464326859,
+        "y" : 106.18906503170729
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "868",
+        "shared_name" : "n9",
+        "name" : "n9",
+        "SUID" : 868,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -148.69744032621384,
+        "y" : 72.64686875790358
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "866",
+        "shared_name" : "n8",
+        "name" : "n8",
+        "SUID" : 866,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -0.4999801516532898,
+        "y" : 70.98402696102858
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "864",
+        "shared_name" : "n7",
+        "name" : "n7",
+        "SUID" : 864,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -504.0474960207939,
+        "y" : 115.82329183071852
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "862",
+        "shared_name" : "n6",
+        "name" : "n6",
+        "SUID" : 862,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -535.6829940676689,
+        "y" : 206.1770849749446
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "860",
+        "shared_name" : "n5",
+        "name" : "n5",
+        "SUID" : 860,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -409.3324996829033,
+        "y" : 79.0040770098567
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "858",
+        "shared_name" : "n4",
+        "name" : "n4",
+        "SUID" : 858,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -319.18615263700485,
+        "y" : 263.13173585385084
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "856",
+        "shared_name" : "n3",
+        "name" : "n3",
+        "SUID" : 856,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -411.90287321805954,
+        "y" : 195.69343476742506
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "854",
+        "shared_name" : "n2",
+        "name" : "n2",
+        "SUID" : 854,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -400.6286727786064,
+        "y" : 316.6065283343196
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "852",
+        "shared_name" : "n1",
+        "name" : "n1",
+        "SUID" : 852,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -493.43635100126266,
+        "y" : 289.33135133236647
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "850",
+        "shared_name" : "n0",
+        "name" : "n0",
+        "SUID" : 850,
+        "selected" : false
+      },
+      "position" : {
+        "x" : -277.8123885989189,
+        "y" : 136.13329511135817
+      },
+      "selected" : false
+    } ],
+    "edges" : [ {
+      "data" : {
+        "id" : "956",
+        "source" : "896",
+        "target" : "888",
+        "shared_name" : "n23 (-) n19",
+        "name" : "n23 (-) n19",
+        "interaction" : "-",
+        "SUID" : 956,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "954",
+        "source" : "894",
+        "target" : "896",
+        "shared_name" : "n22 (-) n23",
+        "name" : "n22 (-) n23",
+        "interaction" : "-",
+        "SUID" : 954,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "952",
+        "source" : "892",
+        "target" : "894",
+        "shared_name" : "n21 (-) n22",
+        "name" : "n21 (-) n22",
+        "interaction" : "-",
+        "SUID" : 952,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "950",
+        "source" : "890",
+        "target" : "892",
+        "shared_name" : "n20 (-) n21",
+        "name" : "n20 (-) n21",
+        "interaction" : "-",
+        "SUID" : 950,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "948",
+        "source" : "888",
+        "target" : "890",
+        "shared_name" : "n19 (-) n20",
+        "name" : "n19 (-) n20",
+        "interaction" : "-",
+        "SUID" : 948,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "946",
+        "source" : "886",
+        "target" : "888",
+        "shared_name" : "n18 (-) n19",
+        "name" : "n18 (-) n19",
+        "interaction" : "-",
+        "SUID" : 946,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "938",
+        "source" : "882",
+        "target" : "884",
+        "shared_name" : "n16 (-) n17",
+        "name" : "n16 (-) n17",
+        "interaction" : "-",
+        "SUID" : 938,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "964",
+        "source" : "880",
+        "target" : "904",
+        "shared_name" : "n15 (-) n27",
+        "name" : "n15 (-) n27",
+        "interaction" : "-",
+        "SUID" : 964,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "962",
+        "source" : "880",
+        "target" : "902",
+        "shared_name" : "n15 (-) n26",
+        "name" : "n15 (-) n26",
+        "interaction" : "-",
+        "SUID" : 962,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "960",
+        "source" : "880",
+        "target" : "900",
+        "shared_name" : "n15 (-) n25",
+        "name" : "n15 (-) n25",
+        "interaction" : "-",
+        "SUID" : 960,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "958",
+        "source" : "880",
+        "target" : "898",
+        "shared_name" : "n15 (-) n24",
+        "name" : "n15 (-) n24",
+        "interaction" : "-",
+        "SUID" : 958,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "936",
+        "source" : "878",
+        "target" : "882",
+        "shared_name" : "n14 (-) n16",
+        "name" : "n14 (-) n16",
+        "interaction" : "-",
+        "SUID" : 936,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "934",
+        "source" : "878",
+        "target" : "880",
+        "shared_name" : "n14 (-) n15",
+        "name" : "n14 (-) n15",
+        "interaction" : "-",
+        "SUID" : 934,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "944",
+        "source" : "876",
+        "target" : "886",
+        "shared_name" : "n13 (-) n18",
+        "name" : "n13 (-) n18",
+        "interaction" : "-",
+        "SUID" : 944,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "930",
+        "source" : "876",
+        "target" : "868",
+        "shared_name" : "n13 (-) n9",
+        "name" : "n13 (-) n9",
+        "interaction" : "-",
+        "SUID" : 930,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "928",
+        "source" : "874",
+        "target" : "876",
+        "shared_name" : "n12 (-) n13",
+        "name" : "n12 (-) n13",
+        "interaction" : "-",
+        "SUID" : 928,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "926",
+        "source" : "872",
+        "target" : "874",
+        "shared_name" : "n11 (-) n12",
+        "name" : "n11 (-) n12",
+        "interaction" : "-",
+        "SUID" : 926,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "942",
+        "source" : "870",
+        "target" : "866",
+        "shared_name" : "n10 (-) n8",
+        "name" : "n10 (-) n8",
+        "interaction" : "-",
+        "SUID" : 942,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "940",
+        "source" : "870",
+        "target" : "878",
+        "shared_name" : "n10 (-) n14",
+        "name" : "n10 (-) n14",
+        "interaction" : "-",
+        "SUID" : 940,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "924",
+        "source" : "870",
+        "target" : "872",
+        "shared_name" : "n10 (-) n11",
+        "name" : "n10 (-) n11",
+        "interaction" : "-",
+        "SUID" : 924,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "932",
+        "source" : "868",
+        "target" : "850",
+        "shared_name" : "n9 (-) n0",
+        "name" : "n9 (-) n0",
+        "interaction" : "-",
+        "SUID" : 932,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "922",
+        "source" : "866",
+        "target" : "868",
+        "shared_name" : "n8 (-) n9",
+        "name" : "n8 (-) n9",
+        "interaction" : "-",
+        "SUID" : 922,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "920",
+        "source" : "856",
+        "target" : "854",
+        "shared_name" : "n3 (-) n2",
+        "name" : "n3 (-) n2",
+        "interaction" : "-",
+        "SUID" : 920,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "918",
+        "source" : "856",
+        "target" : "852",
+        "shared_name" : "n3 (-) n1",
+        "name" : "n3 (-) n1",
+        "interaction" : "-",
+        "SUID" : 918,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "916",
+        "source" : "856",
+        "target" : "860",
+        "shared_name" : "n3 (-) n5",
+        "name" : "n3 (-) n5",
+        "interaction" : "-",
+        "SUID" : 916,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "914",
+        "source" : "856",
+        "target" : "864",
+        "shared_name" : "n3 (-) n7",
+        "name" : "n3 (-) n7",
+        "interaction" : "-",
+        "SUID" : 914,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "912",
+        "source" : "856",
+        "target" : "858",
+        "shared_name" : "n3 (-) n4",
+        "name" : "n3 (-) n4",
+        "interaction" : "-",
+        "SUID" : 912,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "910",
+        "source" : "856",
+        "target" : "862",
+        "shared_name" : "n3 (-) n6",
+        "name" : "n3 (-) n6",
+        "interaction" : "-",
+        "SUID" : 910,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "908",
+        "source" : "856",
+        "target" : "850",
+        "shared_name" : "n3 (-) n0",
+        "name" : "n3 (-) n0",
+        "interaction" : "-",
+        "SUID" : 908,
+        "shared_interaction" : "-",
+        "selected" : false
+      },
+      "selected" : false
+    } ]
+  }
+}
