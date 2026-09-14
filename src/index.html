@@ -626,7 +626,6 @@ font-size:11px;
 
     </div>
 
-
     <div class="btn-group">
 
       <button class="btn" onclick="applyLayout()">
@@ -1605,6 +1604,7 @@ font-size:11px;
     // ============================================================
 
     window.applyLayout = async function () {
+        console.log('!!!components:', cy.elements().components().length);
 
         if (!cy) {
             return;
@@ -1615,7 +1615,7 @@ font-size:11px;
         // Randomize initial positions
         // ==========================================================
 
-        if (1) {
+        if (0) {
 
             const spread = 500;
 
@@ -1640,9 +1640,7 @@ font-size:11px;
         // ==========================================================
 
         if (!initialPositions) {
-
             saveInitialPositions();
-
         }
 
 
@@ -1678,7 +1676,6 @@ font-size:11px;
             if (currentParams.STEP_BY_STEP && currentLayout.steps && currentLayout.steps.length > 0) {
 
                 document.getElementById('firstStepBtn').disabled = false;
-
 
                 document.getElementById('fasterNextStepBtn').disabled = false;
 
