@@ -1,7 +1,6 @@
 /tmp
 /out-tsc
 /dist/
-package-lock.json
 .idea/
 
 
@@ -17,8 +16,6 @@ package-lock.json
 
 # Node modules and dependency files
 /node_modules/
-/package-lock.json
-/yarn.lock
 
 # Environment files
 /.env
@@ -56,3 +53,6 @@ yarn-error.log*
 public/data/6_36115835.cyjs
 public/data/*.cyjs
 *.cyjs
+
+# packed tarballs
+intact-ebi-cytoscape-lumina-*.*.*.tgz

@@ -1,20 +1,36 @@
 {
-  "name": "cytoscape-layout-plugin",
-  "version": "1.0.0",
-  "description": "",
+  "name": "@intact-ebi/cytoscape-lumina",
+  "version": "0.1.0",
+  "description": "LUMINA: Layout for Uncovering Motifs In Network Architecture. Structure-aware layout extension for Cytoscape.js",
   "type": "module",
   "main": "dist/index.js",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
-    "dist"
+      "dist/index.js",
+      "dist/index.d.ts"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/intact-portal/sub-structure-cyto-layout.git"
+  },
+  "homepage": "https://github.com/intact-portal/sub-structure-cyto-layout#readme",
+  "keywords": [
+    "cytoscape",
+    "cytoscape.js",
+    "graph",
+    "layout"
   ],
   "scripts": {
     "build": "tsc && cp src/favicon.ico dist/favicon.ico && cp src/index.html dist/index.html && cp node_modules/cytoscape/dist/cytoscape.min.js dist/ && cp -r data dist/data && touch dist/.nojekyll",
     "dev": "npm run build && concurrently \"tsc --watch\" \"node watch.js\" \"http-server dist -p 8080 -c-1\"",
-    "deploy": "./deploy.sh",
-    "build:lib": "tsc",
+    "deploy-gh-page": "./deploy-gh-page.sh",
+    "clean:lib": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\"",
+    "build:lib": "npm run clean:lib && tsc",
     "local-publish": "npm run build:lib && yalc push"
+  },
+  "peerDependencies": {
+      "cytoscape": "^3.33.0"
   },
   "devDependencies": {
     "concurrently": "^9.2.4",
@@ -24,7 +40,6 @@
     "typescript": "^5.9.3",
     "vite-plugin-singlefile": "^2.3.3"
   },
-  "keywords": [],
   "author": "",
   "license": "ISC"
 }
