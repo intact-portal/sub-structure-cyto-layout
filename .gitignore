@@ -1,22 +1,16 @@
-# 依赖包
 node_modules/
 
-# 编译产物 (已在 src/ 中保留源码，构建结果无需提交)
 dist/
 
-# 依赖锁定文件 (如使用 yarn，可以忽略 yarn.lock，但建议保留 package-lock.json)
 yarn.lock
 
-# 临时代码备份文件 (开发过程中的草稿)
 src/*_save*
 src/*_[0-9].*
 
-# 编辑器与操作系统临时文件
 .DS_Store
 .idea/
 .vscode/
 
-# 运行日志与缓存
 *.log
 .cache/
 *.tsbuildinfo
