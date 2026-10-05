@@ -27,11 +27,19 @@ Written in TypeScript. Registered under the layout name `lumina` (the legacy nam
 6. Expand each virtual node into its real nodes using the substructure-specific arrangement.
 7. Rotate each component to its minimum-area bounding box and pack all components onto the canvas.
 
+## Installation
+
+```bash
+npm install cytoscape cytoscape-lumina
+```
+
+`cytoscape` (^3) is a peer dependency.
+
 ## Usage
 
 ```ts
 import cytoscape from 'cytoscape';
-import registerLumina from './lumina-layout';
+import registerLumina from 'cytoscape-lumina';
 
 registerLumina(cytoscape);
 

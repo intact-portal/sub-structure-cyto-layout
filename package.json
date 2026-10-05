@@ -1,7 +1,7 @@
 {
-  "name": "cytoscape-layout-plugin",
+  "name": "cytoscape-lumina",
   "version": "1.0.0",
-  "description": "",
+  "description": "LUMINA: a structure-aware Cytoscape.js layout that detects cycles, chains, stars and parallel groups and lays them out with force-directed or stress-majorization solvers.",
   "type": "module",
   "main": "dist/index.js",
   "module": "dist/index.js",
@@ -10,11 +10,12 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsc && cp src/favicon.ico dist/favicon.ico && cp src/index.html dist/index.html && cp node_modules/cytoscape/dist/cytoscape.min.js dist/ && cp -r data dist/data && touch dist/.nojekyll",
-    "dev": "npm run build && concurrently \"tsc --watch\" \"node watch.js\" \"http-server dist -p 8080 -c-1\"",
+    "build": "tsc && cp src/favicon.ico dist/favicon.ico && cp src/index.html dist/index.html && cp node_modules/cytoscape/dist/cytoscape.min.js dist/ && if [ -d data ]; then cp -r data dist/data; fi && touch dist/.nojekyll",
+    "dev": "npm run build && concurrently \"tsc --watch\" \"node watch.cjs\" \"http-server dist -p 8080 -c-1\"",
     "deploy": "./deploy.sh",
     "build:lib": "tsc",
-    "local-publish": "npm run build:lib && yalc push"
+    "local-publish": "npm run build:lib && yalc push",
+    "prepublishOnly": "npm run build:lib"
   },
   "devDependencies": {
     "concurrently": "^9.2.4",
@@ -24,7 +25,25 @@
     "typescript": "^5.9.3",
     "vite-plugin-singlefile": "^2.3.3"
   },
-  "keywords": [],
+  "keywords": [
+    "cytoscape",
+    "cytoscape-extension",
+    "layout",
+    "graph",
+    "network",
+    "lumina"
+  ],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/intact-portal/sub-structure-cyto-layout.git"
+  },
+  "homepage": "https://github.com/intact-portal/sub-structure-cyto-layout#readme",
+  "bugs": {
+    "url": "https://github.com/intact-portal/sub-structure-cyto-layout/issues"
+  },
+  "peerDependencies": {
+    "cytoscape": "^3.0.0"
+  }
 }
