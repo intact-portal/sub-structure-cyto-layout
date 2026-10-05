@@ -2,106 +2,241 @@ import cytoscape from 'cytoscape';
 import type {
     EdgeCollection, EdgeSingular, NodeCollection, NodeSingular
 } from 'cytoscape';
+// ============================================================================
+// layout-params.ts
+// Parameters for the substructure layout, split by who uses them:
+//   1. CommonParams  - shared by both 'force' and 'stress'
+//   2. ForceParams   - only used when LAYOUT_ALGORITHM === 'force'   (params.force)
+//   3. StressParams  - only used when LAYOUT_ALGORITHM === 'stress'  (params.stress)
+// ============================================================================
 
-export type LayoutAlgorithm =
-    | 'force'
-    | 'stress';
+export type LayoutAlgorithm = 'force' | 'stress';
 
-// Centralized Layout Parameters
-export interface LayoutParameters {
+/** Parameters shared by every algorithm */
+export interface CommonParams {
     LAYOUT_ALGORITHM: LayoutAlgorithm;
 
-    // Force-directed parameters
+    // ---- Virtual-node solver (used by BOTH force and stress) ----
+    /** Ideal surface-to-surface gap between connected virtual nodes
+     *  (force: spring rest length; stress: base of the target distance;
+     *   both: radius of the initial radial placement of leaf vnodes) */
     IDEAL_LENGTH: number;
-    REPULSION: number;
-    SPRING_K: number;
+    /** Max iterations of the main solver loop */
     ITERATIONS: number;
-    ANGULAR_STRENGTH: number;
-    CENTER_GRAVITY: number;
-    USE_ANGULAR_FORCE: boolean;
-    RANDOMIZE_INITIAL_POSITIONS: boolean;
+    /** Stop early when the max movement of any vnode is below this (px) */
+    CONVERGENCE_THRESHOLD: number;
+    /** Extra gap enforced between vnodes in the anti-collision pass.
+     *  null => use IDEAL_LENGTH */
+    COLLISION_PADDING: number | null;
+    /** Safety cap for the anti-collision loop */
+    MAX_OVERLAP_ITERATIONS: number;
 
-    // Structure detection parameters
+    // ---- Structure detection ----
     MIN_STAR_LEAVES: number;
     MIN_CYCLE_LENGTH: number;
     MAX_CYCLE_LENGTH: number;
     MIN_CHAIN_LENGTH: number;
     MIN_PARALLEL_NEIGHBORS: number;
 
-    // Layout spacing parameters
+    // ---- Substructure spacing (independent of the vnode solver) ----
     CYCLE_NODE_SPACING: number;
     STAR_RING_SPACING: number;
     STAR_BASE_NODES_PER_RING: number;
     CHAIN_MIN_RADIUS: number;
-    PARALLEL_GAP: number;
     LEAF_NODE_DISTANCE: number;
 
-    // Virtual node parameters
-    VNODE_RADIUS_MULTIPLIER: number;
-    VNODE_REPULSION: number;
-    VNODE_SPRING_K: number;
-    VNODE_ITERATIONS: number;
-    VNODE_ANGULAR_STRENGTH: number;
-
-    // Layout control flags
+    // ---- Control flags ----
+    RANDOMIZE_INITIAL_POSITIONS: boolean;
     SPREAD_V_NODES: boolean;
     SUBSTRUCTURE_LAYOUT: boolean;
-    ENABLE_INITIAL_FORCE_LAYOUT: boolean;
-
-    // Step-by-step mode
     STEP_BY_STEP: boolean;
 
-    SHOW_ALL_EDGES: boolean;
 }
 
-// @ts-ignore
+/** Only for the 'force' algorithm */
+export interface ForceParams {
+    /** Node-node repulsion strength */
+    REPULSION: number;
+    /** Spring stiffness of edges */
+    SPRING_K: number;
+    /** Overlapping vnodes repel REPULSION * this factor harder */
+    OVERLAP_REPULSION_FACTOR: number;
+    /** Simulated-annealing cooling: cooling = (1 - iter/ITERATIONS) ^ this */
+    COOLING_EXPONENT: number;
+
+    /** Angular force that spreads leaf vnodes evenly around a hub */
+    USE_ANGULAR_FORCE: boolean;
+    ANGULAR_STRENGTH: number;
+    ANGULAR_MAX_FORCE: number;
+}
+
+/** Only for the 'stress' algorithm */
+export interface StressParams {
+    /** weight w_ij = 1 / d_ij ^ WEIGHT_EXPONENT (2 = classic stress majorization) */
+    WEIGHT_EXPONENT: number;
+}
+
+export interface LayoutParameters extends CommonParams {
+    force: ForceParams;
+    stress: StressParams;
+}
+
 export const DEFAULT_PARAMS: LayoutParameters = {
+    LAYOUT_ALGORITHM: 'stress',
 
-    // Force-directed parameters
+    // shared solver
     IDEAL_LENGTH: 100,
-    REPULSION: 300,
-    SPRING_K: 0.15,
     ITERATIONS: 600,
-    ANGULAR_STRENGTH: 0.2,
-    CENTER_GRAVITY: 0.01,
-    USE_ANGULAR_FORCE: false,
-    RANDOMIZE_INITIAL_POSITIONS: false,
+    CONVERGENCE_THRESHOLD: 0.5,
+    COLLISION_PADDING: null,
+    MAX_OVERLAP_ITERATIONS: 300,
 
-    // Structure detection parameters
+    // structure detection
     MIN_STAR_LEAVES: 3,
     MIN_CYCLE_LENGTH: 3,
     MAX_CYCLE_LENGTH: 30,
     MIN_CHAIN_LENGTH: 2,
     MIN_PARALLEL_NEIGHBORS: 2,
 
-    // Layout spacing parameters
+    // substructure spacing
     CYCLE_NODE_SPACING: 100,
     STAR_RING_SPACING: 100,
     STAR_BASE_NODES_PER_RING: 6,
     CHAIN_MIN_RADIUS: 150,
-    PARALLEL_GAP: 80,
     LEAF_NODE_DISTANCE: 200,
 
-    // Virtual node parameters
-    VNODE_RADIUS_MULTIPLIER: 0.2,
-    //    VNODE_IDEAL_LENGTH: 100,
-    VNODE_REPULSION: 10000,
-    VNODE_SPRING_K: 0.15,
-    VNODE_ITERATIONS: 1000,
-    VNODE_ANGULAR_STRENGTH: 0.1,
-
-    // Layout control flags
+    // flags
+    RANDOMIZE_INITIAL_POSITIONS: false,
     SPREAD_V_NODES: true,
     SUBSTRUCTURE_LAYOUT: false,
-    ENABLE_INITIAL_FORCE_LAYOUT: false,
-
-    // Step-by-step mode
     STEP_BY_STEP: false,
 
-    LAYOUT_ALGORITHM: 'stress',
+    force: {
+        REPULSION: 300,
+        SPRING_K: 0.15,
+        OVERLAP_REPULSION_FACTOR: 5,
+        COOLING_EXPONENT: 2,
+        USE_ANGULAR_FORCE: false,
+        ANGULAR_STRENGTH: 0.2,
+        ANGULAR_MAX_FORCE: 2.0
+    },
 
-    SHOW_ALL_EDGES: true
+    stress: {
+        WEIGHT_EXPONENT: 2
+    }
 };
+
+// ----------------------------------------------------------------------------
+// Public (Cytoscape camelCase) option names -> internal names
+// ----------------------------------------------------------------------------
+
+const COMMON_KEYS: Record<string, keyof CommonParams> = {
+    layoutAlgorithm: 'LAYOUT_ALGORITHM',
+    idealLength: 'IDEAL_LENGTH',
+    iterations: 'ITERATIONS',
+    convergenceThreshold: 'CONVERGENCE_THRESHOLD',
+    collisionPadding: 'COLLISION_PADDING',
+    maxOverlapIterations: 'MAX_OVERLAP_ITERATIONS',
+
+    minStarLeaves: 'MIN_STAR_LEAVES',
+    minCycleLength: 'MIN_CYCLE_LENGTH',
+    maxCycleLength: 'MAX_CYCLE_LENGTH',
+    minChainLength: 'MIN_CHAIN_LENGTH',
+    minParallelNeighbors: 'MIN_PARALLEL_NEIGHBORS',
+
+    cycleNodeSpacing: 'CYCLE_NODE_SPACING',
+    starRingSpacing: 'STAR_RING_SPACING',
+    starBaseNodesPerRing: 'STAR_BASE_NODES_PER_RING',
+    chainMinRadius: 'CHAIN_MIN_RADIUS',
+    leafNodeDistance: 'LEAF_NODE_DISTANCE',
+
+    randomizeInitialPositions: 'RANDOMIZE_INITIAL_POSITIONS',
+    spreadVNodes: 'SPREAD_V_NODES',
+    substructureLayout: 'SUBSTRUCTURE_LAYOUT',
+    stepByStep: 'STEP_BY_STEP',
+
+};
+
+const FORCE_KEYS: Record<string, keyof ForceParams> = {
+    repulsion: 'REPULSION',
+    springK: 'SPRING_K',
+    overlapRepulsionFactor: 'OVERLAP_REPULSION_FACTOR',
+    coolingExponent: 'COOLING_EXPONENT',
+    useAngularForce: 'USE_ANGULAR_FORCE',
+    angularStrength: 'ANGULAR_STRENGTH',
+    angularMaxForce: 'ANGULAR_MAX_FORCE'
+};
+
+const STRESS_KEYS: Record<string, keyof StressParams> = {
+    weightExponent: 'WEIGHT_EXPONENT'
+};
+
+function pick<T>(src: any, map: Record<string, keyof T>): Partial<T> {
+    const out: any = {};
+    if (!src) return out;
+    for (const pub of Object.keys(map)) {
+        if (src[pub] !== undefined) out[map[pub]] = src[pub];
+    }
+    return out;
+}
+
+/**
+ * Build the final parameters from Cytoscape layout options.
+ *
+ * cy.layout({
+ *   name: 'substructure-layout',
+ *   layoutAlgorithm: 'force',
+ *   idealLength: 100,              // shared
+ *   iterations: 600,               // shared
+ *   force:  { repulsion: 300, springK: 0.15, useAngularForce: true },
+ *   stress: { weightExponent: 2 }
+ * })
+ *
+ * Backward compatibility: the old flat force options (repulsion, springK,
+ * angularStrength, useAngularForce) and the legacy `params` object (flat,
+ * upper-case) are still accepted. Nested `force` / `stress` take priority.
+ */
+export function resolveParams(options: any): LayoutParameters {
+    options = options || {};
+    const legacy = options.params || {};
+
+    // flat legacy force options at top level
+    const legacyForce = pick<ForceParams>(options, FORCE_KEYS);
+
+    // legacy upper-case flat `params`: route each key to the right group
+    const legacyCommon: any = {};
+    const legacyForceUpper: any = {};
+    const legacyStressUpper: any = {};
+    Object.keys(legacy).forEach((k) => {
+        if (k in DEFAULT_PARAMS.force) legacyForceUpper[k] = legacy[k];
+        else if (k in DEFAULT_PARAMS.stress) legacyStressUpper[k] = legacy[k];
+        else if (k !== 'force' && k !== 'stress') legacyCommon[k] = legacy[k];
+    });
+
+    const params: LayoutParameters = {
+        ...DEFAULT_PARAMS,
+        ...legacyCommon,
+        ...pick<CommonParams>(options, COMMON_KEYS),
+        force: {
+            ...DEFAULT_PARAMS.force,
+            ...legacyForceUpper,
+            ...(legacy.force || {}),
+            ...legacyForce,
+            ...pick<ForceParams>(options.force, FORCE_KEYS)
+        },
+        stress: {
+            ...DEFAULT_PARAMS.stress,
+            ...legacyStressUpper,
+            ...(legacy.stress || {}),
+            ...pick<StressParams>(options.stress, STRESS_KEYS)
+        }
+    };
+
+    if (params.COLLISION_PADDING == null) {
+        params.COLLISION_PADDING = params.IDEAL_LENGTH;
+    }
+    return params;
+}
 
 // Step snapshot for debugging and visualization
 export interface LayoutStep {
@@ -203,11 +338,6 @@ class VEdge {
     }
 }
 
-// export default function register(cytoscape: any) {
-//     if (!cytoscape) return;
-//     cytoscape('layout', 'SubstructureLayout', SubstructureLayout);
-// }
-
 /**
  * Register this layout as a Cytoscape.js layout extension.
  *
@@ -219,11 +349,11 @@ class VEdge {
  *
  *   cy.layout({
  *       name: 'substructure-layout',
- *       layoutAlgorithm: 'force',
- *       idealLength: 100,
- *       repulsion: 10000,
- *       springK: 0.15,
- *       iterations: 400
+ *       layoutAlgorithm: 'force',          // or 'stress'
+ *       idealLength: 100,                  // shared
+ *       iterations: 600,                   // shared
+ *       force:  { repulsion: 300, springK: 0.15 },   // force only
+ *       stress: { weightExponent: 2 }                // stress only
  *   }).run();
  */
 
@@ -266,64 +396,10 @@ function SubstructureLayout(this: any, options: any) {
         throw new Error('cytoscape-substructure-layout: options.cy is required');
     }
 
-    // Public Cytoscape.js options use camelCase. The original algorithm uses
-    // uppercase internal parameters, so normalize the public API here.
-    // `params` is still accepted for backward compatibility with the old demo.
-    const p = this.options.params || {};
-    const publicParams = {
-
-        IDEAL_LENGTH: this.options.idealLength,
-        REPULSION: this.options.repulsion,
-        SPRING_K: this.options.springK,
-        ITERATIONS: this.options.iterations,
-        ANGULAR_STRENGTH: this.options.angularStrength,
-        CENTER_GRAVITY: this.options.centerGravity,
-        USE_ANGULAR_FORCE: this.options.useAngularForce,
-        RANDOMIZE_INITIAL_POSITIONS: this.options.randomizeInitialPositions,
-
-        MIN_STAR_LEAVES: this.options.minStarLeaves,
-        MIN_CYCLE_LENGTH: this.options.minCycleLength,
-        MAX_CYCLE_LENGTH: this.options.maxCycleLength,
-        MIN_CHAIN_LENGTH: this.options.minChainLength,
-        MIN_PARALLEL_NEIGHBORS: this.options.minParallelNeighbors,
-
-        CYCLE_NODE_SPACING: this.options.cycleNodeSpacing,
-        STAR_RING_SPACING: this.options.starRingSpacing,
-        STAR_BASE_NODES_PER_RING: this.options.starBaseNodesPerRing,
-        CHAIN_MIN_RADIUS: this.options.chainMinRadius,
-        PARALLEL_GAP: this.options.parallelGap,
-        LEAF_NODE_DISTANCE: this.options.leafNodeDistance,
-
-        VNODE_RADIUS_MULTIPLIER: this.options.vnodeRadiusMultiplier,
-        VNODE_REPULSION: this.options.vnodeRepulsion,
-        VNODE_SPRING_K: this.options.vnodeSpringK,
-        VNODE_ITERATIONS: this.options.vnodeIterations,
-        VNODE_ANGULAR_STRENGTH: this.options.vnodeAngularStrength,
-
-        SPREAD_V_NODES: this.options.spreadVNodes,
-        SUBSTRUCTURE_LAYOUT: this.options.substructureLayout,
-        ENABLE_INITIAL_FORCE_LAYOUT: this.options.enableInitialForceLayout,
-        STEP_BY_STEP: this.options.stepByStep,
-
-        // LAYOUT_ALGORITHM: 'stress',
-
-        // SHOW_ALL_EDGES: true
-    };
-
-    // Merge defaults -> legacy params -> public camelCase options. Undefined
-    // public values are ignored so defaults are preserved.
-    const camelToInternal: Record<string, any> = {};
-    Object.keys(publicParams).forEach((key) => {
-        const value = publicParams[key as keyof typeof publicParams];
-
-        if (value !== undefined) {
-            camelToInternal[key] = value;
-        }
-    });
-
-    this.params = {
-        ...DEFAULT_PARAMS, ...p, ...camelToInternal
-    };
+    // Public Cytoscape.js options use camelCase; shared options are flat,
+    // algorithm-specific ones live under `force: {...}` / `stress: {...}`.
+    // See the parameter section at the top of this file. The legacy `params` object is still accepted.
+    this.params = resolveParams(this.options);
 
     // Instance-specific arrays instead of global
     this.vnodes = [];
@@ -419,10 +495,7 @@ function layoutRectangular(nodes: NodeSingular[], center: { x: number, y: number
         return;
     }
 
-    // ============================================================
     // 1. Determine matrix dimensions
-    // ============================================================
-
     let finalCols: number;
 
     if (cols !== undefined && cols > 0) {
@@ -440,13 +513,9 @@ function layoutRectangular(nodes: NodeSingular[], center: { x: number, y: number
         rows = n;
     }
 
-    // ============================================================
     // 2. Calculate the two unit direction vectors
-    //
-    // uLong  = long-side direction = dirVector
-    // uShort = short-side direction = perpendicular to dirVector
-    // ============================================================
-
+    //    uLong  = long-side direction = dirVector
+    //    uShort = short-side direction = perpendicular to dirVector
     const magnitude = Math.sqrt(dirVector.x * dirVector.x + dirVector.y * dirVector.y);
 
     const safeMagnitude = Math.max(magnitude, 0.000001);
@@ -459,10 +528,7 @@ function layoutRectangular(nodes: NodeSingular[], center: { x: number, y: number
         x: -uLong.y, y: uLong.x
     };
 
-    // ============================================================
     // 3. Iterate over all Nodes
-    // ============================================================
-
     nodes.forEach((node, i) => {
 
         // Row containing the current node
@@ -471,42 +537,22 @@ function layoutRectangular(nodes: NodeSingular[], center: { x: number, y: number
         // Column containing the current node
         const col = i % finalCols;
 
-        // --------------------------------------------------------
         // Actual number of nodes in the current row
-        // --------------------------------------------------------
-
         const isLastRow = row === rows - 1;
 
         const nodesInThisRow = isLastRow ? (n % finalCols || finalCols) : finalCols;
 
-        // ========================================================
-        // 4. Position along the long-side direction
-        // Arrange symmetrically around center
-        // ========================================================
-
+        // 4. Position along the long-side direction, symmetric around center
         const longWidth = (nodesInThisRow - 1) * colSpacing;
 
         const offsetLong = col * colSpacing - longWidth / 2;
 
-        // ========================================================
-        // 5. Position along the short-side direction
-        //
-        // Center each row as a whole
-        // ========================================================
-
+        // 5. Position along the short-side direction, center each row as a whole
         const totalShortHeight = (rows - 1) * rowSpacing;
 
         const offsetShort = row * rowSpacing - totalShortHeight / 2;
 
-        // ========================================================
-        // 6. Calculate the final coordinates
-        //
-        // position =
-        //      center
-        //    + offset along the long-side direction
-        //    + offset along the short-side direction
-        // ========================================================
-
+        // 6. Final coordinates
         const x = center.x + offsetLong * uLong.x + offsetShort * uShort.x;
 
         const y = center.y + offsetLong * uLong.y + offsetShort * uShort.y;
@@ -566,9 +612,9 @@ SubstructureLayout.prototype.identifyStructures = function (nodes: NodeCollectio
 
                         if (vIdx > startIndex && !path.includes(vId)) {
                             // define circle has less than 30 nodes, this is for large graph efficiency
-                            // if(path.length < 5) {
+                            if(path.length <  params.MAX_CYCLE_LENGTH) {
                             findCycles(v, u, [...path, vId]);
-                            // }
+                            }
                         }
                     }
                 }
@@ -857,10 +903,7 @@ SubstructureLayout.prototype.run = function () {
 
     this.stopped = false;
 
-    // ============================================================
     // Clean up compound parents generated by previous layout run
-    // ============================================================
-
     const oldParents = this.cy.nodes('.substructure-group');
 
     oldParents.forEach((parent: NodeSingular) => {
@@ -1061,10 +1104,7 @@ SubstructureLayout.prototype.run = function () {
         //construct virtual edges for virtual nodes
         if (1) {
 
-            // --------------------------------------------------------
             // 1. Build mapping: real Node ID -> VNode
-            // --------------------------------------------------------
-
             const nodeToVNode = new Map<string, VNode>();
 
             for (const vnode of this.vnodes) {
@@ -1073,13 +1113,8 @@ SubstructureLayout.prototype.run = function () {
 
                 for (const node of vnode.nodes) {
 
-                    // Should Star-Member participate in VNode edge construction?
-                    // Keep this consistent with the original logic:
-                    //
-                    // In the original code, when actually creating edges:
-                    // if (n1.data("structType") != 'Star-Member')
-                    //
-                    // Therefore, Star-Member can be ignored here.
+                    // Star-Member does not participate in VNode edge construction
+                    // (consistent with the original logic)
                     if (node.data("structType") === "Star-Member") {
                         continue;
                     }
@@ -1088,19 +1123,8 @@ SubstructureLayout.prototype.run = function () {
                 }
             }
 
-            // --------------------------------------------------------
-            // 2. Traverse the real Edges
-            //
-            // Determine directly:
-            //
-            // realNode1 -> VNode1
-            // realNode2 -> VNode2
-            //
-            // Then:
-            //
-            // VNode1 <-> VNode2 : connectionCount++
-            // --------------------------------------------------------
-
+            // 2. Traverse the real Edges:
+            //    realNode1 -> VNode1, realNode2 -> VNode2, then VNode1 <-> VNode2 : connectionCount++
             const connectionMap = new Map<string, {
                 source: VNode; target: VNode; count: number;
             }>();
@@ -1122,32 +1146,12 @@ SubstructureLayout.prototype.run = function () {
                     continue;
                 }
 
-                // ----------------------------------------------------
-                // Edge is inside the same VNode
-                //
-                // Original logic:
-                //
-                // count == 2
-                //
-                // This means both ends of the edge are in the same VNode,
-                // so no virtual edge is created.
-                // ----------------------------------------------------
-
+                // Edge is inside the same VNode: no virtual edge is created
                 if (sourceVNode === targetVNode) {
                     continue;
                 }
 
-                // ----------------------------------------------------
-                // To ensure that:
-                //
-                // A -> B
-                // B -> A
-                //
                 // A -> B and B -> A are treated as the same VEdge
-                //
-                // Use the VNode index / ID to build a unique key
-                // ----------------------------------------------------
-
                 const id1 = sourceVNode.id;
                 const id2 = targetVNode.id;
 
@@ -1171,10 +1175,7 @@ SubstructureLayout.prototype.run = function () {
                 }
             }
 
-            // --------------------------------------------------------
             // 3. Create VEdges based on connectionMap
-            // --------------------------------------------------------
-
             connectionMap.forEach(({
                                        source, target, count
                                    }) => {
@@ -1272,16 +1273,16 @@ SubstructureLayout.prototype.run = function () {
         this.captureStep('Virtual Nodes Positioned', 'Virtual node centers and radii calculated', null);
 
         //******************** virtual node force layout ************************
+        // Uses: shared params (IDEAL_LENGTH, ITERATIONS, CONVERGENCE_THRESHOLD,
+        // COLLISION_PADDING) + force-only params (params.force.*)
         if (params.LAYOUT_ALGORITHM === 'force') {
-            const IDEAL_LENGTH = params.IDEAL_LENGTH;
-            // const IDEAL_LENGTH=3000;
+            const fp = params.force;
 
-            const REPULSION = params.REPULSION;
-            const SPRING_K = params.SPRING_K;
+            const IDEAL_LENGTH = params.IDEAL_LENGTH;
+
+            const REPULSION = fp.REPULSION;
+            const SPRING_K = fp.SPRING_K;
             const ITERATIONS = params.ITERATIONS;
-            // const ITERATIONS =2000;
-            // const ANGULAR_STRENGTH = params.ANGULAR_STRENGTH;
-            //const USE_ANGULAR_FORCE = params.USE_ANGULAR_FORCE;
 
             var colisionFlag = true;
             let iter = 0;
@@ -1289,8 +1290,8 @@ SubstructureLayout.prototype.run = function () {
             var maxRepulsetMove = 10e10;
             var numOfCollision = 0;
 
-            // Adjust the exit threshold: only consider the whole graph truly stationary when the maximum movement of every node is below 0.5 pixels
-            const ENERGY_THRESHOLD = 0.5;
+            // Only consider the whole graph truly stationary when the maximum movement of every node is below this threshold
+            const ENERGY_THRESHOLD = params.CONVERGENCE_THRESHOLD;
 
             // Build the adjacency list in advance so it can be reused seamlessly for both "initial ordering" and the "later angular force"
             const adj = new Map<string, VNode[]>();
@@ -1340,12 +1341,12 @@ SubstructureLayout.prototype.run = function () {
 
                 ////////////////////// Place each node at the position of its corresponding virtual node
 
-                    this.vnodes.forEach((v: any) => {
-                        v.nodes.forEach((n: any) => {
-                            n.position().x = v.center_x + Math.random() * 5;
-                            n.position().y = v.center_y + Math.random() * 5;
-                        })
-                    });
+                this.vnodes.forEach((v: any) => {
+                    v.nodes.forEach((n: any) => {
+                        n.position().x = v.center_x + Math.random() * 5;
+                        n.position().y = v.center_y + Math.random() * 5;
+                    })
+                });
 
 
                 // [Core correction] Perform all physical calculations in virtual space; no longer repeatedly shuffle real nodes randomly within each frame
@@ -1366,7 +1367,7 @@ SubstructureLayout.prototype.run = function () {
                 }
 
                 // Calculate the current global cooling factor (the core simulated-annealing control)
-                const cooling = Math.pow(1 - iter / ITERATIONS, 2);
+                const cooling = Math.pow(1 - iter / ITERATIONS, fp.COOLING_EXPONENT);
 
                 /* ---------- A. Attraction (Spring) ---------- */
                 if (1) {
@@ -1419,7 +1420,7 @@ SubstructureLayout.prototype.run = function () {
                             let force = 0;
                             if (centerDist < minDistance) {
                                 const overlap = minDistance - centerDist;
-                                force = (REPULSION * 5) * (overlap / (centerDist + MIN_GAP));
+                                force = (REPULSION * fp.OVERLAP_REPULSION_FACTOR) * (overlap / (centerDist + MIN_GAP));
                             } else {
                                 const gap = centerDist - minDistance;
                                 force = REPULSION / (gap * gap + 20);
@@ -1445,15 +1446,15 @@ SubstructureLayout.prototype.run = function () {
                 }
 
                 /* ---------- C. Angular Repulsion ---------- */
-                if (params.USE_ANGULAR_FORCE) {
+                if (fp.USE_ANGULAR_FORCE) {
                     const norm = (a: number): number => Math.atan2(Math.sin(a), Math.cos(a));
 
                     type AngleItem = {
                         nb: VNode; dx: number; dy: number; dist: number; angle: number;
                     };
 
-                    const ANGULAR_STRENGTH = params.ANGULAR_STRENGTH;
-                    const MAX_FORCE = 2.0;
+                    const ANGULAR_STRENGTH = fp.ANGULAR_STRENGTH;
+                    const MAX_FORCE = fp.ANGULAR_MAX_FORCE;
 
                     this.vnodes.forEach((node: VNode) => {
 
@@ -1553,7 +1554,7 @@ SubstructureLayout.prototype.run = function () {
             if (1) {
                 colisionFlag = true;
                 numOfCollision = 0;
-                const padding = IDEAL_LENGTH;
+                const padding = params.COLLISION_PADDING as number;
                 let iter = 0;
                 while (colisionFlag) {
                     if(this.stopped){
@@ -1640,10 +1641,14 @@ SubstructureLayout.prototype.run = function () {
         // Stress Majorization algorithm
         // All-Pairs shortest-path calculation and Guttman Transform (weighted Laplacian updates),
         // while retaining the polar-coordinate initialization for leaf nodes and the Anti-Collision post-processing in the original code
+        // Uses: shared params (IDEAL_LENGTH, ITERATIONS, CONVERGENCE_THRESHOLD,
+        // COLLISION_PADDING, MAX_OVERLAP_ITERATIONS) + stress-only params (params.stress.*)
         if (params.LAYOUT_ALGORITHM === 'stress') {
+            const sp = params.stress;
+
             const IDEAL_LENGTH = params.IDEAL_LENGTH;
             const ITERATIONS = params.ITERATIONS;
-            const ENERGY_THRESHOLD = 0.5;
+            const ENERGY_THRESHOLD = params.CONVERGENCE_THRESHOLD;
 
             const numNodes = this.vnodes.length;
             if (numNodes === 0) return;
@@ -1693,14 +1698,14 @@ SubstructureLayout.prototype.run = function () {
                 }
             }
 
-            // Calculate the weight matrix W_ij = 1 / (d_ij ^ 2)
+            // Calculate the weight matrix W_ij = 1 / (d_ij ^ WEIGHT_EXPONENT)
             for (let i = 0; i < numNodes; i++) {
                 for (let j = 0; j < numNodes; j++) {
                     if (i !== j && distMatrix[i][j] !== Infinity) {
                         // Account for the actual node radius to prevent excessive crowding
                         const minR = this.vnodes[i].radius + this.vnodes[j].radius;
                         const d = Math.max(distMatrix[i][j], minR);
-                        weightMatrix[i][j] = 1 / (d * d);
+                        weightMatrix[i][j] = 1 / Math.pow(d, sp.WEIGHT_EXPONENT);
                     }
                 }
             }
@@ -1816,7 +1821,7 @@ SubstructureLayout.prototype.run = function () {
             if (1) {
                 let colisionFlag = true;
                 let numOfCollision = 0;
-                const padding = IDEAL_LENGTH;
+                const padding = params.COLLISION_PADDING as number;
                 let overlapIter = 0;
 
                 while (colisionFlag) {
@@ -1859,7 +1864,7 @@ SubstructureLayout.prototype.run = function () {
                         }
                     }
 
-                    if (numOfCollision > 10000 || overlapIter > 300) {
+                    if (numOfCollision > 10000 || overlapIter > params.MAX_OVERLAP_ITERATIONS) {
                         console.warn("Avoid dead loop in overlap removal");
                         break;
                     }
@@ -1965,10 +1970,7 @@ SubstructureLayout.prototype.run = function () {
 
                             if (count >= 2) {
 
-                                // ============================================================
                                 // 1. Calculate the arithmetic mean center of the current node group
-                                // ============================================================
-
                                 let cx = 0;
                                 let cy = 0;
 
@@ -1982,72 +1984,25 @@ SubstructureLayout.prototype.run = function () {
                                 cx /= count;
                                 cy /= count;
 
-                                // ============================================================
-                                // 2. Special handling: exactly 3 nodes
-                                //
-                                // Three nodes form a strict equilateral triangle
-                                //
-                                // Note:
-                                // Do not use CHAIN_MIN_RADIUS
-                                // Prevent the triangle from being artificially enlarged
-                                // ============================================================
-
+                                // 2. Special handling: exactly 3 nodes form a strict equilateral triangle
+                                //    (do not use CHAIN_MIN_RADIUS, so the triangle is not artificially enlarged)
                                 if (count === 3) {
 
-                                    // --------------------------------------------------------
-                                    // Triangle side length
-                                    //
-                                    // CYCLE_NODE_SPACING represents the desired node spacing
-                                    // --------------------------------------------------------
-
+                                    // CYCLE_NODE_SPACING represents the desired node spacing (triangle side length)
                                     const sideLength = params.CYCLE_NODE_SPACING;
 
-                                    // --------------------------------------------------------
-                                    // Circumradius of the equilateral triangle
-                                    //
-                                    // side = sqrt(3) * radius
-                                    //
-                                    // Therefore:
-                                    //
-                                    // radius = side / sqrt(3)
-                                    // --------------------------------------------------------
-
+                                    // Circumradius of the equilateral triangle: radius = side / sqrt(3)
                                     const radius = sideLength / Math.sqrt(3);
 
-                                    // ========================================================
-                                    // 3. Search for the best rotation angle
-                                    //
-                                    // Use exactly the same strategy as for a normal network
-                                    //
-                                    // 0°
-                                    // 10°
-                                    // 20°
-                                    // ...
-                                    // 350°
-                                    //
-                                    // For each calculation:
-                                    //
-                                    // totalEdgeLength(edges)
-                                    //
-                                    // Find the minimum value
-                                    // ========================================================
-
+                                    // 3. Search for the best rotation angle (0°, 10°, ... 350°),
+                                    //    minimizing totalEdgeLength(edges)
                                     let minTotalLength = Number.POSITIVE_INFINITY;
 
                                     let bestRotate = 0;
 
                                     for (let rotate = 0; rotate < 360; rotate += 10) {
 
-                                        // ----------------------------------------------------
-                                        // Three nodes are evenly distributed around the circumference
-                                        //
-                                        // Between every pair of nodes:
-                                        //
-                                        // 120°
-                                        //
-                                        // Therefore, an equilateral triangle is naturally formed
-                                        // ----------------------------------------------------
-
+                                        // Three nodes evenly distributed around the circumference (120° apart)
                                         gNodes.forEach((n: any, i: number) => {
 
                                             const angle = i * 2 * Math.PI / 3 + rotate * Math.PI / 180;
@@ -2062,16 +2017,10 @@ SubstructureLayout.prototype.run = function () {
 
                                         });
 
-                                        // ----------------------------------------------------
                                         // Calculate the total edge length at the current rotation angle
-                                        // ----------------------------------------------------
-
                                         const totalLength = totalEdgeLength(edgeSet);
 
-                                        // ----------------------------------------------------
                                         // Save the best rotation
-                                        // ----------------------------------------------------
-
                                         if (totalLength < minTotalLength) {
 
                                             minTotalLength = totalLength;
@@ -2082,10 +2031,7 @@ SubstructureLayout.prototype.run = function () {
 
                                     }
 
-                                    // ========================================================
                                     // 4. Reapply positions using the best rotation angle
-                                    // ========================================================
-
                                     gNodes.forEach((n: any, i: number) => {
 
                                         const angle = i * 2 * Math.PI / 3 + bestRotate * Math.PI / 180;
@@ -2103,50 +2049,27 @@ SubstructureLayout.prototype.run = function () {
                                     return;
                                 }
 
-                                // ============================================================
                                 // 3. count > 3
-                                //
-                                // Keep the original layout strategy:
-                                //
-                                // gNodes[0]
-                                //     ↓
-                                // Center node
-                                //
-                                // gNodes[1...]
-                                //     ↓
-                                // Circumference nodes
-                                // ============================================================
+                                //    gNodes[0] -> center node, gNodes[1...] -> circumference nodes
 
-                                // ============================================================
                                 // 4. Calculate the standard radius based on the number of nodes
-                                // ============================================================
-
                                 const miniMumRadius = params.CHAIN_MIN_RADIUS;
 
                                 const radius = Math.max((count * params.CYCLE_NODE_SPACING) / (2 * Math.PI),
 
                                     miniMumRadius);
 
-                                // ============================================================
-                                // 5. Sort / circumference nodes
-                                // ============================================================
-
+                                // 5. Circumference nodes
                                 const sorted = gNodes.slice(1);
 
-                                // ============================================================
                                 // 6. Search for the best rotation angle
-                                // ============================================================
-
                                 let minTotalLength = Number.POSITIVE_INFINITY;
 
                                 let bestRotate = 0;
 
                                 for (let rotate = 0; rotate < 360; rotate += 10) {
 
-                                    // --------------------------------------------------------
                                     // Forcefully overwrite the coordinates of circumference nodes
-                                    // --------------------------------------------------------
-
                                     sorted.forEach((n: any, i: number) => {
 
                                         const angle = (i / sorted.length) * 2 * Math.PI + rotate * Math.PI / 180;
@@ -2161,16 +2084,10 @@ SubstructureLayout.prototype.run = function () {
 
                                     });
 
-                                    // --------------------------------------------------------
                                     // Calculate the total edge length at the current rotation
-                                    // --------------------------------------------------------
-
                                     const totalLength = totalEdgeLength(edgeSet);
 
-                                    // --------------------------------------------------------
                                     // Save the best rotation
-                                    // --------------------------------------------------------
-
                                     if (totalLength < minTotalLength) {
 
                                         minTotalLength = totalLength;
@@ -2181,10 +2098,7 @@ SubstructureLayout.prototype.run = function () {
 
                                 }
 
-                                // ============================================================
                                 // 7. Apply the best rotation angle
-                                // ============================================================
-
                                 sorted.forEach((n: any, i: number) => {
 
                                     const angle = (i / sorted.length) * 2 * Math.PI + bestRotate * Math.PI / 180;
@@ -2198,10 +2112,7 @@ SubstructureLayout.prototype.run = function () {
                                     });
                                 });
 
-                                // ============================================================
                                 // 8. Place the first node at the center
-                                // ============================================================
-
                                 gNodes[0].position({
 
                                     x: cx, y: cy
@@ -2439,10 +2350,7 @@ SubstructureLayout.prototype.run = function () {
 
             });
 
-            // ========================================
             // Create parent
-            // ========================================
-
             parentIds.forEach((parentId: string) => {
 
                 // Parent already exists
@@ -2459,10 +2367,7 @@ SubstructureLayout.prototype.run = function () {
                     return;
                 }
 
-                // ========================================
                 // ① Save the original positions of the children
-                // ========================================
-
                 const originalPositions = new Map<string, {
                     x: number, y: number
                 }>();
@@ -2477,19 +2382,13 @@ SubstructureLayout.prototype.run = function () {
 
                 });
 
-                // ========================================
                 // ② Calculate the bounding box from the original positions
-                // ========================================
-
                 const bb = children.boundingBox();
 
                 const centerX = (bb.x1 + bb.x2) / 2;
                 const centerY = (bb.y1 + bb.y2) / 2;
 
-                // ========================================
                 // ③ Create the parent
-                // ========================================
-
                 const parent = this.cy.add({
 
                     group: 'nodes',
@@ -2506,10 +2405,7 @@ SubstructureLayout.prototype.run = function () {
 
                 }).first();
 
-                // ========================================
                 // ④ Establish the compound relationship
-                // ========================================
-
                 children.forEach((node: any) => {
 
                     node.move({
@@ -2518,10 +2414,7 @@ SubstructureLayout.prototype.run = function () {
 
                 });
 
-                // ========================================
                 // ⑤ Restore the original absolute positions of the children
-                // ========================================
-
                 children.forEach((node: any) => {
 
                     const original = originalPositions.get(node.id());
@@ -2536,10 +2429,7 @@ SubstructureLayout.prototype.run = function () {
 
                 });
 
-                // ========================================
                 // ⑥ Restore the center position of the parent
-                // ========================================
-
                 parent.position({
                     x: centerX, y: centerY
                 });
@@ -2616,7 +2506,7 @@ SubstructureLayout.prototype.stop = function () {
     this.trigger({
         type: 'layoutstop',
         layout:this
-        });
+    });
 
     return this;
 };
@@ -2631,10 +2521,7 @@ function rotateNetworkToMinimumBoundingBox(nodes: any) {
         return null;
     }
 
-    // ============================================================
     // 1. get four corner position for each node in network
-    // ============================================================
-
     const points: {
         x: number; y: number;
     }[] = [];
@@ -2651,44 +2538,17 @@ function rotateNetworkToMinimumBoundingBox(nodes: any) {
 
         const halfHeight = height / 2;
 
-        points.push({
+        points.push({x: pos.x - halfWidth, y: pos.y - halfHeight});
 
-            x: pos.x - halfWidth,
+        points.push({x: pos.x + halfWidth, y: pos.y - halfHeight});
 
-            y: pos.y - halfHeight
+        points.push({x: pos.x + halfWidth, y: pos.y + halfHeight});
 
-        });
-
-        points.push({
-
-            x: pos.x + halfWidth,
-
-            y: pos.y - halfHeight
-
-        });
-
-        points.push({
-
-            x: pos.x + halfWidth,
-
-            y: pos.y + halfHeight
-
-        });
-
-        points.push({
-
-            x: pos.x - halfWidth,
-
-            y: pos.y + halfHeight
-
-        });
+        points.push({x: pos.x - halfWidth, y: pos.y + halfHeight});
 
     });
 
-    // ============================================================
     // 2. Convex Hull
-    // ============================================================
-
     const sortedPoints = [...points].sort((a, b) => {
 
         if (a.x !== b.x) {
@@ -2749,10 +2609,7 @@ function rotateNetworkToMinimumBoundingBox(nodes: any) {
 
     }
 
-    // ============================================================
     // 3. search Minimum Area Bounding Rectangle
-    // ============================================================
-
     let bestArea = Number.POSITIVE_INFINITY;
 
     let bestWidth = 0;
@@ -2771,16 +2628,10 @@ function rotateNetworkToMinimumBoundingBox(nodes: any) {
 
         const p2 = hull[(i + 1) % hull.length];
 
-        // --------------------------------------------------------
-        // convex hull
-        // --------------------------------------------------------
-
+        // convex hull edge angle
         const edgeAngle = Math.atan2(p2.y - p1.y, p2.x - p1.x);
 
-        // --------------------------------------------------------
         // rotate to X axis
-        // --------------------------------------------------------
-
         const cos = Math.cos(-edgeAngle);
 
         const sin = Math.sin(-edgeAngle);
@@ -2793,10 +2644,7 @@ function rotateNetworkToMinimumBoundingBox(nodes: any) {
 
         let maxY = Number.NEGATIVE_INFINITY;
 
-        // --------------------------------------------------------
         // rotate all hull
-        // --------------------------------------------------------
-
         hull.forEach((p) => {
 
             const x = p.x * cos - p.y * sin;
@@ -2819,10 +2667,7 @@ function rotateNetworkToMinimumBoundingBox(nodes: any) {
 
         const area = width * height;
 
-        // --------------------------------------------------------
         // search for minimum rectangle
-        // --------------------------------------------------------
-
         if (area < bestArea) {
 
             bestArea = area;
@@ -2837,10 +2682,7 @@ function rotateNetworkToMinimumBoundingBox(nodes: any) {
 
             const centerYRot = (minY + maxY) / 2;
 
-            // ----------------------------------------------------
-            // rotate
-            // ----------------------------------------------------
-
+            // rotate back
             bestCenterX = centerXRot * Math.cos(edgeAngle) - centerYRot * Math.sin(edgeAngle);
 
             bestCenterY = centerXRot * Math.sin(edgeAngle) + centerYRot * Math.cos(edgeAngle);
@@ -2849,13 +2691,7 @@ function rotateNetworkToMinimumBoundingBox(nodes: any) {
 
     }
 
-    // ============================================================
-    // 4. make sure：
-    //
-    // width >= height
-    //
-    // ============================================================
-
+    // 4. make sure: width >= height
     if (bestHeight > bestWidth) {
 
         const temp = bestWidth;
@@ -2864,20 +2700,12 @@ function rotateNetworkToMinimumBoundingBox(nodes: any) {
 
         bestHeight = temp;
 
-        // --------------------------------------------------------
         // rotate 90°
-        // --------------------------------------------------------
-
         bestAngle += Math.PI / 2;
 
     }
 
-    // ============================================================
-    // 5. Normalize angle
-    //
-    // [-PI, PI]
-    // ============================================================
-
+    // 5. Normalize angle to [-PI, PI]
     while (bestAngle > Math.PI) {
 
         bestAngle -= 2 * Math.PI;
@@ -2890,10 +2718,7 @@ function rotateNetworkToMinimumBoundingBox(nodes: any) {
 
     }
 
-    // ============================================================
     // 6. rotate network according to bounding box center
-    // ============================================================
-
     const cos = Math.cos(-bestAngle);
 
     const sin = Math.sin(-bestAngle);
@@ -2906,11 +2731,7 @@ function rotateNetworkToMinimumBoundingBox(nodes: any) {
 
         const dy = pos.y - bestCenterY;
 
-        // ----------------------------------------------------
-        // rotate
-        // -bestAngle
-        // ----------------------------------------------------
-
+        // rotate by -bestAngle
         const newX = bestCenterX + dx * cos - dy * sin;
 
         const newY = bestCenterY + dx * sin + dy * cos;
@@ -2925,10 +2746,7 @@ function rotateNetworkToMinimumBoundingBox(nodes: any) {
 
     });
 
-    // ============================================================
     // 7. re-calculate Bounding Box after rotation
-    // ============================================================
-
     const finalBB = nodes.boundingBox();
 
     return {
@@ -2957,10 +2775,7 @@ SubstructureLayout.prototype.packNetworks = function (networks: any[]): void {
         return;
     }
 
-    // ============================================================
     // 1. Canvas
-    // ============================================================
-
     const container = this.cy.container();
 
     const canvasWidth = container?.clientWidth ?? 1200;
@@ -2969,36 +2784,23 @@ SubstructureLayout.prototype.packNetworks = function (networks: any[]): void {
 
     const canvasAspect = canvasWidth / canvasHeight;
 
-    // ============================================================
     // 2. Parameters
-    // ============================================================
-
     const H_GAP = 60;
 
     const V_GAP = 80;
 
     const SEARCH_STEPS = 300;
 
-    // ------------------------------------------------------------
-    // Weight
-    //
-    // aspect: overall ratio
-    //
-    // similarity: network similarity on the same row
-    //
-    // balance: make sure not too crowd on one row
-    // ------------------------------------------------------------
-
+    // Weights
+    // aspect: overall ratio; similarity: network similarity on the same row;
+    // balance: make sure not too crowded on one row
     const ASPECT_WEIGHT = 0.60;
 
     const SIZE_SIMILARITY_WEIGHT = 0.30;
 
     const ROW_BALANCE_WEIGHT = 0.10;
 
-    // ============================================================
     // 3. Get real bounding boxes
-    // ============================================================
-
     networks.forEach((network: any) => {
 
         const bb = network.nodes.boundingBox();
@@ -3023,12 +2825,7 @@ SubstructureLayout.prototype.packNetworks = function (networks: any[]): void {
 
     });
 
-    // ============================================================
-    // 4. Sort
-    //
-    // large → small
-    // ============================================================
-
+    // 4. Sort: large → small
     const sortedNetworks = [...networks].sort((a: any, b: any) => {
 
         if (a.nodeCount !== b.nodeCount) {
@@ -3041,22 +2838,8 @@ SubstructureLayout.prototype.packNetworks = function (networks: any[]): void {
 
     });
 
-    // ============================================================
-    // 5. Size normalization
-    //
-    // use log(size) to calculate difference
-    //
-    // so：
-    //
-    // 100 → 200
-    //
-    // and
-    //
-    // 500 → 1000
-    //
-    // are same 2 times difference。
-    // ============================================================
-
+    // 5. Size normalization: use log(size) to calculate difference,
+    //    so 100 → 200 and 500 → 1000 are the same 2x difference.
     const allSizes = sortedNetworks.map((n: any) => Math.log(Math.max(n.size, 1)));
 
     const minLogSize = Math.min(...allSizes);
@@ -3071,10 +2854,7 @@ SubstructureLayout.prototype.packNetworks = function (networks: any[]): void {
 
     });
 
-    // ============================================================
     // 6. Width range
-    // ============================================================
-
     const maxNetworkWidth = Math.max(...sortedNetworks.map((n: any) => n.width));
 
     const totalNetworkWidth = sortedNetworks.reduce((sum: number, n: any) => {
@@ -3087,10 +2867,7 @@ SubstructureLayout.prototype.packNetworks = function (networks: any[]): void {
 
     const maxWidth = totalNetworkWidth + H_GAP * Math.max(sortedNetworks.length - 1, 0);
 
-    // ============================================================
     // 7. Make rows
-    // ============================================================
-
     const makeRows = (widthLimit: number): any[][] => {
 
         const rows: any[][] = [];
@@ -3103,10 +2880,7 @@ SubstructureLayout.prototype.packNetworks = function (networks: any[]): void {
 
             const networkWidth = network.width;
 
-            // =================================================
             // First network
-            // =================================================
-
             if (currentRow.length === 0) {
 
                 currentRow.push(network);
@@ -3117,10 +2891,7 @@ SubstructureLayout.prototype.packNetworks = function (networks: any[]): void {
 
             }
 
-            // =================================================
             // Width check
-            // =================================================
-
             const requiredWidth = currentWidth + H_GAP + networkWidth;
 
             if (requiredWidth > widthLimit) {
@@ -3135,18 +2906,12 @@ SubstructureLayout.prototype.packNetworks = function (networks: any[]): void {
 
             }
 
-            // =================================================
             // Size similarity check
-            // =================================================
-
             const currentMeanSize = currentRow.reduce((sum: number, n: any) => sum + n.normalizedSize, 0) / currentRow.length;
 
             const sizeDifference = Math.abs(network.normalizedSize - currentMeanSize);
 
-            // -------------------------------------------------
             // Avoid placing vastly different networks on the same line.
-            // -------------------------------------------------
-
             const SIZE_THRESHOLD = 0.35;
 
             if (sizeDifference > SIZE_THRESHOLD && currentRow.length >= 2) {
@@ -3167,10 +2932,7 @@ SubstructureLayout.prototype.packNetworks = function (networks: any[]): void {
 
         });
 
-        // =========================================================
         // Last row
-        // =========================================================
-
         if (currentRow.length > 0) {
 
             rows.push(currentRow);
@@ -3181,10 +2943,7 @@ SubstructureLayout.prototype.packNetworks = function (networks: any[]): void {
 
     };
 
-    // ============================================================
     // 8. Calculate layout size
-    // ============================================================
-
     const calculateLayoutSize = (rows: any[][]) => {
 
         let totalWidth = 0;
@@ -3229,21 +2988,8 @@ SubstructureLayout.prototype.packNetworks = function (networks: any[]): void {
 
     };
 
-    // ============================================================
-    // 9. Calculate row size similarity score
-    //
-    // 0 = good
-    // 1 = bad
-    //
-    // using row max/min。
-    //
-    // case：
-    //
-    // 100, 110, 120 → good
-    //
-    // 100, 500, 1000 → bad
-    // ============================================================
-
+    // 9. Row size similarity score (0 = good, 1 = bad), using row max/min.
+    //    100, 110, 120 → good;  100, 500, 1000 → bad
     const calculateSizeSimilarity = (rows: any[][]): number => {
 
         if (rows.length === 0) {
@@ -3290,15 +3036,7 @@ SubstructureLayout.prototype.packNetworks = function (networks: any[]): void {
 
     };
 
-    // ============================================================
-    // 10. Row balance score
-    //
-    // avoid extreme case like：
-    //
-    // Row 1: 6 networks
-    // Row 2: 1 network
-    // ============================================================
-
+    // 10. Row balance score: avoid extreme cases like Row 1: 6 networks, Row 2: 1 network
     const calculateRowBalance = (rows: any[][]): number => {
 
         if (rows.length <= 1) {
@@ -3327,10 +3065,7 @@ SubstructureLayout.prototype.packNetworks = function (networks: any[]): void {
 
     };
 
-    // ============================================================
     // 11. Search best layout
-    // ============================================================
-
     let bestRows: any[][] = [];
 
     let bestScore = Number.POSITIVE_INFINITY;
@@ -3347,10 +3082,7 @@ SubstructureLayout.prototype.packNetworks = function (networks: any[]): void {
 
         const testWidth = minWidth + (maxWidth - minWidth) * i / Math.max(SEARCH_STEPS - 1, 1);
 
-        // ========================================================
         // Make rows
-        // ========================================================
-
         const rows = makeRows(testWidth);
 
         if (!rows || rows.length === 0) {
@@ -3359,10 +3091,7 @@ SubstructureLayout.prototype.packNetworks = function (networks: any[]): void {
 
         }
 
-        // ========================================================
         // Layout size
-        // ========================================================
-
         const layoutSize = calculateLayoutSize(rows);
 
         const layoutWidth = layoutSize.width;
@@ -3375,48 +3104,23 @@ SubstructureLayout.prototype.packNetworks = function (networks: any[]): void {
 
         }
 
-        // ========================================================
         // Layout aspect
-        // ========================================================
-
         const layoutAspect = layoutWidth / layoutHeight;
 
-        // ========================================================
         // Aspect error
-        // ========================================================
-
         const aspectError = Math.abs(Math.log(layoutAspect / canvasAspect));
 
-        // ========================================================
         // Size similarity
-        // ========================================================
-
         const similarityError = calculateSizeSimilarity(rows);
 
-        // ========================================================
         // Row balance
-        // ========================================================
-
         const rowBalanceError = calculateRowBalance(rows);
 
-        // ========================================================
-        // Row count
-        //
-        // Very small penalty
-        // ========================================================
-
+        // Row count: very small penalty
         const rowPenalty = rows.length / Math.max(sortedNetworks.length, 1);
 
-        // ========================================================
-        // Final score
-        //
-        // Key point:
-        //
-        // Aspect ratio is still the primary objective
-        //
-        // But size similarity clearly participates in the optimization.
-        // ========================================================
-
+        // Final score: aspect ratio is still the primary objective,
+        // but size similarity clearly participates in the optimization.
         const score = aspectError * ASPECT_WEIGHT *
 
             100
@@ -3433,10 +3137,7 @@ SubstructureLayout.prototype.packNetworks = function (networks: any[]): void {
 
             rowPenalty * 0.01;
 
-        // ========================================================
         // Save best
-        // ========================================================
-
         if (score < bestScore) {
 
             bestScore = score;
@@ -3455,10 +3156,7 @@ SubstructureLayout.prototype.packNetworks = function (networks: any[]): void {
 
     }
 
-    // ============================================================
     // 12. Fallback
-    // ============================================================
-
     if (bestRows.length === 0) {
 
         bestRows = makeRows(minWidth);
@@ -3475,28 +3173,14 @@ SubstructureLayout.prototype.packNetworks = function (networks: any[]): void {
 
     }
 
-    // ============================================================
-    // 13. Final order
-    //
-    // search：
-    //
-    //     large → small
-    //
-    // display：
-    //
-    //     small → large
-    // ============================================================
-
+    // 13. Final order: search large → small, display small → large
     const finalRows = bestRows.map((row: any[]) => {
 
         return [...row].reverse();
 
     });
 
-    // ============================================================
     // 16. Calculate row infos
-    // ============================================================
-
     const rowInfos: any[] = [];
 
     finalRows.forEach((row: any[]) => {
@@ -3525,10 +3209,7 @@ SubstructureLayout.prototype.packNetworks = function (networks: any[]): void {
 
     });
 
-    // ============================================================
     // 17. Final layout size
-    // ============================================================
-
     let totalLayoutWidth = 0;
 
     let totalLayoutHeight = 0;
@@ -3549,18 +3230,12 @@ SubstructureLayout.prototype.packNetworks = function (networks: any[]): void {
 
     const finalAspect = totalLayoutWidth / Math.max(totalLayoutHeight, 1);
 
-    // ============================================================
     // 19. Center layout
-    // ============================================================
-
     const layoutStartX = (canvasWidth - totalLayoutWidth) / 2;
 
     const layoutStartY = (canvasHeight - totalLayoutHeight) / 2;
 
-    // ============================================================
     // 20. Pack networks
-    // ============================================================
-
     let currentY = layoutStartY;
 
     rowInfos.forEach((info: any) => {
@@ -3571,32 +3246,20 @@ SubstructureLayout.prototype.packNetworks = function (networks: any[]): void {
 
         row.forEach((network: any) => {
 
-            // =================================================
             // Current bounding box
-            // =================================================
-
             const bb = network.nodes.boundingBox();
 
-            // =================================================
             // Move X
-            // =================================================
-
             const dx = currentX - bb.x1;
 
-            // =================================================
             // Move Y
-            // =================================================
-
             const networkCenterY = (bb.y1 + bb.y2) / 2;
 
             const rowCenterY = currentY + info.height / 2;
 
             const dy = rowCenterY - networkCenterY;
 
-            // =================================================
             // Move nodes
-            // =================================================
-
             network.nodes.forEach((node: Node) => {
 
                 const pos = node.position();
@@ -3609,26 +3272,17 @@ SubstructureLayout.prototype.packNetworks = function (networks: any[]): void {
 
             });
 
-            // =================================================
             // Next network
-            // =================================================
-
             currentX += network.width + H_GAP;
 
         });
 
-        // ========================================================
         // Next row
-        // ========================================================
-
         currentY += info.height + V_GAP;
 
     });
 
-    // ============================================================
     // 22. Final network positions
-    // ============================================================
-
     finalRows.forEach((row: any[], rowIndex: number) => {
 
         row.forEach((network: any) => {
