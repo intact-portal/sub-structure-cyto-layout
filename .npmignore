@@ -1,0 +1,14 @@
+src/
+data/
+public/
+watch.cjs
+deploy.sh
+tsconfig.json
+dist/data/
+dist/index.html
+dist/favicon.ico
+dist/cytoscape.min.js
+*.cyjs
+*.gz
+.idea/
+.vscode/

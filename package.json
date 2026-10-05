@@ -7,15 +7,21 @@
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
-    "dist"
+    "dist/index.js",
+    "dist/index.d.ts",
+    "dist/lumina-layout.js",
+    "dist/lumina-layout.d.ts",
+    "README.md",
+    "LICENSE"
   ],
   "scripts": {
-    "build": "tsc && cp src/favicon.ico dist/favicon.ico && cp src/index.html dist/index.html && cp node_modules/cytoscape/dist/cytoscape.min.js dist/ && if [ -d data ]; then cp -r data dist/data; fi && touch dist/.nojekyll",
+    "build": "tsc && cp demo/favicon.ico dist/favicon.ico && cp demo/index.html dist/index.html && cp node_modules/cytoscape/dist/cytoscape.min.js dist/ && if [ -d demo/data ]; then cp -r demo/data dist/data; fi && touch dist/.nojekyll",
     "dev": "npm run build && concurrently \"tsc --watch\" \"node watch.cjs\" \"http-server dist -p 8080 -c-1\"",
     "deploy": "./deploy.sh",
     "build:lib": "tsc",
     "local-publish": "npm run build:lib && yalc push",
-    "prepublishOnly": "npm run build:lib"
+    "clean": "rm -rf dist",
+    "prepublishOnly": "npm run clean && npm run build:lib"
   },
   "devDependencies": {
     "concurrently": "^9.2.4",
@@ -33,8 +39,8 @@
     "network",
     "lumina"
   ],
-  "author": "",
-  "license": "ISC",
+  "author": "Shutan Xu",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/intact-portal/sub-structure-cyto-layout.git"
