@@ -1,8 +1,8 @@
-# cytoscape-substructure-layout
+# LUMINA
 
-A [Cytoscape.js](https://js.cytoscape.org/) layout extension that is **structure-aware**: instead of treating every node the same, it detects common substructures in your graph, collapses each one into a *virtual node*, lays out the virtual nodes with either a force-directed or a stress-majorization solver, and then expands every substructure back into a clean, purpose-built arrangement.
+**LUMINA** is a [Cytoscape.js](https://js.cytoscape.org/) layout extension that is **structure-aware**: instead of treating every node the same, it detects common substructures in your graph, collapses each one into a *virtual node*, lays out the virtual nodes with either a force-directed or a stress-majorization solver, and then expands every substructure back into a clean, purpose-built arrangement.
 
-Written in TypeScript. Registered under the layout name `substructure-layout`.
+Written in TypeScript. Registered under the layout name `lumina` (the legacy name `substructure-layout` is still registered as an alias).
 
 ## Features
 
@@ -31,14 +31,14 @@ Written in TypeScript. Registered under the layout name `substructure-layout`.
 
 ```ts
 import cytoscape from 'cytoscape';
-import registerSubstructureLayout from './substructure-layout';
+import registerLumina from './lumina-layout';
 
-registerSubstructureLayout(cytoscape);
+registerLumina(cytoscape);
 
 const cy = cytoscape({ container: document.getElementById('cy'), elements: [/* ... */] });
 
 cy.layout({
-  name: 'substructure-layout',
+  name: 'lumina',
   layoutAlgorithm: 'stress',   // 'stress' (default) or 'force'
 
   // shared by both algorithms
@@ -137,7 +137,7 @@ The old flat force options (`repulsion`, `springK`, `useAngularForce`, `angularS
 Set `stepByStep: true`, keep a reference to the layout, and run it:
 
 ```ts
-const layout = cy.layout({ name: 'substructure-layout', stepByStep: true });
+const layout = cy.layout({ name: 'lumina', stepByStep: true });
 layout.run();
 
 layout.listSteps();   // print and return all captured steps
