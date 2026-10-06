@@ -21,6 +21,10 @@
     "README.md",
     "LICENSE"
   ],
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
   "scripts": {
     "build": "tsc && cp demo/favicon.ico dist/favicon.ico && cp demo/index.html dist/index.html && cp node_modules/cytoscape/dist/cytoscape.min.js dist/ && if [ -d demo/data ]; then cp -r demo/data dist/data; fi && touch dist/.nojekyll",
     "dev": "npm run build && concurrently \"tsc --watch\" \"node watch.cjs\" \"http-server dist -p 8080 -c-1\"",
