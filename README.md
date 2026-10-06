@@ -30,7 +30,7 @@ Written in TypeScript. Registered under the layout name `lumina` (the legacy nam
 ## Installation
 
 ```bash
-npm install cytoscape cytoscape-lumina
+npm install cytoscape @intact-ebi/cytoscape-lumina
 ```
 
 `cytoscape` (^3) is a peer dependency.
@@ -39,7 +39,7 @@ npm install cytoscape cytoscape-lumina
 
 ```ts
 import cytoscape from 'cytoscape';
-import registerLumina from 'cytoscape-lumina';
+import registerLumina from '@intact-ebi/cytoscape-lumina';
 
 registerLumina(cytoscape);
 
@@ -169,4 +169,3 @@ Each step restores real-node positions and overlays the virtual nodes (transluce
 - Generated compound parents have the class `substructure-group` and ids of the form `<componentIndex>_<groupId>`; they are removed and regenerated on each run.
 
 ## License
-
