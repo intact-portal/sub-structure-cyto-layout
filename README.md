@@ -167,5 +167,3 @@ Each step restores real-node positions and overlays the virtual nodes (transluce
 - Nodes with 8 or more neighbours are skipped during cycle search, for performance.
 - Self-loops and duplicate edges are ignored by the layout.
 - Generated compound parents have the class `substructure-group` and ids of the form `<componentIndex>_<groupId>`; they are removed and regenerated on each run.
-
-## License
