@@ -107,6 +107,8 @@ Options are split by who uses them:
 | --- | --- | --- |
 | `weightExponent` | `2` | Stress weights are `w_ij = 1 / d_ij ^ weightExponent`; `2` is classic stress majorization. |
 
+Stress shortest paths use weighted Dijkstra. Computed edge lengths (`idealLength` plus both virtual-node radii) must be finite and non-negative; invalid lengths throw a `RangeError`.
+
 ### Structure detection
 
 | Option | Default | Description |

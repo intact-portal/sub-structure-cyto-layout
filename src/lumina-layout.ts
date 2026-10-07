@@ -1,3 +1,4 @@
+import FastPriorityQueue from 'fastpriorityqueue';
 import cytoscape from 'cytoscape';
 import type {
     EdgeCollection, EdgeSingular, NodeCollection, NodeSingular
@@ -242,6 +243,62 @@ class VEdge {
             source: this.source.id, target: this.target.id, weight: this.weight
         };
     }
+}
+
+interface DistanceEntry {
+    node: number;
+    distance: number;
+}
+
+/** Dense stress distances from repeated weighted Dijkstra. */
+function computeStressDistances(nodes: VNode[], edges: VEdge[], idealLength: number): number[][] {
+    const numNodes = nodes.length;
+    const nodeIndexMap = new Map<string, number>();
+    nodes.forEach((node, index) => nodeIndexMap.set(node.id, index));
+    const adjacency: DistanceEntry[][] = Array.from({length: numNodes}, () => []);
+
+    edges.forEach(edge => {
+        if (!edge.source || !edge.target) {
+            return;
+        }
+        const source = nodeIndexMap.get(edge.source.id);
+        const target = nodeIndexMap.get(edge.target.id);
+        if (source === undefined || target === undefined) {
+            return;
+        }
+        const distance = idealLength + edge.source.radius + edge.target.radius;
+        if (distance < 0 || !Number.isFinite(distance)) {
+            throw new RangeError('cytoscape-lumina: stress edge lengths must be finite and non-negative');
+        }
+        adjacency[source].push({node: target, distance});
+        adjacency[target].push({node: source, distance});
+    });
+
+    const distances: number[][] = Array.from({length: numNodes}, (_, index) => {
+        const row = new Array<number>(numNodes).fill(Infinity);
+        row[index] = 0;
+        return row;
+    });
+
+    for (let source = 0; source < numNodes; source++) {
+        const row = distances[source];
+        const heap = new FastPriorityQueue<DistanceEntry>((a, b) =>
+            a.distance < b.distance || (a.distance === b.distance && a.node < b.node)
+        );
+        heap.add({node: source, distance: 0});
+        let current: DistanceEntry | undefined;
+        while ((current = heap.poll()) !== undefined) {
+            if (current.distance !== row[current.node]) continue;
+            for (const neighbor of adjacency[current.node]) {
+                const candidate = current.distance + neighbor.distance;
+                if (candidate < row[neighbor.node]) {
+                    row[neighbor.node] = candidate;
+                    heap.add({node: neighbor.node, distance: candidate});
+                }
+            }
+        }
+    }
+    return distances;
 }
 
 /**
@@ -1567,9 +1624,7 @@ LuminaLayout.prototype.run = function () {
             if (numNodes === 0) return;
 
             // Index mapping: ID -> array index, for matrix operations
-            const nodeIndexMap = new Map<string, number>();
-            this.vnodes.forEach((v: VNode, i: number) => nodeIndexMap.set(v.id, i));
-
+            // The distance helper builds the index alongside its weighted adjacency.
             // Extract the adjacency list for reuse during initialization
             const adj = new Map<string, VNode[]>();
             this.vedges.forEach((e: VEdge) => {
@@ -1581,35 +1636,10 @@ LuminaLayout.prototype.run = function () {
             });
 
             // -------------------------------------------------------------
-            // [Preprocessing 1] Calculate the shortest-path distance matrix between every pair of nodes in the graph (APSP - Floyd Warshall)
+            // [Preprocessing 1] Calculate all-pairs shortest paths using weighted Dijkstra
             // -------------------------------------------------------------
-            const distMatrix: number[][] = Array.from({length: numNodes}, () => new Array(numNodes).fill(Infinity));
+            const distMatrix = computeStressDistances(this.vnodes, this.vedges, idealLength);
             const weightMatrix: number[][] = Array.from({length: numNodes}, () => new Array(numNodes).fill(0));
-
-            for (let i = 0; i < numNodes; i++) distMatrix[i][i] = 0;
-
-            // Assign the ideal distance baseline based on real edges
-            this.vedges.forEach((e: VEdge) => {
-                if (!e.source || !e.target) return;
-                const u = nodeIndexMap.get(e.source.id);
-                const v = nodeIndexMap.get(e.target.id);
-                if (u !== undefined && v !== undefined) {
-                    const idealDist = idealLength + e.source.radius + e.target.radius;
-                    distMatrix[u][v] = Math.min(distMatrix[u][v], idealDist);
-                    distMatrix[v][u] = Math.min(distMatrix[v][u], idealDist);
-                }
-            });
-
-            // Use Floyd-Warshall to compute shortest paths between all node pairs
-            for (let k = 0; k < numNodes; k++) {
-                for (let i = 0; i < numNodes; i++) {
-                    for (let j = 0; j < numNodes; j++) {
-                        if (distMatrix[i][k] + distMatrix[k][j] < distMatrix[i][j]) {
-                            distMatrix[i][j] = distMatrix[i][k] + distMatrix[k][j];
-                        }
-                    }
-                }
-            }
 
             // Calculate the weight matrix W_ij = 1 / (d_ij ^ weightExponent)
             for (let i = 0; i < numNodes; i++) {

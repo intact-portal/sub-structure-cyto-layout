@@ -26,8 +26,9 @@
     "registry": "https://registry.npmjs.org/"
   },
   "scripts": {
-    "build": "tsc && cp demo/favicon.ico dist/favicon.ico && cp demo/index.html dist/index.html && cp node_modules/cytoscape/dist/cytoscape.min.js dist/ && if [ -d demo/data ]; then cp -r demo/data dist/data; fi && touch dist/.nojekyll",
-    "dev": "npm run build && concurrently \"tsc --watch\" \"node watch.cjs\" \"http-server dist -p 8080 -c-1\"",
+    "build": "npm run build:lib && npm run build:browser && cp demo/favicon.ico dist/favicon.ico && cp demo/index.html dist/index.html && cp node_modules/cytoscape/dist/cytoscape.min.js dist/ && if [ -d demo/data ]; then cp -r demo/data dist/data; fi && touch dist/.nojekyll",
+    "build:browser": "esbuild src/index.ts --bundle --format=esm --platform=browser --target=es2020 --external:cytoscape --outfile=dist/lumina-browser.js",
+    "dev": "npm run build && concurrently \"tsc --watch\" \"npm run build:browser -- --watch\" \"node watch.cjs\" \"http-server dist -p 8080 -c-1\"",
     "deploy": "./deploy.sh",
     "build:lib": "tsc",
     "local-publish": "npm run build:lib && yalc push",
@@ -37,6 +38,7 @@
   "devDependencies": {
     "concurrently": "^9.2.4",
     "cytoscape": "^3.33.1",
+    "esbuild": "^0.28.2",
     "gh-pages": "^6.3.0",
     "http-server": "^14.1.1",
     "typescript": "^5.9.3",
@@ -65,5 +67,8 @@
   },
   "allowScripts": {
     "fsevents@2.3.3": true
+  },
+  "dependencies": {
+    "fastpriorityqueue": "^0.8.0"
   }
 }

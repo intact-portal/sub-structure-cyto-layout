@@ -3,11 +3,11 @@
 const fs = require('fs');
 const path = require('path');
 
-console.log('👀 Watching src/index.html for changes...');
+console.log('👀 Watching demo/index.html for changes...');
 
 // Copy HTML file
 function copyHTML() {
-  const src = path.join(__dirname, 'src/index.html');
+  const src = path.join(__dirname, 'demo/index.html');
   const dest = path.join(__dirname, 'dist/index.html');
 
   try {
@@ -22,7 +22,7 @@ function copyHTML() {
 copyHTML();
 
 // Watch for changes
-fs.watch(path.join(__dirname, 'src/index.html'), (eventType) => {
+fs.watch(path.join(__dirname, 'demo/index.html'), (eventType) => {
   if (eventType === 'change') {
     console.log('📝 index.html changed, copying...');
     copyHTML();
