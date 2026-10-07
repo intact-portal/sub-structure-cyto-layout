@@ -362,18 +362,6 @@ LuminaLayout.prototype.captureStep = function (stepName: string, description: st
     console.debug(`[Step ${step.stepNumber}] ${stepName}: ${description}`);
 };
 
-/////////////// Check whether two node arrays are identical, ignoring order
-function areNodesEqual(arr1: cytoscape.NodeCollection, arr2: cytoscape.NodeCollection): boolean {
-    // 1. Different lengths mean they are definitely different
-    if (arr1.length !== arr2.length) return false;
-
-    // 2. Extract all IDs and put them into a Set
-    const ids1 = new Set(arr1.map((node: Node) => node.id()));
-
-    // 3. Check whether every ID in arr2 exists in the Set
-    return arr2.every(node => ids1.has((node as NodeSingular).id()));
-}
-
 ////////////////sum length of all edges ////////////////
 function totalEdgeLength(edges: Edges) {
     let total = 0;
@@ -750,56 +738,60 @@ LuminaLayout.prototype.identifyStructures = function (nodes: NodeCollection) {
 
     /////////////////////////////// Find parallel/diamond structures ///////////////////////////////////
 
-    // let diamonds = [];
+    const nodesById = new Map<string, NodeSingular>();
+    const parallelGroups = new Map<string, NodeSingular[]>();
+    nodes.forEach((node: NodeSingular) => {
+      nodesById.set(node.id(), node);
+      if (node.data("structType") !== "Normal") {
+        return;
+      }
+
+      const neighbors = neighborsOf(node);
+      if (!(neighbors.length >= params.minParallelNeighbors)) {
+        return;
+      }
+
+      // Encode a sorted copy so IDs cannot collide and cached neighbor order stays intact.
+      const signature = JSON.stringify(
+        neighbors.map((neighbor) => neighbor.id()).sort(),
+      );
+      const group = parallelGroups.get(signature);
+      if (group) {
+        group.push(node);
+      } else {
+        parallelGroups.set(signature, [node]);
+      }
+    });
+
+    // Map insertion order preserves group numbering by the first eligible member.
     let parallelId = 0;
-    // Whether any two nodes have common neighbors
-    for (let i = 0; i < nodes.length; i++) {
-        let nodeVecParallel = [];
-        const u = nodes[i];
-        const u1 = neighborsOf(u);
+    for (const group of parallelGroups.values()) {
+      if (group.length < 2) continue;
+      const groupId = "Parallel" + parallelId;
+      group.forEach((node) => {
+        node.addClass("substructure-parallel");
+        node.data("structType", "Parallel");
+        node.data("groupId", groupId);
+        node.data("structs", {
+          ...node.data("structs"),
+          Parallel: {
+            color: "#50C878",
+            groupId: `Parallel_${parallelId}`,
+          },
+        });
+      });
 
-        if (u.data('structType') === 'Normal') {
-            for (let j = 0; j < nodes.length; j++) {
-                if (i === j) continue;
-                const v = nodes[j];
-                if (v.data('structType') === 'Normal') {
-                    const v1 = neighborsOf(v);
-                    if (areNodesEqual(v1, u1) && v1.length >= params.minParallelNeighbors && u1.length >= params.minParallelNeighbors) {
-                        if (nodeVecParallel.length === 0) {
-                            nodeVecParallel.push(u.id());
-                        }
-                        nodeVecParallel.push(v.id());
-                    }
-                }
-            }
+      neighborsOf(group[0]).forEach((neighbor) => {
+        // Neighborhoods may include nodes outside the supplied collection.
+        const node = nodesById.get(neighbor.id());
+        if (node) {
+          node.data("parallelGroupIdVec", [
+            ...node.data("parallelGroupIdVec"),
+            groupId,
+          ]);
         }
-        if (nodeVecParallel.length >= 2) {
-            nodeVecParallel.forEach(v => {
-                nodes.forEach((node: Node) => {
-                    if (node.id() == v) {
-                        node.addClass('substructure-parallel')
-                        node.data('structType', 'Parallel');
-                        // node.data('structColor', '#50C878');
-                        node.data('groupId', 'Parallel' + parallelId);
-
-                        node.data('structs', {
-                            ...node.data('structs'), Parallel: {
-                                color: '#50C878', groupId: `Parallel_${parallelId}`
-                            }
-                        });
-                    }
-                })
-            })
-
-            u1.forEach((v1: Node) => {
-                nodes.forEach((node: Node) => {
-                    if (node.id() == v1.id()) {
-                        node.data('parallelGroupIdVec', [...node.data('parallelGroupIdVec'), 'Parallel' + parallelId]);
-                    }
-                })
-            })
-            parallelId++;
-        }
+      });
+      parallelId++;
     }
 
 };
