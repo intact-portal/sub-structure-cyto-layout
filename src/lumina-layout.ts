@@ -359,7 +359,7 @@ LuminaLayout.prototype.captureStep = function (stepName: string, description: st
     this.steps.push(step);
     this.currentStepIndex = this.steps.length - 1;
 
-    console.log(`[Step ${step.stepNumber}] ${stepName}: ${description}`);
+    console.debug(`[Step ${step.stepNumber}] ${stepName}: ${description}`);
 };
 
 /////////////// Check whether two node arrays are identical, ignoring order
@@ -593,8 +593,6 @@ LuminaLayout.prototype.identifyStructures = function (nodes: NodeCollection) {
         circleIndex++;
     })
 
-    console.log("num of cycles: ", filteredCycles.length);
-
     ////////////////////////////////////////// Define the storage structure for chains  ////////////////////////////
     interface Chain {
         chainId: string;
@@ -795,7 +793,6 @@ LuminaLayout.prototype.identifyStructures = function (nodes: NodeCollection) {
         }
     }
 
-    console.log("num of chains: ", chains.length);
 };
 
 interface NetworkInfo {
@@ -848,8 +845,6 @@ LuminaLayout.prototype.run = function () {
         this.vnodes = [];
         this.vedges = [];
 
-        console.log(`independent net: ${index + 1}`);
-
         // 1. get user defined boundingBox，if not then default cy container
         const bb = this.boundingBox || this.cy.extent();
 
@@ -885,9 +880,6 @@ LuminaLayout.prototype.run = function () {
                 });
             });
         }
-
-        console.log("num of nodes: " + nodes.length);
-        console.log("num of edges: " + edgeSet.length);
 
         // Capture initial state
         this.captureStep('Initial', 'Initial node positions before any layout', {
@@ -1467,6 +1459,7 @@ LuminaLayout.prototype.run = function () {
                 numOfCollision = 0;
                 const padding = params.collisionPadding;
                 let iter = 0;
+                let overlapLimitReached = false;
                 while (colisionFlag) {
                     if(this.stopped){
                         break;
@@ -1520,12 +1513,21 @@ LuminaLayout.prototype.run = function () {
 
                     // [Optimization 3] Safety valve: exit directly if the iteration count becomes too large (typically when nodes are extremely dense)
                     if (numOfCollision > 10000) {
-                        console.warn("avoid dead loop");
-                        break;
+                      overlapLimitReached = true;
+                      break;
                     }
-                    // this.captureStep('Anti-collision', 'Eliminate all collisions ' + iter, {iterations});
                 }
-                this.captureStep('Anti-collision', 'Eliminate all collisions', {iterations});
+                this.captureStep(
+                  "Anti-collision",
+                  overlapLimitReached
+                    ? "Overlap removal stopped at safety limit"
+                    : "Eliminate all collisions",
+                  {
+                    iterations,
+                    overlapIterations: iter,
+                    overlapLimitReached,
+                  },
+                );
                 if (1) {
                     numOfCollision = 0;
                     for (let i = 0; i < this.vnodes.length; i++) {
@@ -1733,6 +1735,7 @@ LuminaLayout.prototype.run = function () {
                 let numOfCollision = 0;
                 const padding = params.collisionPadding;
                 let overlapIter = 0;
+                let overlapLimitReached = false;
 
                 while (colisionFlag) {
                     if (this.stopped) {
@@ -1775,11 +1778,21 @@ LuminaLayout.prototype.run = function () {
                     }
 
                     if (numOfCollision > 10000 || overlapIter > params.maxOverlapIterations) {
-                        console.warn("Avoid dead loop in overlap removal");
+                        overlapLimitReached = true;
                         break;
                     }
                 }
-                this.captureStep('Anti-collision', 'Eliminate all collisions', {iterations});
+                this.captureStep(
+                  "Anti-collision",
+                  overlapLimitReached
+                    ? "Overlap removal stopped at safety limit"
+                    : "Eliminate all collisions",
+                  {
+                    iterations,
+                    overlapIterations: overlapIter,
+                    overlapLimitReached,
+                  },
+                );
             }
 
             this.captureStep('Virtual Node Layout', 'Stress Majorization layout applied to virtual nodes', {iterations});
@@ -2187,35 +2200,6 @@ LuminaLayout.prototype.run = function () {
         }
 
         rotateNetworkToMinimumBoundingBox(nodes)
-
-        if (1) {
-            let maxDis = 0;
-            let maxS = 0;
-            let maxT = 0;
-            let minDist = 10e10;
-            let minS = 0;
-            let minT = 0;
-            let avgDis = 0;
-            edgeSet.forEach((e: { source: () => any; target: () => any; position: { y: number; }; }) => {
-                const s = e.source();
-                const t = e.target();
-                const distance = Math.sqrt(Math.pow(s.position().x - t.position().x, 2) + Math.pow(s.position().y - t.position().y, 2));
-                if (maxDis < distance) {
-                    maxDis = distance;
-                    maxS = s.id();
-                    maxT = t.id();
-                }
-                if (minDist > distance) {
-                    minDist = distance;
-                    minS = s.id();
-                    minT = t.id();
-                }
-                avgDis += distance;
-            })
-            console.log("maxDis:", maxDis, " ", maxS, "->", maxT);
-            console.log("minDist:", minDist, " ", minS, "->", minT);
-            console.log("avgDis:", avgDis / edgeSet.length);
-        }
 
         const bb2 = nodes.boundingBox();
 
@@ -3209,12 +3193,12 @@ LuminaLayout.prototype.packNetworks = function (networks: any[]): void {
 LuminaLayout.prototype.goToStep = function (stepIndex: number) {
     if (!this.params.stepByStep || this.steps.length === 0) {
         console.warn('Step-by-step mode is not enabled or no steps have been captured');
-        return this;
+      return this;
     }
 
     if (stepIndex < 0 || stepIndex >= this.steps.length) {
         console.error(`Invalid step index: ${stepIndex}. Valid range: 0-${this.steps.length - 1}`);
-        return this;
+      return this;
     }
 
     const step = this.steps[stepIndex];
@@ -3232,7 +3216,9 @@ LuminaLayout.prototype.goToStep = function (stepIndex: number) {
     // Visualize virtual nodes if they exist at this step
     this.visualizeVirtualNodes(step);
 
-    console.log(`[Step ${step.stepNumber}/${this.steps.length - 1}] ${step.stepName}: ${step.description}`);
+    console.debug(
+      `[Step ${step.stepNumber}/${this.steps.length - 1}] ${step.stepName}: ${step.description}`,
+    );
 
     this.cy.fit(null, 50);
     return this;
@@ -3243,9 +3229,9 @@ LuminaLayout.prototype.goToStep = function (stepIndex: number) {
  */
 LuminaLayout.prototype.nextStep = function () {
     if (this.currentStepIndex < this.steps.length - 1) {
-        return this.goToStep(this.currentStepIndex + 1);
+      return this.goToStep(this.currentStepIndex + 1);
     } else {
-        console.log('Already at the last step');
+        console.debug("Already at the last step");
         return this;
     }
 };
@@ -3255,9 +3241,9 @@ LuminaLayout.prototype.nextStep = function () {
  */
 LuminaLayout.prototype.prevStep = function () {
     if (this.currentStepIndex > 0) {
-        return this.goToStep(this.currentStepIndex - 1);
+      return this.goToStep(this.currentStepIndex - 1);
     } else {
-        console.log('Already at the first step');
+        console.debug("Already at the first step");
         return this;
     }
 };
@@ -3267,15 +3253,9 @@ LuminaLayout.prototype.prevStep = function () {
  */
 LuminaLayout.prototype.listSteps = function () {
     if (!this.params.stepByStep || this.steps.length === 0) {
-        console.log('No steps available');
+        console.debug("No steps available");
         return [];
     }
-
-    console.log(`Total steps: ${this.steps.length}`);
-    this.steps.forEach((step: LayoutStep, index: number) => {
-        const current = index === this.currentStepIndex ? ' ← CURRENT' : '';
-        console.log(`  [${index}] ${step.stepName}: ${step.description}${current}`);
-    });
 
     return this.steps.map((s: LayoutStep) => ({
         stepNumber: s.stepNumber,

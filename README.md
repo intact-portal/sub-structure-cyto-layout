@@ -143,7 +143,7 @@ Set `stepByStep: true`, keep a reference to the layout, and run it:
 const layout = cy.layout({ name: 'lumina', stepByStep: true });
 layout.run();
 
-layout.listSteps();   // print and return all captured steps
+const steps = layout.listSteps(); // return all captured steps
 layout.goToStep(3);   // jump to a step
 layout.nextStep();
 layout.prevStep();
