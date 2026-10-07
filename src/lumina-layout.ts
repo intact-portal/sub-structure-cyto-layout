@@ -477,6 +477,17 @@ function layoutRectangular(nodes: NodeSingular[], center: { x: number, y: number
 
 LuminaLayout.prototype.identifyStructures = function (nodes: NodeCollection) {
     const params = this.params;
+    // Topology stays fixed during detection; structure markers are filtered dynamically.
+    const neighborhoodCache = new Map<string, NodeCollection>();
+    const neighborsOf = (node: NodeSingular): NodeCollection => {
+        const id = node.id();
+        let neighbors = neighborhoodCache.get(id);
+        if (neighbors === undefined) {
+            neighbors = node.neighborhood().nodes();
+            neighborhoodCache.set(id, neighbors);
+        }
+        return neighbors;
+    };
 
     // 0. Reset all markers
     nodes.data('structType', 'Normal');
@@ -491,7 +502,7 @@ LuminaLayout.prototype.identifyStructures = function (nodes: NodeCollection) {
     ///////////////////////////// 2. detecting Cycle - by DFS algorithm /////////////////
     const allCycles: string[][] = [];  // each sub-array represents an independent cycle
     if (1) {
-        const normalNodes: Node[] = nodes.toArray().filter((n: Node) => n.data('structType') === 'Normal' && n.neighborhood().nodes().length >= 2);
+        const normalNodes: Node[] = nodes.toArray().filter((n: Node) => n.data('structType') === 'Normal' && neighborsOf(n).length >= 2);
         const seenCycles = new Set<string>();
 
         // To avoid duplicate cycles (like A-B-C and B-C-A), we sort and stringify for a check
@@ -502,7 +513,7 @@ LuminaLayout.prototype.identifyStructures = function (nodes: NodeCollection) {
             const startId = startNode.id();
 
             const findCycles = (u: Node, parent: Node | null, path: string[]) => {
-                const neighbors = u.neighborhood().nodes().toArray().filter((n: any) => n.data('structType') === 'Normal');
+                const neighbors = neighborsOf(u).toArray().filter((n: any) => n.data('structType') === 'Normal');
 
                 if (neighbors.length < 8) { // If a node has too many neighbors, it is unlikely to be part of a cycle; this mainly improves efficiency and prevents the search from getting stuck here
                     for (const v of neighbors) {
@@ -603,7 +614,7 @@ LuminaLayout.prototype.identifyStructures = function (nodes: NodeCollection) {
     const processedNodeIds = new Set<string>(); // avoid processing nodes more than once
 
     // 2. Find all leaf nodes (Normal type with degree 1)
-    const leafNodes = nodes.filter((n: any) => n.data('structType') === 'Normal' && n.neighborhood().nodes().length === 1);
+    const leafNodes = nodes.filter((n: any) => n.data('structType') === 'Normal' && neighborsOf(n).length === 1);
 
     let chainId = 0;
     leafNodes.forEach((leaf: any) => {
@@ -620,8 +631,7 @@ LuminaLayout.prototype.identifyStructures = function (nodes: NodeCollection) {
             processedNodeIds.add(currentNode.id());
 
             // Find the next neighbor
-            const neighbors = currentNode
-                .neighborhood('node')
+            const neighbors = neighborsOf(currentNode)
                 .filter((n: any) =>
                     n.id() !== currentNode.id() &&
                     n.data('structType') === 'Normal' &&
@@ -634,8 +644,7 @@ LuminaLayout.prototype.identifyStructures = function (nodes: NodeCollection) {
             if (neighbors.length === 1) {
                 const nextNode = neighbors[0];
 
-                const nextNodeNeighborCount = nextNode
-                    .neighborhood('node')
+                const nextNodeNeighborCount = neighborsOf(nextNode)
                     .filter((n: any) => n.id() !== nextNode.id())
                     .length;
 
@@ -695,13 +704,13 @@ LuminaLayout.prototype.identifyStructures = function (nodes: NodeCollection) {
     let starIndex: number = 0;
     nodes.forEach((node: any) => {
 
-        const neighbors = node.neighborhood().nodes();
+        const neighbors = neighborsOf(node);
 
         // Number of distinct neighbors
         const neighborCount = neighbors.length;
 
         // Check whether the neighbors consist only of distinct neighbor nodes
-        const leafNeighbors = neighbors.filter((n: Node) => n.neighborhood().nodes().length === 1);
+        const leafNeighbors = neighbors.filter((n: Node) => neighborsOf(n).length === 1);
 
         if (leafNeighbors.length >= params.minStarLeaves && neighborCount >= params.minStarLeaves) {
 
@@ -747,14 +756,14 @@ LuminaLayout.prototype.identifyStructures = function (nodes: NodeCollection) {
     for (let i = 0; i < nodes.length; i++) {
         let nodeVecParallel = [];
         const u = nodes[i];
-        const u1 = u.neighborhood().nodes();
+        const u1 = neighborsOf(u);
 
         if (u.data('structType') === 'Normal') {
             for (let j = 0; j < nodes.length; j++) {
                 if (i === j) continue;
                 const v = nodes[j];
                 if (v.data('structType') === 'Normal') {
-                    const v1 = v.neighborhood().nodes();
+                    const v1 = neighborsOf(v);
                     if (areNodesEqual(v1, u1) && v1.length >= params.minParallelNeighbors && u1.length >= params.minParallelNeighbors) {
                         if (nodeVecParallel.length === 0) {
                             nodeVecParallel.push(u.id());
