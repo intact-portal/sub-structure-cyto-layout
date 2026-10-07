@@ -2,237 +2,146 @@ import cytoscape from 'cytoscape';
 import type {
     EdgeCollection, EdgeSingular, NodeCollection, NodeSingular
 } from 'cytoscape';
-// ============================================================================
-// LUMINA - layout parameters, split by who uses them:
-//   1. CommonParams  - shared by both 'force' and 'stress'
-//   2. ForceParams   - only used when LAYOUT_ALGORITHM === 'force'   (params.force)
-//   3. StressParams  - only used when LAYOUT_ALGORITHM === 'stress'  (params.stress)
-// ============================================================================
-
 export type LayoutAlgorithm = 'force' | 'stress';
 
-/** Parameters shared by every algorithm */
-export interface CommonParams {
-    LAYOUT_ALGORITHM: LayoutAlgorithm;
+/** Options used only by the force-directed solver. */
+export interface LuminaForceOptions {
+    /** Node-node repulsion strength. */
+    repulsion?: number;
+    /** Spring stiffness of edges. */
+    springK?: number;
+    /** Multiplier applied to repulsion for overlapping virtual nodes. */
+    overlapRepulsionFactor?: number;
+    /** Exponent used by the simulated-annealing cooling function. */
+    coolingExponent?: number;
+    /** Whether to spread leaf virtual nodes evenly around their hub. */
+    useAngularForce?: boolean;
+    angularStrength?: number;
+    angularMaxForce?: number;
+}
 
-    // ---- Virtual-node solver (used by BOTH force and stress) ----
+/** Options used only by the stress-majorization solver. */
+export interface LuminaStressOptions {
+    /** Exponent in the stress weight formula: w = 1 / distance ^ exponent. */
+    weightExponent?: number;
+}
+
+/** Public LUMINA options, excluding Cytoscape's required layout name. */
+export interface LuminaOptions {
+    layoutAlgorithm?: LayoutAlgorithm;
     /** Ideal surface-to-surface gap between connected virtual nodes
      *  (force: spring rest length; stress: base of the target distance;
-     *   both: radius of the initial radial placement of leaf vnodes) */
-    IDEAL_LENGTH: number;
-    /** Max iterations of the main solver loop */
-    ITERATIONS: number;
-    /** Stop early when the max movement of any vnode is below this (px) */
-    CONVERGENCE_THRESHOLD: number;
-    /** Extra gap enforced between vnodes in the anti-collision pass.
-     *  null => use IDEAL_LENGTH */
-    COLLISION_PADDING: number | null;
-    /** Safety cap for the anti-collision loop */
-    MAX_OVERLAP_ITERATIONS: number;
+     *   both: radius of the initial radial placement of leaf virtual nodes). */
+    idealLength?: number;
+    iterations?: number;
+    convergenceThreshold?: number;
+    /** Extra gap in the anti-collision pass. Null uses `idealLength`. */
+    collisionPadding?: number | null;
+    maxOverlapIterations?: number;
 
-    // ---- Structure detection ----
-    MIN_STAR_LEAVES: number;
-    MIN_CYCLE_LENGTH: number;
-    MAX_CYCLE_LENGTH: number;
-    MIN_CHAIN_LENGTH: number;
-    MIN_PARALLEL_NEIGHBORS: number;
-
-    // ---- Substructure spacing (independent of the vnode solver) ----
-    CYCLE_NODE_SPACING: number;
-    STAR_RING_SPACING: number;
-    STAR_BASE_NODES_PER_RING: number;
-    CHAIN_MIN_RADIUS: number;
-    LEAF_NODE_DISTANCE: number;
-
-    // ---- Control flags ----
-    RANDOMIZE_INITIAL_POSITIONS: boolean;
-    SPREAD_V_NODES: boolean;
-    SUBSTRUCTURE_LAYOUT: boolean;
-    STEP_BY_STEP: boolean;
-}
-
-/** Only for the 'force' algorithm */
-export interface ForceParams {
-    /** Node-node repulsion strength */
-    REPULSION: number;
-    /** Spring stiffness of edges */
-    SPRING_K: number;
-    /** Overlapping vnodes repel REPULSION * this factor harder */
-    OVERLAP_REPULSION_FACTOR: number;
-    /** Simulated-annealing cooling: cooling = (1 - iter/ITERATIONS) ^ this */
-    COOLING_EXPONENT: number;
-
-    /** Angular force that spreads leaf vnodes evenly around a hub */
-    USE_ANGULAR_FORCE: boolean;
-    ANGULAR_STRENGTH: number;
-    ANGULAR_MAX_FORCE: number;
-}
-
-/** Only for the 'stress' algorithm */
-export interface StressParams {
-    /** weight w_ij = 1 / d_ij ^ WEIGHT_EXPONENT (2 = classic stress majorization) */
-    WEIGHT_EXPONENT: number;
-}
-
-export interface LayoutParameters extends CommonParams {
-    force: ForceParams;
-    stress: StressParams;
-}
-
-export const DEFAULT_PARAMS: LayoutParameters = {
-    LAYOUT_ALGORITHM: 'stress',
-
-    // shared solver
-    IDEAL_LENGTH: 100,
-    ITERATIONS: 600,
-    CONVERGENCE_THRESHOLD: 0.5,
-    COLLISION_PADDING: null,
-    MAX_OVERLAP_ITERATIONS: 300,
-
-    // structure detection
-    MIN_STAR_LEAVES: 3,
-    MIN_CYCLE_LENGTH: 3,
-    MAX_CYCLE_LENGTH: 30,
-    MIN_CHAIN_LENGTH: 2,
-    MIN_PARALLEL_NEIGHBORS: 2,
-
+    // structure deteciton
+    minStarLeaves?: number;
+    minCycleLength?: number;
+    minChainLength?: number;
+    minParallelNeighbors?: number;
+    
     // substructure spacing
-    CYCLE_NODE_SPACING: 100,
-    STAR_RING_SPACING: 100,
-    STAR_BASE_NODES_PER_RING: 6,
-    CHAIN_MIN_RADIUS: 150,
-    LEAF_NODE_DISTANCE: 200,
+    cycleNodeSpacing?: number;
+    starRingSpacing?: number;
+    starBaseNodesPerRing?: number;
+    chainMinRadius?: number;
+    leafNodeDistance?: number;
 
-    // flags
-    RANDOMIZE_INITIAL_POSITIONS: false,
-    SPREAD_V_NODES: true,
-    SUBSTRUCTURE_LAYOUT: false,
-    STEP_BY_STEP: false,
-
-    force: {
-        REPULSION: 300,
-        SPRING_K: 0.15,
-        OVERLAP_REPULSION_FACTOR: 5,
-        COOLING_EXPONENT: 2,
-        USE_ANGULAR_FORCE: false,
-        ANGULAR_STRENGTH: 0.2,
-        ANGULAR_MAX_FORCE: 2.0
-    },
-
-    stress: {
-        WEIGHT_EXPONENT: 2
-    }
-};
-
-// ----------------------------------------------------------------------------
-// Public (Cytoscape camelCase) option names -> internal names
-// ----------------------------------------------------------------------------
-
-const COMMON_KEYS: Record<string, keyof CommonParams> = {
-    layoutAlgorithm: 'LAYOUT_ALGORITHM',
-    idealLength: 'IDEAL_LENGTH',
-    iterations: 'ITERATIONS',
-    convergenceThreshold: 'CONVERGENCE_THRESHOLD',
-    collisionPadding: 'COLLISION_PADDING',
-    maxOverlapIterations: 'MAX_OVERLAP_ITERATIONS',
-
-    minStarLeaves: 'MIN_STAR_LEAVES',
-    minCycleLength: 'MIN_CYCLE_LENGTH',
-    maxCycleLength: 'MAX_CYCLE_LENGTH',
-    minChainLength: 'MIN_CHAIN_LENGTH',
-    minParallelNeighbors: 'MIN_PARALLEL_NEIGHBORS',
-
-    cycleNodeSpacing: 'CYCLE_NODE_SPACING',
-    starRingSpacing: 'STAR_RING_SPACING',
-    starBaseNodesPerRing: 'STAR_BASE_NODES_PER_RING',
-    chainMinRadius: 'CHAIN_MIN_RADIUS',
-    leafNodeDistance: 'LEAF_NODE_DISTANCE',
-
-    randomizeInitialPositions: 'RANDOMIZE_INITIAL_POSITIONS',
-    spreadVNodes: 'SPREAD_V_NODES',
-    substructureLayout: 'SUBSTRUCTURE_LAYOUT',
-    stepByStep: 'STEP_BY_STEP'
-};
-
-const FORCE_KEYS: Record<string, keyof ForceParams> = {
-    repulsion: 'REPULSION',
-    springK: 'SPRING_K',
-    overlapRepulsionFactor: 'OVERLAP_REPULSION_FACTOR',
-    coolingExponent: 'COOLING_EXPONENT',
-    useAngularForce: 'USE_ANGULAR_FORCE',
-    angularStrength: 'ANGULAR_STRENGTH',
-    angularMaxForce: 'ANGULAR_MAX_FORCE'
-};
-
-const STRESS_KEYS: Record<string, keyof StressParams> = {
-    weightExponent: 'WEIGHT_EXPONENT'
-};
-
-function pick<T>(src: any, map: Record<string, keyof T>): Partial<T> {
-    const out: any = {};
-    if (!src) return out;
-    for (const pub of Object.keys(map)) {
-        if (src[pub] !== undefined) out[map[pub]] = src[pub];
-    }
-    return out;
+    randomizeInitialPositions?: boolean;
+    spreadVNodes?: boolean;
+    substructureLayout?: boolean;
+    stepByStep?: boolean;
+    
+    force?: LuminaForceOptions;
+    stress?: LuminaStressOptions;
 }
 
-/**
- * Build the final parameters from Cytoscape layout options.
- *
- * cy.layout({
- *   name: 'lumina',
- *   layoutAlgorithm: 'force',
- *   idealLength: 100,              // shared
- *   iterations: 600,               // shared
- *   force:  { repulsion: 300, springK: 0.15, useAngularForce: true },
- *   stress: { weightExponent: 2 }
- * })
- *
- * Backward compatibility: the old flat force options (repulsion, springK,
- * angularStrength, useAngularForce) and the legacy `params` object (flat,
- * upper-case) are still accepted. Nested `force` / `stress` take priority.
- */
-export function resolveParams(options: any): LayoutParameters {
-    options = options || {};
-    const legacy = options.params || {};
+/** Options passed to `cy.layout()` for the LUMINA layout. */
+export interface LuminaLayoutOptions extends LuminaOptions, cytoscape.BaseLayoutOptions {
+    name: 'lumina' | 'substructure-layout';
+}
 
-    // flat legacy force options at top level
-    const legacyForce = pick<ForceParams>(options, FORCE_KEYS);
+/** Fully resolved options used internally by the layout. */
+export interface LuminaParameters extends Required<Omit<LuminaOptions, 'collisionPadding' | 'force' | 'stress'>> {
+    collisionPadding: number;
+    force: Required<LuminaForceOptions>;
+    stress: Required<LuminaStressOptions>;
+}
 
-    // legacy upper-case flat `params`: route each key to the right group
-    const legacyCommon: any = {};
-    const legacyForceUpper: any = {};
-    const legacyStressUpper: any = {};
-    Object.keys(legacy).forEach((k) => {
-        if (k in DEFAULT_PARAMS.force) legacyForceUpper[k] = legacy[k];
-        else if (k in DEFAULT_PARAMS.stress) legacyStressUpper[k] = legacy[k];
-        else if (k !== 'force' && k !== 'stress') legacyCommon[k] = legacy[k];
-    });
+export const DEFAULT_PARAMS: LuminaParameters = {
+    layoutAlgorithm: 'stress',
+    
+    // shared solver
+    idealLength: 100,
+    iterations: 600,
+    convergenceThreshold: 0.5,
+    collisionPadding: 100,
+    maxOverlapIterations: 300,
+    
+    // structure deteciton
+    minStarLeaves: 3,
+    minCycleLength: 3,
+    minChainLength: 2,
+    minParallelNeighbors: 2,
+    
+    // substructure spacing
+    cycleNodeSpacing: 100,
+    starRingSpacing: 100,
+    starBaseNodesPerRing: 6,
+    chainMinRadius: 150,
+    leafNodeDistance: 200,
 
-    const params: LayoutParameters = {
-        ...DEFAULT_PARAMS,
-        ...legacyCommon,
-        ...pick<CommonParams>(options, COMMON_KEYS),
-        force: {
-            ...DEFAULT_PARAMS.force,
-            ...legacyForceUpper,
-            ...(legacy.force || {}),
-            ...legacyForce,
-            ...pick<ForceParams>(options.force, FORCE_KEYS)
-        },
-        stress: {
-            ...DEFAULT_PARAMS.stress,
-            ...legacyStressUpper,
-            ...(legacy.stress || {}),
-            ...pick<StressParams>(options.stress, STRESS_KEYS)
-        }
-    };
-
-    if (params.COLLISION_PADDING == null) {
-        params.COLLISION_PADDING = params.IDEAL_LENGTH;
+    randomizeInitialPositions: false,
+    spreadVNodes: true,
+    substructureLayout: false,
+    stepByStep: false,
+    force: {
+        repulsion: 300,
+        springK: 0.15,
+        overlapRepulsionFactor: 5,
+        coolingExponent: 2,
+        useAngularForce: false,
+        angularStrength: 0.2,
+        angularMaxForce: 2.0
+    },
+    stress: {
+        weightExponent: 2
     }
-    return params;
+};
+
+function applyDefaults<T extends object>(defaults: T, overrides?: Partial<T>): T {
+    const resolved = {...defaults};
+    for (const key of Object.keys(defaults) as Array<keyof T>) {
+        if (overrides?.[key] !== undefined) {
+            resolved[key] = overrides[key] as T[keyof T];
+        }
+    }
+    return resolved;
+}
+
+/** Resolve optional public settings into the complete internal configuration. */
+export function resolveParams(options: LuminaOptions = {}): LuminaParameters {
+    const {
+        collisionPadding: _defaultCollisionPadding,
+        force: defaultForce,
+        stress: defaultStress,
+        ...commonDefaults
+    } = DEFAULT_PARAMS;
+    const common = applyDefaults(commonDefaults, options);
+    const idealLength = options.idealLength ?? common.idealLength;
+
+    return {
+        ...common,
+        idealLength,
+        collisionPadding: options.collisionPadding ?? idealLength,
+        force: applyDefaults(defaultForce, options.force),
+        stress: applyDefaults(defaultStress, options.stress)
+    };
 }
 
 // Step snapshot for debugging and visualization
@@ -384,21 +293,24 @@ export {LuminaLayout, LuminaLayout as SubstructureLayout};
 /**
  * Enhanced force-directed layout with structure awareness
  */
-function LuminaLayout(this: any, options: any) {
+function LuminaLayout(
+    this: any,
+    options: LuminaLayoutOptions & {
+        cy?: cytoscape.Core;
+        eles?: cytoscape.CollectionReturnValue;
+        boundingBox?: cytoscape.BoundingBox12 | cytoscape.BoundingBoxWH;
+    }
+) {
     this.options = options || {};
     this.cy = this.options.cy;
+    if (!this.cy) {
+        throw new Error('cytoscape-lumina: options.cy is required');
+    }
     this.eles = this.options.eles || this.cy.elements();
     this.boundingBox = this.options.boundingBox;
 
     this.stopped = false;
 
-    if (!this.cy) {
-        throw new Error('cytoscape-lumina: options.cy is required');
-    }
-
-    // Public Cytoscape.js options use camelCase; shared options are flat,
-    // algorithm-specific ones live under `force: {...}` / `stress: {...}`.
-    // See the parameter section at the top of this file. The legacy `params` object is still accepted.
     this.params = resolveParams(this.options);
 
     // Instance-specific arrays instead of global
@@ -414,7 +326,7 @@ function LuminaLayout(this: any, options: any) {
  * Capture a snapshot of the current layout state
  */
 LuminaLayout.prototype.captureStep = function (stepName: string, description: string, metadata?: any) {
-    if (!this.params.STEP_BY_STEP) return;
+    if (!this.params.stepByStep) return;
 
     const nodes = this.cy.nodes();
     const nodePositions: { [nodeId: string]: { x: number; y: number } } = {};
@@ -596,7 +508,7 @@ LuminaLayout.prototype.identifyStructures = function (nodes: NodeCollection) {
                     for (const v of neighbors) {
                         const vId = v.id();
                         // 1. Found a cycle back to our specific START node
-                        if (vId === startId && path.length >= params.MIN_CYCLE_LENGTH) {
+                        if (vId === startId && path.length >= params.minCycleLength) {
                             const cycle = [...path];
                             const sortedKey = [...cycle].sort().join(',');
                             if (!seenCycles.has(sortedKey)) {
@@ -741,7 +653,7 @@ LuminaLayout.prototype.identifyStructures = function (nodes: NodeCollection) {
         }
 
         // 4. Save the chain that was found
-        if (currentChainNodes.length >= params.MIN_CHAIN_LENGTH) {
+        if (currentChainNodes.length >= params.minChainLength) {
             nodeId = 0;
             currentChainNodes.forEach((node: any) => {
                 node.addClass('substructure-chain')
@@ -793,7 +705,7 @@ LuminaLayout.prototype.identifyStructures = function (nodes: NodeCollection) {
         // Check whether the neighbors consist only of distinct neighbor nodes
         const leafNeighbors = neighbors.filter((n: Node) => n.neighborhood().nodes().length === 1);
 
-        if (leafNeighbors.length >= params.MIN_STAR_LEAVES && neighborCount >= params.MIN_STAR_LEAVES) {
+        if (leafNeighbors.length >= params.minStarLeaves && neighborCount >= params.minStarLeaves) {
 
             if (node.data('structType') !== 'Cycle' && node.data('structType') !== 'Chain') {
 
@@ -845,7 +757,7 @@ LuminaLayout.prototype.identifyStructures = function (nodes: NodeCollection) {
                 const v = nodes[j];
                 if (v.data('structType') === 'Normal') {
                     const v1 = v.neighborhood().nodes();
-                    if (areNodesEqual(v1, u1) && v1.length >= params.MIN_PARALLEL_NEIGHBORS && u1.length >= params.MIN_PARALLEL_NEIGHBORS) {
+                    if (areNodesEqual(v1, u1) && v1.length >= params.minParallelNeighbors && u1.length >= params.minParallelNeighbors) {
                         if (nodeVecParallel.length === 0) {
                             nodeVecParallel.push(u.id());
                         }
@@ -966,7 +878,7 @@ LuminaLayout.prototype.run = function () {
         });
 
         // 2. NOW define your collections to get the updated state
-        if (params.RANDOMIZE_INITIAL_POSITIONS) {
+        if (params.randomizeInitialPositions) {
             nodes.forEach((node: NodeSingular) => {
                 node.position({
                     x: bb.x1 + Math.random() * width, y: bb.y1 + Math.random() * height
@@ -1218,8 +1130,8 @@ LuminaLayout.prototype.run = function () {
                     const allMemberNode = v1.nodes.filter((node: {
                         data: (arg0: string) => string;
                     }) => node.data('structType') !== 'Star-Center');
-                    const ringSpacing = params.STAR_RING_SPACING;
-                    const baseNodesInFirstRing = params.STAR_BASE_NODES_PER_RING;
+                    const ringSpacing = params.starRingSpacing;
+                    const baseNodesInFirstRing = params.starBaseNodesPerRing;
 
                     // 1. Pre-calculate how many nodes go into each ring
                     const rings: any[][] = [];
@@ -1235,7 +1147,7 @@ LuminaLayout.prototype.run = function () {
                     v1.radius = (rings.length + 0) * ringSpacing;
                 } else if (v1.type == 'Cycle') {
                     const count = v1.nodes.length;
-                    const k = params.CYCLE_NODE_SPACING;
+                    const k = params.cycleNodeSpacing;
                     v1.radius = (count * k) / (2 * Math.PI);
                 } else if (v1.type == 'Parallel') {
                     // v1.radius = 300;
@@ -1262,8 +1174,8 @@ LuminaLayout.prototype.run = function () {
                     }
                 } else if (v1.type == 'Chain') {
                     const count = v1.nodes.length;
-                    const miniMumRadius = params.CHAIN_MIN_RADIUS;
-                    v1.radius = Math.max((count * params.CYCLE_NODE_SPACING) / (2 * Math.PI), miniMumRadius);
+                    const miniMumRadius = params.chainMinRadius;
+                    v1.radius = Math.max((count * params.cycleNodeSpacing) / (2 * Math.PI), miniMumRadius);
                 } else {
                     v1.radius = 10;
                 }
@@ -1273,16 +1185,15 @@ LuminaLayout.prototype.run = function () {
         this.captureStep('Virtual Nodes Positioned', 'Virtual node centers and radii calculated', null);
 
         //******************** virtual node force layout ************************
-        // Uses: shared params (IDEAL_LENGTH, ITERATIONS, CONVERGENCE_THRESHOLD,
-        // COLLISION_PADDING) + force-only params (params.force.*)
-        if (params.LAYOUT_ALGORITHM === 'force') {
+        // Shared settings are on params; solver-specific settings are nested.
+        if (params.layoutAlgorithm === 'force') {
             const fp = params.force;
 
-            const IDEAL_LENGTH = params.IDEAL_LENGTH;
+            const idealLength = params.idealLength;
 
-            const REPULSION = fp.REPULSION;
-            const SPRING_K = fp.SPRING_K;
-            const ITERATIONS = params.ITERATIONS;
+            const repulsion = fp.repulsion;
+            const springK = fp.springK;
+            const iterations = params.iterations;
 
             var colisionFlag = true;
             let iter = 0;
@@ -1291,7 +1202,7 @@ LuminaLayout.prototype.run = function () {
             var numOfCollision = 0;
 
             // Only consider the whole graph truly stationary when the maximum movement of every node is below this threshold
-            const ENERGY_THRESHOLD = params.CONVERGENCE_THRESHOLD;
+            const convergenceThreshold = params.convergenceThreshold;
 
             // Build the adjacency list in advance so it can be reused seamlessly for both "initial ordering" and the "later angular force"
             const adj = new Map<string, VNode[]>();
@@ -1320,14 +1231,14 @@ LuminaLayout.prototype.run = function () {
                         // Also give them an initial star-shaped radial geometric distribution that is guaranteed not to cross
                         leafNeighbors.forEach((nb: VNode, index: number) => {
                             const initAngle = (Math.PI * 2 / leafNeighbors.length) * index;
-                            nb.center_x = node.center_x + Math.cos(initAngle) * IDEAL_LENGTH;
-                            nb.center_y = node.center_y + Math.sin(initAngle) * IDEAL_LENGTH;
+                            nb.center_x = node.center_x + Math.cos(initAngle) * idealLength;
+                            nb.center_y = node.center_y + Math.sin(initAngle) * idealLength;
                         });
                     }
                 }
             });
 
-            while (iter < ITERATIONS) {
+            while (iter < iterations) {
                 if(this.stopped){
                     break;
                 }
@@ -1367,7 +1278,7 @@ LuminaLayout.prototype.run = function () {
                 }
 
                 // Calculate the current global cooling factor (the core simulated-annealing control)
-                const cooling = Math.pow(1 - iter / ITERATIONS, fp.COOLING_EXPONENT);
+                const cooling = Math.pow(1 - iter / iterations, fp.coolingExponent);
 
                 /* ---------- A. Attraction (Spring) ---------- */
                 if (1) {
@@ -1381,10 +1292,10 @@ LuminaLayout.prototype.run = function () {
                         const centerDist = Math.max(Math.sqrt(dx * dx + dy * dy), 1);
 
                         const surfaceDist = centerDist - (s.radius + t.radius);
-                        const delta = Math.max(0, surfaceDist - IDEAL_LENGTH);
+                        const delta = Math.max(0, surfaceDist - idealLength);
 
                         // Apply the cooling factor to the attractive force
-                        let force = SPRING_K * delta * cooling;
+                        let force = springK * delta * cooling;
 
                         const fx = (force * dx) / centerDist;
                         const fy = (force * dy) / centerDist;
@@ -1400,7 +1311,7 @@ LuminaLayout.prototype.run = function () {
 
                 /* ---------- B. Repulsion ---------- */
                 if (1) {
-                    const MIN_GAP = 0.1;
+                    const minGap = 0.1;
                     for (let i = 0; i < this.vnodes.length; i++) {
                         for (let j = i + 1; j < this.vnodes.length; j++) {
                             const n1 = this.vnodes[i];
@@ -1420,16 +1331,16 @@ LuminaLayout.prototype.run = function () {
                             let force = 0;
                             if (centerDist < minDistance) {
                                 const overlap = minDistance - centerDist;
-                                force = (REPULSION * fp.OVERLAP_REPULSION_FACTOR) * (overlap / (centerDist + MIN_GAP));
+                                force = (repulsion * fp.overlapRepulsionFactor) * (overlap / (centerDist + minGap));
                             } else {
                                 const gap = centerDist - minDistance;
-                                force = REPULSION / (gap * gap + 20);
+                                force = repulsion / (gap * gap + 20);
                             }
 
                             // Apply the cooling factor to the repulsive force
                             force *= cooling;
 
-                            const maxForceLimit = REPULSION * 2 * cooling;
+                            const maxForceLimit = repulsion * 2 * cooling;
                             if (force > maxForceLimit) force = maxForceLimit;
 
                             const fx = (force * dx) / centerDist;
@@ -1446,15 +1357,15 @@ LuminaLayout.prototype.run = function () {
                 }
 
                 /* ---------- C. Angular Repulsion ---------- */
-                if (fp.USE_ANGULAR_FORCE) {
+                if (fp.useAngularForce) {
                     const norm = (a: number): number => Math.atan2(Math.sin(a), Math.cos(a));
 
                     type AngleItem = {
                         nb: VNode; dx: number; dy: number; dist: number; angle: number;
                     };
 
-                    const ANGULAR_STRENGTH = fp.ANGULAR_STRENGTH;
-                    const MAX_FORCE = fp.ANGULAR_MAX_FORCE;
+                    const angularStrength = fp.angularStrength;
+                    const maxForce = fp.angularMaxForce;
 
                     this.vnodes.forEach((node: VNode) => {
 
@@ -1506,9 +1417,9 @@ LuminaLayout.prototype.run = function () {
 
                             const gapError = idealGap - gap;
 
-                            let force = gapError * ANGULAR_STRENGTH;
+                            let force = gapError * angularStrength;
 
-                            force = Math.min(force, MAX_FORCE);
+                            force = Math.min(force, maxForce);
 
                             // Tangential direction of the left item
                             const ltx = -left.dy / left.dist;
@@ -1538,7 +1449,7 @@ LuminaLayout.prototype.run = function () {
 
                 // [Exit criterion] Only allow an early safe exit when all movement energy in the graph has completely settled and become extremely small
                 const totalMaxMovement = Math.max(maxAttractMove, maxRepulsetMove, maxAngularMove);
-                if (totalMaxMovement < ENERGY_THRESHOLD && iter > 10) {
+                if (totalMaxMovement < convergenceThreshold && iter > 10) {
                     break;
                 }
             }
@@ -1554,7 +1465,7 @@ LuminaLayout.prototype.run = function () {
             if (1) {
                 colisionFlag = true;
                 numOfCollision = 0;
-                const padding = params.COLLISION_PADDING as number;
+                const padding = params.collisionPadding;
                 let iter = 0;
                 while (colisionFlag) {
                     if(this.stopped){
@@ -1612,9 +1523,9 @@ LuminaLayout.prototype.run = function () {
                         console.warn("avoid dead loop");
                         break;
                     }
-                    // this.captureStep('Anti-collision', 'Eliminate all collisions ' + iter, { iterations: ITERATIONS });
+                    // this.captureStep('Anti-collision', 'Eliminate all collisions ' + iter, {iterations});
                 }
-                this.captureStep('Anti-collision', 'Eliminate all collisions', {iterations: ITERATIONS});
+                this.captureStep('Anti-collision', 'Eliminate all collisions', {iterations});
                 if (1) {
                     numOfCollision = 0;
                     for (let i = 0; i < this.vnodes.length; i++) {
@@ -1626,7 +1537,7 @@ LuminaLayout.prototype.run = function () {
                             let dy = n1.center_y - n2.center_y;
 
                             const centerDist = Math.sqrt(dx * dx + dy * dy);
-                            if (centerDist < (IDEAL_LENGTH + n1.radius + n2.radius)) {
+                            if (centerDist < (idealLength + n1.radius + n2.radius)) {
                                 numOfCollision++
                             }
                         }
@@ -1634,21 +1545,20 @@ LuminaLayout.prototype.run = function () {
                 }
             }
 
-            this.captureStep('Virtual Node Layout', 'Force-directed layout applied to virtual nodes', {iterations: ITERATIONS});
+            this.captureStep('Virtual Node Layout', 'Force-directed layout applied to virtual nodes', {iterations});
         }
 
         //******************** stress force layout ************************
         // Stress Majorization algorithm
         // All-Pairs shortest-path calculation and Guttman Transform (weighted Laplacian updates),
         // while retaining the polar-coordinate initialization for leaf nodes and the Anti-Collision post-processing in the original code
-        // Uses: shared params (IDEAL_LENGTH, ITERATIONS, CONVERGENCE_THRESHOLD,
-        // COLLISION_PADDING, MAX_OVERLAP_ITERATIONS) + stress-only params (params.stress.*)
-        if (params.LAYOUT_ALGORITHM === 'stress') {
+        // Shared settings are on params; solver-specific settings are nested.
+        if (params.layoutAlgorithm === 'stress') {
             const sp = params.stress;
 
-            const IDEAL_LENGTH = params.IDEAL_LENGTH;
-            const ITERATIONS = params.ITERATIONS;
-            const ENERGY_THRESHOLD = params.CONVERGENCE_THRESHOLD;
+            const idealLength = params.idealLength;
+            const iterations = params.iterations;
+            const convergenceThreshold = params.convergenceThreshold;
 
             const numNodes = this.vnodes.length;
             if (numNodes === 0) return;
@@ -1681,7 +1591,7 @@ LuminaLayout.prototype.run = function () {
                 const u = nodeIndexMap.get(e.source.id);
                 const v = nodeIndexMap.get(e.target.id);
                 if (u !== undefined && v !== undefined) {
-                    const idealDist = IDEAL_LENGTH + e.source.radius + e.target.radius;
+                    const idealDist = idealLength + e.source.radius + e.target.radius;
                     distMatrix[u][v] = Math.min(distMatrix[u][v], idealDist);
                     distMatrix[v][u] = Math.min(distMatrix[v][u], idealDist);
                 }
@@ -1698,14 +1608,14 @@ LuminaLayout.prototype.run = function () {
                 }
             }
 
-            // Calculate the weight matrix W_ij = 1 / (d_ij ^ WEIGHT_EXPONENT)
+            // Calculate the weight matrix W_ij = 1 / (d_ij ^ weightExponent)
             for (let i = 0; i < numNodes; i++) {
                 for (let j = 0; j < numNodes; j++) {
                     if (i !== j && distMatrix[i][j] !== Infinity) {
                         // Account for the actual node radius to prevent excessive crowding
                         const minR = this.vnodes[i].radius + this.vnodes[j].radius;
                         const d = Math.max(distMatrix[i][j], minR);
-                        weightMatrix[i][j] = 1 / Math.pow(d, sp.WEIGHT_EXPONENT);
+                        weightMatrix[i][j] = 1 / Math.pow(d, sp.weightExponent);
                     }
                 }
             }
@@ -1727,8 +1637,8 @@ LuminaLayout.prototype.run = function () {
 
                         leafNeighbors.forEach((nb: VNode, index: number) => {
                             const initAngle = (Math.PI * 2 / leafNeighbors.length) * index;
-                            nb.center_x = node.center_x + Math.cos(initAngle) * IDEAL_LENGTH;
-                            nb.center_y = node.center_y + Math.sin(initAngle) * IDEAL_LENGTH;
+                            nb.center_x = node.center_x + Math.cos(initAngle) * idealLength;
+                            nb.center_y = node.center_y + Math.sin(initAngle) * idealLength;
                         });
                     }
                 }
@@ -1738,7 +1648,7 @@ LuminaLayout.prototype.run = function () {
             // [Main loop] Stress Majorization iteration (Guttman Transform)
             // -------------------------------------------------------------
             let iter = 0;
-            while (iter < ITERATIONS) {
+            while (iter < iterations) {
                 if (this.stopped) {
                     break;
                 }
@@ -1802,7 +1712,7 @@ LuminaLayout.prototype.run = function () {
                 }
 
                 // Check the convergence condition and exit early
-                if (maxStressMove < ENERGY_THRESHOLD && iter > 10) {
+                if (maxStressMove < convergenceThreshold && iter > 10) {
                     break;
                 }
             }
@@ -1821,7 +1731,7 @@ LuminaLayout.prototype.run = function () {
             if (1) {
                 let colisionFlag = true;
                 let numOfCollision = 0;
-                const padding = params.COLLISION_PADDING as number;
+                const padding = params.collisionPadding;
                 let overlapIter = 0;
 
                 while (colisionFlag) {
@@ -1864,20 +1774,20 @@ LuminaLayout.prototype.run = function () {
                         }
                     }
 
-                    if (numOfCollision > 10000 || overlapIter > params.MAX_OVERLAP_ITERATIONS) {
+                    if (numOfCollision > 10000 || overlapIter > params.maxOverlapIterations) {
                         console.warn("Avoid dead loop in overlap removal");
                         break;
                     }
                 }
-                this.captureStep('Anti-collision', 'Eliminate all collisions', {iterations: ITERATIONS});
+                this.captureStep('Anti-collision', 'Eliminate all collisions', {iterations});
             }
 
-            this.captureStep('Virtual Node Layout', 'Stress Majorization layout applied to virtual nodes', {iterations: ITERATIONS});
+            this.captureStep('Virtual Node Layout', 'Stress Majorization layout applied to virtual nodes', {iterations});
         }
 
         /////////////////////////////////////////////////////////////////////////////
         if (1) {
-            if (params.SPREAD_V_NODES) {
+            if (params.spreadVNodes) {
                 this.vnodes.forEach((v: any) => {
                     v.nodes.forEach((n: any) => {
                         n.position().x = v.center_x + Math.random() * 5;
@@ -1889,8 +1799,8 @@ LuminaLayout.prototype.run = function () {
         }
 
         /////////////////////  Delete the old layout so that only virtual-node VNode layout remains  ////////////////
-        if (!params.SUBSTRUCTURE_LAYOUT) {
-            const IDEAL_LENGTH = params.LEAF_NODE_DISTANCE;
+        if (!params.substructureLayout) {
+            const idealLength = params.leafNodeDistance;
             this.vnodes.forEach((v: any) => {
                 if (v.type == 'Star') {
 
@@ -1899,8 +1809,8 @@ LuminaLayout.prototype.run = function () {
                         const allMemberNode = v.nodes.filter((node: {
                             data: (arg0: string) => string;
                         }) => node.data('structType') !== 'Star-Center');
-                        const ringSpacing = params.STAR_RING_SPACING;
-                        const baseNodesInFirstRing = params.STAR_BASE_NODES_PER_RING;
+                        const ringSpacing = params.starRingSpacing;
+                        const baseNodesInFirstRing = params.starBaseNodesPerRing;
 
                         // 1. Pre-calculate how many nodes go into each ring
                         const rings: any[][] = [];
@@ -1985,11 +1895,11 @@ LuminaLayout.prototype.run = function () {
                                 cy /= count;
 
                                 // 2. Special handling: exactly 3 nodes form a strict equilateral triangle
-                                //    (do not use CHAIN_MIN_RADIUS, so the triangle is not artificially enlarged)
+                                //    (do not use chainMinRadius, so the triangle is not artificially enlarged)
                                 if (count === 3) {
 
                                     // CYCLE_NODE_SPACING represents the desired node spacing (triangle side length)
-                                    const sideLength = params.CYCLE_NODE_SPACING;
+                                    const sideLength = params.cycleNodeSpacing;
 
                                     // Circumradius of the equilateral triangle: radius = side / sqrt(3)
                                     const radius = sideLength / Math.sqrt(3);
@@ -2053,9 +1963,9 @@ LuminaLayout.prototype.run = function () {
                                 //    gNodes[0] -> center node, gNodes[1...] -> circumference nodes
 
                                 // 4. Calculate the standard radius based on the number of nodes
-                                const miniMumRadius = params.CHAIN_MIN_RADIUS;
+                                const miniMumRadius = params.chainMinRadius;
 
-                                const radius = Math.max((count * params.CYCLE_NODE_SPACING) / (2 * Math.PI),
+                                const radius = Math.max((count * params.cycleNodeSpacing) / (2 * Math.PI),
 
                                     miniMumRadius);
 
@@ -2153,7 +2063,7 @@ LuminaLayout.prototype.run = function () {
                     }
                     // 2. Calculate the standard radius based on the number of nodes (to keep node spacing close to k)
                     const count = v.nodes.length;
-                    const k = params.CYCLE_NODE_SPACING;
+                    const k = params.cycleNodeSpacing;
                     const radius = (count * k) / (2 * Math.PI);
 
                     // 3. Sort to prevent nodes from flickering around the circumference
@@ -2226,15 +2136,15 @@ LuminaLayout.prototype.run = function () {
                     let aroundNodesVec: any[] = [];
 
                     nodes.forEach((nd: any, i: number) => {
-                        if (((nd.position().x - fatherPos.x) * (nd.position().x - fatherPos.x) + (nd.position().y - fatherPos.y) * (nd.position().y - fatherPos.y)) < 2 * IDEAL_LENGTH * IDEAL_LENGTH) {
+                        if (((nd.position().x - fatherPos.x) * (nd.position().x - fatherPos.x) + (nd.position().y - fatherPos.y) * (nd.position().y - fatherPos.y)) < 2 * idealLength * idealLength) {
                             aroundNodesVec.push(nd);
                         }
                     })
 
                     for (let rotate = 0; rotate <= 360; rotate = rotate + 10) {
                         n.position({
-                            x: fatherPos.x + Math.cos(rotate * 3.14 / 180) * IDEAL_LENGTH,
-                            y: fatherPos.y + Math.sin(rotate * 3.14 / 180) * IDEAL_LENGTH
+                            x: fatherPos.x + Math.cos(rotate * 3.14 / 180) * idealLength,
+                            y: fatherPos.y + Math.sin(rotate * 3.14 / 180) * idealLength
                         });
                         let totalLength = 0;
                         aroundNodesVec.forEach((nd: any, i: number) => {
@@ -2251,8 +2161,8 @@ LuminaLayout.prototype.run = function () {
                     }
                     //
                     n.position({
-                        x: fatherPos.x + Math.cos(bestRotate * 3.14 / 180) * IDEAL_LENGTH,
-                        y: fatherPos.y + Math.sin(bestRotate * 3.14 / 180) * IDEAL_LENGTH
+                        x: fatherPos.x + Math.cos(bestRotate * 3.14 / 180) * idealLength,
+                        y: fatherPos.y + Math.sin(bestRotate * 3.14 / 180) * idealLength
                     });
 
                 }
@@ -3297,7 +3207,7 @@ LuminaLayout.prototype.packNetworks = function (networks: any[]): void {
  * Navigate to a specific step in step-by-step mode
  */
 LuminaLayout.prototype.goToStep = function (stepIndex: number) {
-    if (!this.params.STEP_BY_STEP || this.steps.length === 0) {
+    if (!this.params.stepByStep || this.steps.length === 0) {
         console.warn('Step-by-step mode is not enabled or no steps have been captured');
         return this;
     }
@@ -3356,7 +3266,7 @@ LuminaLayout.prototype.prevStep = function () {
  * Get information about all steps
  */
 LuminaLayout.prototype.listSteps = function () {
-    if (!this.params.STEP_BY_STEP || this.steps.length === 0) {
+    if (!this.params.stepByStep || this.steps.length === 0) {
         console.log('No steps available');
         return [];
     }

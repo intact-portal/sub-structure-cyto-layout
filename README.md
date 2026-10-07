@@ -71,7 +71,7 @@ Options are split by who uses them:
 - **Force-only** options go under `force: { ... }` and are ignored when `layoutAlgorithm` is `'stress'`.
 - **Stress-only** options go under `stress: { ... }` and are ignored when `layoutAlgorithm` is `'force'`.
 
-Internally these map to upper-case constants (e.g. `idealLength` → `IDEAL_LENGTH`); `DEFAULT_PARAMS` and `resolveParams` are exported if you need them.
+`DEFAULT_PARAMS` and `resolveParams` are exported for consumers that need the complete resolved configuration.
 
 ### Algorithm
 
@@ -113,7 +113,6 @@ Internally these map to upper-case constants (e.g. `idealLength` → `IDEAL_LENG
 | --- | --- | --- |
 | `minStarLeaves` | `3` | Minimum leaf neighbours for a node to become a star centre. |
 | `minCycleLength` | `3` | Minimum number of nodes in a detected cycle. |
-| `maxCycleLength` | `30` | Reserved. Currently **not enforced** by the cycle search. |
 | `minChainLength` | `2` | Minimum number of nodes in a chain. |
 | `minParallelNeighbors` | `2` | Minimum shared neighbours for nodes to count as a parallel group. |
 
@@ -135,10 +134,6 @@ Internally these map to upper-case constants (e.g. `idealLength` → `IDEAL_LENG
 | `spreadVNodes` | `true` | After solving, scatter real nodes slightly around their virtual node centre. |
 | `substructureLayout` | `false` | When `false` (default), each substructure is arranged internally (circle, rings, grid, ...). When `true`, that step is skipped. |
 | `stepByStep` | `false` | Record a snapshot after each stage (see below). |
-
-### Backward compatibility
-
-The old flat force options (`repulsion`, `springK`, `useAngularForce`, `angularStrength`) and the legacy upper-case `params: { ... }` object are still accepted. Nested `force` / `stress` objects take priority.
 
 ## Step-by-step debugging
 
