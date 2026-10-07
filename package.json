@@ -1,6 +1,6 @@
 {
   "name": "@intact-ebi/cytoscape-lumina",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "LUMINA: a structure-aware Cytoscape.js layout that detects cycles, chains, stars and parallel groups and lays them out with force-directed or stress-majorization solvers.",
   "type": "module",
   "main": "dist/index.js",
