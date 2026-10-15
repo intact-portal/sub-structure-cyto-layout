@@ -60,6 +60,8 @@ export interface LuminaOptions {
     
     force?: LuminaForceOptions;
     stress?: LuminaStressOptions;
+
+    createSubstructureGroups?: boolean;
 }
 
 /** Options passed to `cy.layout()` for the LUMINA layout. */
@@ -112,7 +114,9 @@ export const DEFAULT_PARAMS: LuminaParameters = {
     },
     stress: {
         weightExponent: 2
-    }
+    },
+
+    createSubstructureGroups: true
 };
 
 function applyDefaults<T extends object>(defaults: T, overrides?: Partial<T>): T {
@@ -317,6 +321,7 @@ function computeStressDistances(nodes: VNode[], edges: VEdge[], idealLength: num
  *       iterations: 600,                   // shared
  *       force:  { repulsion: 300, springK: 0.15 },   // force only
  *       stress: { weightExponent: 2 }                // stress only
+ *       createSubstructureGroups: true
  *   }).run();
  */
 
@@ -2256,7 +2261,7 @@ LuminaLayout.prototype.run = function () {
 
     this.packNetworks(networkInfos);
 
-    if (1) {
+    if (this.params.createSubstructureGroups) {
 
         networkInfos.forEach((networkInfo, index) => {
 
