@@ -14,7 +14,7 @@ Written in TypeScript. Registered under the layout name `lumina` (the legacy nam
   - Leaves that don't belong to a chain are placed on a circle around their parent
 - **Two interchangeable solvers** for the virtual-node graph: `force` and `stress`
 - **Multiple connected components** are each laid out independently, rotated to their minimum bounding box, and packed into rows that match the canvas aspect ratio
-- **Compound parents** (`.substructure-group`) are generated for each detected substructure
+- **Optional compound parents** (`.substructure-group`) can be generated for each detected substructure using `createSubstructureGroups`. When enabled, this modifies the `parent` data of nodes belonging to these groups and may affect existing compound-node relationships.
 - **Step-by-step mode** to inspect and replay every stage of the pipeline
 
 ## How it works
@@ -45,6 +45,7 @@ registerLumina(cytoscape);
 
 const cy = cytoscape({ container: document.getElementById('cy'), elements: [/* ... */] });
 
+```ts
 cy.layout({
   name: 'lumina',
   layoutAlgorithm: 'stress',   // 'stress' (default) or 'force'
@@ -57,9 +58,16 @@ cy.layout({
   force: { repulsion: 300, springK: 0.15, useAngularForce: true },
 
   // used only when layoutAlgorithm is 'stress'
-  stress: { weightExponent: 2 }
+  stress: { weightExponent: 2 },
+
+  // create compound parent nodes for detected substructures
+  // Set to false to avoid creating substructure group parents
+  createSubstructureGroups: true
 }).run();
 ```
+
+Set `createSubstructureGroups: false` to disable the creation of compound parent nodes.
+
 
 Registration is idempotent, so it is safe to call more than once (e.g. with hot reload).
 
@@ -135,6 +143,7 @@ Stress shortest paths use weighted Dijkstra. Computed edge lengths (`idealLength
 | `randomizeInitialPositions` | `false` | Randomize node positions inside the bounding box before the layout starts. |
 | `spreadVNodes` | `true` | After solving, scatter real nodes slightly around their virtual node centre. |
 | `substructureLayout` | `false` | When `false` (default), each substructure is arranged internally (circle, rings, grid, ...). When `true`, that step is skipped. |
+| `createSubstructureGroups` | `true` | Whether to create compound parent nodes (`.substructure-group`) for detected substructures. When enabled, the layout modifies the `parent` data of grouped nodes, which may overwrite or alter existing compound-node relationships. Set to `false` to disable compound parent creation. |
 | `stepByStep` | `false` | Record a snapshot after each stage (see below). |
 
 ## Step-by-step debugging
@@ -164,3 +173,5 @@ Each step restores real-node positions and overlays the virtual nodes (transluce
 - Nodes with 8 or more neighbours are skipped during cycle search, for performance.
 - Self-loops and duplicate edges are ignored by the layout.
 - Generated compound parents have the class `substructure-group` and ids of the form `<componentIndex>_<groupId>`; they are removed and regenerated on each run.
+* **Node `parent` data may be modified:** When `createSubstructureGroups` is `true` (the default), LUMINA creates compound parent nodes for detected substructures and assigns child nodes to those parents by modifying their `parent` data. If your Cytoscape.js graph already uses compound nodes or existing `parent` relationships, these relationships may be changed. Set `createSubstructureGroups: false` if you do not want LUMINA to create substructure group parents or modify node `parent` data for this purpose. Check your graph's existing compound-node structure before enabling this option.
+* Generated compound parents have the class `substructure-group` and IDs of the form `<componentIndex>_<groupId>`. When enabled, they are removed and regenerated on each run.
